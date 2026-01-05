@@ -10,6 +10,9 @@
 	  <Description>TagHelper library</Description>
 	  <PackageTags>aspnetcore;taghelper;ui;razor</PackageTags>
 
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <RepositoryUrl>https://github.com/ColmKenna/CK.TagHelpers</RepositoryUrl>
+	  <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
