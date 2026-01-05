@@ -1,0 +1,17 @@
+@model CK.Taghelpers.SampleUsage.Models.PersonViewModel
+
+<div class="card mb-3">
+    <div class="card-body">
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Name</label>
+            <input asp-for="Name" class="form-control" placeholder="Enter name" />
+        </div>
+        
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label">Role</label>
+            <input asp-for="Role" class="form-control" placeholder="Enter role" />
+        </div>
+    </div>
+</div>

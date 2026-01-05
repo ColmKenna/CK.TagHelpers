@@ -1,0 +1,41 @@
+@model CK.Taghelpers.SampleUsage.Models.TeamViewModel
+
+@{
+    ViewData["Title"] = "Edit Array Sample";
+}
+
+<h1>Edit Array Sample</h1>
+
+<form asp-action="Index" method="post">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Team Name</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+
+    <h3>Members</h3>
+    <hr />
+
+    <edit-array asp-for="Members"
+                asp-items="Model.Members"
+                id="team-members"
+                asp-view-name="../Shared/PersonEditors/_PersonEditor.cshtml"
+                asp-display-mode="true"
+                asp-display-view-name="../Shared/PersonEditors/_PersonDisplay.cshtml"
+                asp-template="true"
+                asp-add-button="true"
+                asp-add-text="Add New Member"
+                asp-enable-reordering="true"
+                asp-empty-placeholder="No members found. Add one!"
+                asp-container-class="members-container"
+                asp-item-class="member-item"
+    />
+
+    <hr />
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+
+@section Scripts {
+    <script>
+        // Optional: Custom scripts if needed
+    </script>
+}
