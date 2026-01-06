@@ -29,6 +29,9 @@ public class EditArrayTagHelper : TagHelper
     private const string DeleteButtonTextAttributeName = "asp-delete-text";
     private const string DoneButtonTextAttributeName = "asp-done-text";
     private const string AddButtonTextAttributeName = "asp-add-text";
+    private const string ContainerCssClassDefault = "edit-array-container";
+    private const string ItemCssClassDefault = "edit-array-item";
+    
 
     // ============================================================
     // REQUIRED PROPERTIES
@@ -308,7 +311,7 @@ public class EditArrayTagHelper : TagHelper
     /// The value is HTML-encoded before output to prevent XSS attacks.
     /// </remarks>
     [HtmlAttributeName(ContainerCssClassAttributeName)]
-    public string ContainerCssClass { get; set; } = "edit-array-container";
+    public string ContainerCssClass { get; set; } 
 
     /// <summary>
     /// Gets or sets the CSS class(es) to apply to each item wrapper element.
@@ -322,7 +325,7 @@ public class EditArrayTagHelper : TagHelper
     /// The value is HTML-encoded before output to prevent XSS attacks.
     /// </remarks>
     [HtmlAttributeName(ItemCssClassAttributeName)]
-    public string ItemCssClass { get; set; } = "edit-array-item";
+    public string ItemCssClass { get; set; } 
 
     /// <summary>
     /// Gets or sets the base CSS class(es) to apply to all buttons (Edit, Delete, Done, Add).
@@ -847,7 +850,19 @@ public class EditArrayTagHelper : TagHelper
     /// <returns>The encoded container CSS class.</returns>
     private string GetEncodedContainerCssClass()
     {
-        return HtmlEncoder.Default.Encode(ContainerCssClass);
+        var cssClass = ContainerCssClass;
+        if (string.IsNullOrWhiteSpace(cssClass))
+        {
+            return ContainerCssClassDefault;
+        }
+
+        var classes = cssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (!classes.Contains(ContainerCssClassDefault, StringComparer.OrdinalIgnoreCase))
+        {
+            cssClass = ContainerCssClassDefault + " " + cssClass;
+        }
+
+        return HtmlEncoder.Default.Encode(cssClass);
     }
 
     /// <summary>
@@ -859,13 +874,13 @@ public class EditArrayTagHelper : TagHelper
         var cssClass = ItemCssClass;
         if (string.IsNullOrWhiteSpace(cssClass))
         {
-            return "edit-array-item";
+            return ItemCssClassDefault;
         }
 
         var classes = cssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (!classes.Contains("edit-array-item", StringComparer.OrdinalIgnoreCase))
+        if (!classes.Contains(ItemCssClassDefault, StringComparer.OrdinalIgnoreCase))
         {
-            cssClass = "edit-array-item " + cssClass;
+            cssClass = ItemCssClassDefault + " " + cssClass;
         }
 
         return HtmlEncoder.Default.Encode(cssClass);
