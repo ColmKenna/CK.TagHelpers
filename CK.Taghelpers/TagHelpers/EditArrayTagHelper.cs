@@ -856,7 +856,19 @@ public class EditArrayTagHelper : TagHelper
     /// <returns>The encoded item CSS class.</returns>
     private string GetEncodedItemCssClass()
     {
-        return HtmlEncoder.Default.Encode(ItemCssClass);
+        var cssClass = ItemCssClass;
+        if (string.IsNullOrWhiteSpace(cssClass))
+        {
+            return "edit-array-item";
+        }
+
+        var classes = cssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (!classes.Contains("edit-array-item", StringComparer.OrdinalIgnoreCase))
+        {
+            cssClass = "edit-array-item " + cssClass;
+        }
+
+        return HtmlEncoder.Default.Encode(cssClass);
     }
 
     /// <summary>

@@ -16,6 +16,21 @@ public class EditArrayController : Controller
                 new() { Id = 1, Name = "Tony Stark", Role = "Tech Lead" },
                 new() { Id = 2, Name = "Steve Rogers", Role = "Team Lead" },
                 new() { Id = 3, Name = "Natasha Romanoff", Role = "Spy" }
+            },
+            BasicList = new List<PersonViewModel>
+            {
+                new() { Id = 10, Name = "Bruce Banner", Role = "Scientist" },
+                new() { Id = 11, Name = "Thor", Role = "God of Thunder" }
+            },
+            StyledList = new List<PersonViewModel>
+            {
+                new() { Id = 20, Name = "Peter Parker", Role = "Intern" },
+                new() { Id = 21, Name = "Wanda Maximoff", Role = "Mage" }
+            },
+            EmptyList = new List<PersonViewModel>(), // Intentionally empty
+            CallbackList = new List<PersonViewModel>
+            {
+                new() { Id = 30, Name = "Clint Barton", Role = "Archer" }
             }
         };
         return View(model);
