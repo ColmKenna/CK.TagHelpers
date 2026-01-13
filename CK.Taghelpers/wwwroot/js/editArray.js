@@ -163,6 +163,12 @@ function toggleEditMode(itemId) {
             // Switch from edit to display
             displayContainer.style.display = 'block';
             editContainer.style.display = 'none';
+
+            // Safely invoke OnUpdate callback if defined (XSS prevention: validate function exists)
+            const onUpdate = item.dataset.onUpdate;
+            if (onUpdate && typeof window[onUpdate] === 'function') {
+                window[onUpdate](itemId);
+            }
         } else {
             // Switch from display to edit
             displayContainer.style.display = 'none';
@@ -266,6 +272,12 @@ function markForDeletion(itemId) {
             }
             if (editButton) {
                 editButton.disabled = true;
+            }
+
+            // Safely invoke OnDelete callback if defined (XSS prevention: validate function exists)
+            const onDelete = item.dataset.onDelete;
+            if (onDelete && typeof window[onDelete] === 'function') {
+                window[onDelete](itemId);
             }
         }
     }

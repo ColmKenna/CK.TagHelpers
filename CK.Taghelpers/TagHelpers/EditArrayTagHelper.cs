@@ -555,7 +555,12 @@ public class EditArrayTagHelper : TagHelper
               .Append(GetEncodedItemCssClass())
               .Append("\" id=\"")
               .Append(itemId)
-              .Append("\">");
+              .Append("\"");
+
+            // Add callback data attributes for safe JS invocation (XSS prevention)
+            AppendCallbackDataAttributes(sb);
+
+            sb.Append(">");
 
             var isDeletedProperty = item.GetType().GetProperty("IsDeleted");
 
@@ -676,7 +681,12 @@ public class EditArrayTagHelper : TagHelper
 
         sb.Append("<div class=\"")
           .Append(GetEncodedItemCssClass())
-          .Append("\">");
+          .Append("\"");
+
+        // Add callback data attributes for safe JS invocation (XSS prevention)
+        AppendCallbackDataAttributes(sb);
+
+        sb.Append(">");
 
         var name = $"{templateFieldName}.IsDeleted";
 
@@ -821,6 +831,32 @@ public class EditArrayTagHelper : TagHelper
         sb.Append(downText);
         sb.Append("</button>");
         sb.Append("</div>");
+    }
+
+    /// <summary>
+    /// Appends data attributes for callback functions to enable safe JavaScript invocation.
+    /// </summary>
+    /// <remarks>
+    /// This method outputs data-on-update and data-on-delete attributes instead of inline
+    /// JavaScript callbacks, preventing XSS vulnerabilities. The JavaScript code validates
+    /// that callback names resolve to actual functions before invoking them.
+    /// </remarks>
+    /// <param name="sb">The StringBuilder to append to.</param>
+    private void AppendCallbackDataAttributes(StringBuilder sb)
+    {
+        if (!string.IsNullOrWhiteSpace(OnUpdate))
+        {
+            sb.Append(" data-on-update=\"")
+              .Append(HtmlEncoder.Default.Encode(OnUpdate))
+              .Append("\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(OnDelete))
+        {
+            sb.Append(" data-on-delete=\"")
+              .Append(HtmlEncoder.Default.Encode(OnDelete))
+              .Append("\"");
+        }
     }
 
     private int EstimateInitialCapacity()
@@ -986,30 +1022,6 @@ public class EditArrayTagHelper : TagHelper
           .Append(targetId)
           .Append(')');
 
-        // Add callback for delete buttons (OnDelete callback)
-        if (string.Equals(buttonType, "delete", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(OnDelete))
-        {
-            var encodedCallback = HtmlEncoder.Default.Encode(OnDelete);
-            sb.Append("; ")
-              .Append(encodedCallback)
-              .Append('(')
-              .Append(targetId)
-              .Append(");");
-        }
-
-        // Add callback for done buttons (OnUpdate callback)
-        if (string.Equals(buttonType, "done", StringComparison.OrdinalIgnoreCase))
-        {
-            if (!string.IsNullOrWhiteSpace(OnUpdate))
-            {
-                var encodedCallback = HtmlEncoder.Default.Encode(OnUpdate);
-                sb.Append("; ")
-                  .Append(encodedCallback)
-                  .Append('(')
-                  .Append(targetId)
-                  .Append(");");
-            }
-        }
 
         sb.Append("\">")
           .Append(HtmlEncoder.Default.Encode(buttonText))

@@ -151,6 +151,7 @@ public class EditArrayTagHelperTests
         tagHelper.ItemCssClass = "edit-array-item custom-item";
         
         SetupPartialAsync("_Editor", new HtmlString(""));
+        SetupPartialAsync("_Display", new HtmlString(""));
         
         var context = CreateContext();
         var output = CreateOutput();
@@ -192,6 +193,7 @@ public class EditArrayTagHelperTests
         var tagHelper = CreateTagHelper(items: items, viewName: "_Editor");
         
         SetupPartialAsync("_Editor", new HtmlString("<span>Rendered</span>"));
+        SetupPartialAsync("_Display", new HtmlString(""));
         
         var context = CreateContext();
         var output = CreateOutput();
@@ -268,6 +270,7 @@ public class EditArrayTagHelperTests
         tagHelper.RenderTemplate = true;
         
         SetupPartialAsync("_Editor", new HtmlString("TemplateContent"));
+        SetupPartialAsync("_Display", new HtmlString(""));
         
         var context = CreateContext();
         var output = CreateOutput();
@@ -371,13 +374,13 @@ public class EditArrayTagHelperTests
         // Assert
         var content = output.Content.GetContent();
         
-        // Check Delete button has callback
-        Assert.Contains("markForDeletion", content);
-        Assert.Contains("myDeleteCallback", content);
+        // Verify data attributes are present (XSS-safe approach)
+        Assert.Contains("data-on-update=\"myUpdateCallback\"", content);
+        Assert.Contains("data-on-delete=\"myDeleteCallback\"", content);
         
-        // Check Done button has callback
+        // Verify core button handlers are still present
+        Assert.Contains("markForDeletion", content);
         Assert.Contains("toggleEditMode", content);
-        Assert.Contains("myUpdateCallback", content);
     }
 
     // ========================================================================
@@ -395,6 +398,7 @@ public class EditArrayTagHelperTests
         tagHelper.EnableReordering = true;
         
         SetupPartialAsync("_Editor", new HtmlString("Template content"));
+        SetupPartialAsync("_Display", new HtmlString(""));
         
         var context = CreateContext();
         var output = CreateOutput();
@@ -427,6 +431,7 @@ public class EditArrayTagHelperTests
         tagHelper.MoveDownButtonText = "Go Down";
         
         SetupPartialAsync("_Editor", new HtmlString(""));
+        SetupPartialAsync("_Display", new HtmlString(""));
         
         var context = CreateContext();
         var output = CreateOutput();
@@ -457,6 +462,7 @@ public class EditArrayTagHelperTests
             Items = items ?? Array.Empty<object>(),
             ViewName = viewName,
             Id = id,
+            DisplayViewName = "_Display",
             // Create a fresh ViewContext for each test to avoid state pollution
             ViewContext = CreateViewContext()
         };
