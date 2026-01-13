@@ -500,10 +500,10 @@ public class EditArrayTagHelper : TagHelper
         // Reset the TagHelper output
         output.TagName = "div";
         output.TagMode = TagMode.StartTagAndEndTag;
-        output.Attributes.SetAttribute("class", GetEncodedContainerCssClass());
+        output.Attributes.SetAttribute("class", GetContainerCssClass());
 
-        // Create an ID for the container to use with JavaScript (with encoding for security)
-        string containerId = GetEncodedContainerId();
+        // Create an ID for the container to use with JavaScript
+        string containerId = GetContainerId();
         output.Attributes.SetAttribute("id", containerId);
         if (EnableReordering)
         {
@@ -552,7 +552,7 @@ public class EditArrayTagHelper : TagHelper
             var itemId = $"{containerId}-item-{index}";
 
             sb.Append("<div class=\"")
-              .Append(GetEncodedItemCssClass())
+              .Append(GetItemCssClass())
               .Append("\" id=\"")
               .Append(itemId)
               .Append("\"");
@@ -680,7 +680,7 @@ public class EditArrayTagHelper : TagHelper
         };
 
         sb.Append("<div class=\"")
-          .Append(GetEncodedItemCssClass())
+          .Append(GetItemCssClass())
           .Append("\"");
 
         // Add callback data attributes for safe JS invocation (XSS prevention)
@@ -742,7 +742,7 @@ public class EditArrayTagHelper : TagHelper
         if (ShowAddButton)
         {
             sb.Append("<button type=\"button\" class=\"")
-              .Append(GetEncodedButtonCssClass())
+              .Append(GetButtonCssClass())
               .Append(" btn-primary mt-2\" id=\"")
               .Append(containerId)
               .Append("-add\" aria-label=\"Add new item\" onclick=\"addNewItem('")
@@ -776,7 +776,7 @@ public class EditArrayTagHelper : TagHelper
 
         var upText = EncodeButtonText(MoveUpButtonText, "Move Up");
         var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
-        var encodedCssClass = GetEncodedReorderButtonCssClass();
+        var encodedCssClass = GetReorderButtonCssClass();
 
         sb.Append("<div class=\"reorder-controls\">");
         sb.Append("<button type=\"button\" class=\"")
@@ -813,7 +813,7 @@ public class EditArrayTagHelper : TagHelper
 
         var upText = EncodeButtonText(MoveUpButtonText, "Move Up");
         var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
-        var encodedCssClass = GetEncodedReorderButtonCssClass();
+        var encodedCssClass = GetReorderButtonCssClass();
 
         sb.Append("<div class=\"reorder-controls\">");
         sb.Append("<button type=\"button\" class=\"")
@@ -883,16 +883,54 @@ public class EditArrayTagHelper : TagHelper
         return capacity;
     }
 
-    private string GetReorderButtonCssClass()
+    /// <summary>
+    /// Validates that a CSS class string contains only safe characters.
+    /// </summary>
+    /// <param name="cssClass">The CSS class string to validate.</param>
+    /// <param name="propertyName">The name of the property being validated (for error messages).</param>
+    /// <exception cref="InvalidOperationException">Thrown when the CSS class contains invalid characters.</exception>
+    private void ValidateCssClass(string cssClass, string propertyName)
     {
-        return string.IsNullOrWhiteSpace(ReorderButtonCssClass) ? ButtonCssClass : ReorderButtonCssClass;
+        if (!System.Text.RegularExpressions.Regex.IsMatch(cssClass, @"^[a-zA-Z0-9\s\-_]*$"))
+        {
+            throw new InvalidOperationException(
+                $"{propertyName} contains invalid characters. " +
+                "Only alphanumeric, spaces, hyphens, and underscores allowed.");
+        }
     }
 
     /// <summary>
-    /// Gets the container CSS class, properly HTML-encoded for safe output in attributes.
+    /// Validates that an ID string contains only safe characters.
     /// </summary>
-    /// <returns>The encoded container CSS class.</returns>
-    private string GetEncodedContainerCssClass()
+    /// <param name="id">The ID string to validate.</param>
+    /// <param name="propertyName">The name of the property being validated (for error messages).</param>
+    /// <exception cref="InvalidOperationException">Thrown when the ID contains invalid characters.</exception>
+    private void ValidateId(string id, string propertyName)
+    {
+        if (!System.Text.RegularExpressions.Regex.IsMatch(id, @"^[a-zA-Z0-9\-_]*$"))
+        {
+            throw new InvalidOperationException(
+                $"{propertyName} contains invalid characters. " +
+                "Only alphanumeric, hyphens, and underscores allowed.");
+        }
+    }
+
+    /// <summary>
+    /// Gets the reorder button CSS class with validation for safe output.
+    /// </summary>
+    /// <returns>The raw reorder button CSS class (falls back to ButtonCssClass if ReorderButtonCssClass is empty). Razor will encode.</returns>
+    private string GetReorderButtonCssClass()
+    {
+        var cssClass = string.IsNullOrWhiteSpace(ReorderButtonCssClass) ? ButtonCssClass : ReorderButtonCssClass;
+        ValidateCssClass(cssClass, nameof(ReorderButtonCssClass));
+        return cssClass; // Return raw, Razor will encode
+    }
+
+    /// <summary>
+    /// Gets the container CSS class with validation for safe output.
+    /// </summary>
+    /// <returns>The raw container CSS class (Razor will encode).</returns>
+    private string GetContainerCssClass()
     {
         var cssClass = ContainerCssClass;
         if (string.IsNullOrWhiteSpace(cssClass))
@@ -900,20 +938,22 @@ public class EditArrayTagHelper : TagHelper
             return ContainerCssClassDefault;
         }
 
+        ValidateCssClass(cssClass, nameof(ContainerCssClass));
+
         var classes = cssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (!classes.Contains(ContainerCssClassDefault, StringComparer.OrdinalIgnoreCase))
         {
             cssClass = ContainerCssClassDefault + " " + cssClass;
         }
 
-        return HtmlEncoder.Default.Encode(cssClass);
+        return cssClass; // Return raw, Razor will encode
     }
 
     /// <summary>
-    /// Gets the item CSS class, properly HTML-encoded for safe output in attributes.
+    /// Gets the item CSS class with validation for safe output.
     /// </summary>
-    /// <returns>The encoded item CSS class.</returns>
-    private string GetEncodedItemCssClass()
+    /// <returns>The raw item CSS class (Razor will encode).</returns>
+    private string GetItemCssClass()
     {
         var cssClass = ItemCssClass;
         if (string.IsNullOrWhiteSpace(cssClass))
@@ -921,32 +961,25 @@ public class EditArrayTagHelper : TagHelper
             return ItemCssClassDefault;
         }
 
+        ValidateCssClass(cssClass, nameof(ItemCssClass));
+
         var classes = cssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (!classes.Contains(ItemCssClassDefault, StringComparer.OrdinalIgnoreCase))
         {
             cssClass = ItemCssClassDefault + " " + cssClass;
         }
 
-        return HtmlEncoder.Default.Encode(cssClass);
+        return cssClass; // Return raw, Razor will encode
     }
 
     /// <summary>
-    /// Gets the button CSS class, properly HTML-encoded for safe output in attributes.
+    /// Gets the button CSS class with validation for safe output.
     /// </summary>
-    /// <returns>The encoded button CSS class.</returns>
-    private string GetEncodedButtonCssClass()
+    /// <returns>The raw button CSS class (Razor will encode).</returns>
+    private string GetButtonCssClass()
     {
-        return HtmlEncoder.Default.Encode(ButtonCssClass);
-    }
-
-    /// <summary>
-    /// Gets the reorder button CSS class, properly HTML-encoded for safe output in attributes.
-    /// </summary>
-    /// <returns>The encoded reorder button CSS class (falls back to ButtonCssClass if ReorderButtonCssClass is empty).</returns>
-    private string GetEncodedReorderButtonCssClass()
-    {
-        var cssClass = GetReorderButtonCssClass();
-        return HtmlEncoder.Default.Encode(cssClass);
+        ValidateCssClass(ButtonCssClass, nameof(ButtonCssClass));
+        return ButtonCssClass; // Return raw, Razor will encode
     }
 
     private string EncodeButtonText(string text, string fallback)
@@ -1007,7 +1040,7 @@ public class EditArrayTagHelper : TagHelper
 
         // Build the button HTML
         sb.Append("<button type=\"button\" class=\"")
-          .Append(GetEncodedButtonCssClass())
+          .Append(GetButtonCssClass())
           .Append(' ')
           .Append(cssModifier)
           .Append("\" aria-label=\"")
@@ -1031,20 +1064,21 @@ public class EditArrayTagHelper : TagHelper
     }
 
     /// <summary>
-    /// Gets the container ID for use in HTML attributes, properly HTML-encoded for safe output.
+    /// Gets the container ID for use in HTML attributes with validation for safe output.
     /// </summary>
     /// <remarks>
-    /// The user-provided Id is HTML-encoded to prevent XSS attacks. The resulting encoded container ID
-    /// is safe for use in both HTML attributes and JavaScript string literals within those attributes
+    /// The user-provided Id is validated to contain only safe characters. Razor's SetAttribute()
+    /// will handle HTML encoding automatically. The resulting container ID is safe for use in both
+    /// HTML attributes and JavaScript string literals within those attributes
     /// (e.g., onclick="moveItem('edit-array-id')"). All itemIds derived from this containerId inherit
     /// the same safety guarantees.
     /// </remarks>
-    /// <returns>The encoded container ID (e.g., "edit-array-myId").</returns>
-    private string GetEncodedContainerId()
+    /// <returns>The raw container ID (e.g., "edit-array-myId"). Razor will encode.</returns>
+    private string GetContainerId()
     {
-        // Encode the user-provided Id for safe HTML attribute output
-        var encodedId = HtmlEncoder.Default.Encode(Id);
-        return $"edit-array-{encodedId}";
+        // Validate and return raw ID (Razor will encode)
+        ValidateId(Id, nameof(Id));
+        return $"edit-array-{Id}";
     }
 
     /// <summary>
