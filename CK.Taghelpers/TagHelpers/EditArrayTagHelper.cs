@@ -482,6 +482,7 @@ public class EditArrayTagHelper : TagHelper
     /// and maintaining proper model binding prefixes.
     /// </remarks>
     [ViewContext]
+    [HtmlAttributeNotBound]
     public required ViewContext ViewContext { get; set; }
 
     private readonly IHtmlHelper _htmlHelper;
