@@ -449,6 +449,56 @@ public class EditArrayTagHelperTests
     }
 
     // ========================================================================
+    // 8. Attribute Preservation Tests
+    // ========================================================================
+
+    [Fact]
+    public async Task Should_PreserveUserProvidedClassAttribute_When_ClassIsSetOnElement()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(id: "my-array");
+        
+        var context = CreateContext();
+        // Create output with an existing class attribute (simulating user-provided class)
+        var output = new TagHelperOutput(
+            tagName: "edit-array",
+            attributes: new TagHelperAttributeList { { "class", "my-custom-class another-class" } },
+            getChildContentAsync: (useCached, encoder) =>
+                Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()));
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var classValue = output.Attributes["class"].Value.ToString();
+        
+        // Should contain both user-provided classes and container class
+        Assert.Contains("my-custom-class", classValue);
+        Assert.Contains("another-class", classValue);
+        Assert.Contains("edit-array-container", classValue);
+        
+        // User-provided classes should come first
+        Assert.StartsWith("my-custom-class another-class", classValue);
+    }
+
+    [Fact]
+    public async Task Should_UseOnlyContainerClass_When_NoClassIsSetOnElement()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(id: "my-array");
+        
+        var context = CreateContext();
+        var output = CreateOutput(); // No class attribute
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var classValue = output.Attributes["class"].Value.ToString();
+        Assert.Equal("edit-array-container", classValue);
+    }
+
+    // ========================================================================
     // Helper Methods
     // ========================================================================
 

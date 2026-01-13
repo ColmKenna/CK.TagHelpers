@@ -500,7 +500,14 @@ public class EditArrayTagHelper : TagHelper
         // Reset the TagHelper output
         output.TagName = "div";
         output.TagMode = TagMode.StartTagAndEndTag;
-        output.Attributes.SetAttribute("class", GetContainerCssClass());
+        
+        // Merge with existing class attribute to preserve user-specified classes
+        var existingClass = output.Attributes["class"]?.Value?.ToString();
+        var containerClass = GetContainerCssClass();
+        var finalClass = string.IsNullOrEmpty(existingClass) 
+            ? containerClass 
+            : $"{existingClass} {containerClass}";
+        output.Attributes.SetAttribute("class", finalClass);
 
         // Create an ID for the container to use with JavaScript
         string containerId = GetContainerId();
