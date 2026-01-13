@@ -60,20 +60,23 @@ function addNewItem(containerId, templateId, data) {
   
         itemDiv.id = itemId;
 
-        // Update onclick handlers with the new ID
+        // Update event handlers with the new ID using event listeners (XSS prevention)
         const editBtn = itemDiv.querySelector('.edit-item-btn');
         if (editBtn) {
-            editBtn.setAttribute('onclick', `toggleEditMode('${itemId}')`);
+            editBtn.removeAttribute('onclick');
+            editBtn.addEventListener('click', () => toggleEditMode(itemId));
         }
 
         const doneBtn = itemDiv.querySelector('.done-edit-btn');
         if (doneBtn) {
-            doneBtn.setAttribute('onclick', `toggleEditMode('${itemId}')`);
+            doneBtn.removeAttribute('onclick');
+            doneBtn.addEventListener('click', () => toggleEditMode(itemId));
         }
 
         const deleteBtn = itemDiv.querySelector('.delete-item-btn');
         if (deleteBtn) {
-            deleteBtn.setAttribute('onclick', `markForDeletion('${itemId}')`);
+            deleteBtn.removeAttribute('onclick');
+            deleteBtn.addEventListener('click', () => markForDeletion(itemId));
         }
 
         // For newly added items in display mode, show edit container first and hide display container
@@ -121,7 +124,7 @@ function addNewItem(containerId, templateId, data) {
     cancelButton.textContent = 'Cancel';
     cancelButton.className = 'btn btn-secondary';
     
-    cancelButton.setAttribute('onclick', `markForDeletion('${itemId}')`);
+    cancelButton.addEventListener('click', () => markForDeletion(itemId));
     cancelButton.setAttribute('data-new-item-marker', 'true');
     cancelButton.setAttribute('data-cancel', `cancel`);
     
