@@ -1,0 +1,231 @@
+@model CK.Taghelpers.SampleUsage.Models.TeamViewModel
+
+@{
+    ViewData["Title"] = "EditArray TagHelper Examples";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>@ViewData["Title"]</h1>
+        <a asp-action="EditArray" class="btn btn-outline-secondary">← Back to EditArray Info</a>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="Samples" method="post">
+        <div class="mb-5">
+            <h2>Example 1: Full-Featured List (Display Mode + Add + Reorder + Callbacks)</h2>
+            <p class="text-muted">
+                This example demonstrates all features: display/edit mode toggle, add new items,
+                reordering, delete/undelete, and custom callbacks.
+            </p>
+
+            <edit-array
+                id="team-members"
+                asp-items="Model.Members"
+                asp-for="Members"
+                asp-view-name="~/Views/Shared/PersonEditors/_PersonEditor.cshtml"
+                asp-display-view-name="~/Views/Shared/PersonEditors/_PersonDisplay.cshtml"
+                asp-display-mode="true"
+                asp-template="true"
+                asp-add-button="true"
+                asp-enable-reordering="true"
+                asp-add-text="Add Team Member"
+                asp-edit-text="Edit"
+                asp-delete-text="Delete"
+                asp-done-text="Done"
+                asp-move-up-text="↑"
+                asp-move-down-text="↓"
+                asp-on-update="onMemberUpdated"
+                asp-on-delete="onMemberDeleted">
+            </edit-array>
+        </div>
+
+        <hr class="my-5" />
+
+        <div class="mb-5">
+            <h2>Example 2: Basic List (Edit Mode Only)</h2>
+            <p class="text-muted">
+                Simple list without display mode toggle. Items are always in edit mode.
+                No add button or reordering.
+            </p>
+
+            <edit-array
+                id="basic-list"
+                asp-items="Model.BasicList"
+                asp-for="BasicList"
+                asp-view-name="~/Views/Shared/PersonEditors/_PersonEditor.cshtml"
+                asp-display-view-name="~/Views/Shared/PersonEditors/_PersonDisplay.cshtml"
+                asp-display-mode="false">
+            </edit-array>
+        </div>
+
+        <hr class="my-5" />
+
+        <div class="mb-5">
+            <h2>Example 3: Custom Styling</h2>
+            <p class="text-muted">
+                Demonstrates custom CSS classes for container, items, and buttons.
+            </p>
+
+            <edit-array
+                id="styled-list"
+                asp-items="Model.StyledList"
+                asp-for="StyledList"
+                asp-view-name="~/Views/Shared/PersonEditors/_PersonEditor.cshtml"
+                asp-display-view-name="~/Views/Shared/PersonEditors/_PersonDisplay.cshtml"
+                asp-display-mode="true"
+                asp-template="true"
+                asp-add-button="true"
+                asp-container-class="border rounded p-3 bg-light"
+                asp-item-class="mb-2"
+                asp-button-class="btn"
+                asp-add-text="+ Add Person">
+            </edit-array>
+        </div>
+
+        <hr class="my-5" />
+
+        <div class="mb-5">
+            <h2>Example 4: Empty List with Placeholder</h2>
+            <p class="text-muted">
+                Shows how to handle empty lists with a placeholder message.
+            </p>
+
+            <edit-array
+                id="empty-list"
+                asp-items="Model.EmptyList"
+                asp-for="EmptyList"
+                asp-view-name="~/Views/Shared/PersonEditors/_PersonEditor.cshtml"
+                asp-display-view-name="~/Views/Shared/PersonEditors/_PersonDisplay.cshtml"
+                asp-display-mode="true"
+                asp-template="true"
+                asp-add-button="true"
+                asp-empty-placeholder="No team members yet. Click 'Add New Member' to get started!"
+                asp-add-text="Add New Member">
+            </edit-array>
+        </div>
+
+        <hr class="my-5" />
+
+        <div class="mb-5">
+            <h2>Example 5: With Callbacks</h2>
+            <p class="text-muted">
+                Demonstrates JavaScript callbacks that fire after update and delete actions.
+                Open the browser console to see callback messages.
+            </p>
+
+            <edit-array
+                id="callback-list"
+                asp-items="Model.CallbackList"
+                asp-for="CallbackList"
+                asp-view-name="~/Views/Shared/PersonEditors/_PersonEditor.cshtml"
+                asp-display-view-name="~/Views/Shared/PersonEditors/_PersonDisplay.cshtml"
+                asp-display-mode="true"
+                asp-on-update="onItemSaved"
+                asp-on-delete="onItemDeleteToggled">
+            </edit-array>
+        </div>
+
+        <hr class="my-5" />
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="submit" class="btn btn-primary btn-lg">Submit All Changes</button>
+            <button type="reset" class="btn btn-secondary btn-lg">Reset Form</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Callback for Example 1: Member updated
+        function onMemberUpdated(itemId) {
+            console.log('Member updated:', itemId);
+
+            // Example: Show a toast notification
+            showNotification('Member changes saved!', 'success');
+        }
+
+        // Callback for Example 1: Member deleted
+        function onMemberDeleted(itemId) {
+            const item = document.getElementById(itemId);
+            const isDeleted = item.getAttribute('data-deleted') === 'true';
+
+            console.log('Member delete toggled:', itemId, 'Deleted:', isDeleted);
+
+            if (isDeleted) {
+                showNotification('Member marked for deletion', 'warning');
+            } else {
+                showNotification('Member restored', 'info');
+            }
+        }
+
+        // Callback for Example 5: Item saved
+        function onItemSaved(itemId) {
+            console.log('Item saved:', itemId);
+
+            // Example: You could trigger an AJAX call to save the item
+            // fetch('/api/items/save', { method: 'POST', body: ... });
+
+            showNotification('Item saved successfully!', 'success');
+        }
+
+        // Callback for Example 5: Item delete toggled
+        function onItemDeleteToggled(itemId) {
+            const item = document.getElementById(itemId);
+            const isDeleted = item.getAttribute('data-deleted') === 'true';
+
+            console.log('Item delete toggled:', itemId, 'Deleted:', isDeleted);
+
+            if (isDeleted) {
+                // Example: Confirm deletion
+                if (!confirm('Are you sure you want to delete this item?')) {
+                    // If user cancels, toggle it back
+                    markForDeletion(itemId);
+                } else {
+                    showNotification('Item will be deleted on submit', 'warning');
+                }
+            } else {
+                showNotification('Item deletion cancelled', 'info');
+            }
+        }
+
+        // Helper function to show notifications
+        function showNotification(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(alertDiv);
+
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // Form submit handler - log what would be submitted
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            console.log('Form would submit with data:');
+
+            for (let [key, value] of formData.entries()) {
+                console.log(`  ${key}: ${value}`);
+            }
+
+            // Actually submit the form (comment out to prevent actual submission)
+            this.submit();
+        });
+    </script>
+}

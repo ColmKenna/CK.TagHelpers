@@ -2,8 +2,8 @@
 
 <div class="card mb-3 bg-light">
     <div class="card-body">
-        <h5 class="card-title">@Model.Name</h5>
-        <h6 class="card-subtitle mb-2 text-muted">@Model.Role</h6>
-        <p class="card-text">ID: @Model.Id</p>
+        <h5 class="card-title" data-display-for="@Html.IdFor(m => m.Name)">@Model.Name</h5>
+        <h6 class="card-subtitle mb-2 text-muted" data-display-for="@Html.IdFor(m => m.Role)">@Model.Role</h6>
+        <p class="card-text">ID: <span data-display-for="@Html.IdFor(m => m.Id)">@Model.Id</span></p>
     </div>
 </div>
