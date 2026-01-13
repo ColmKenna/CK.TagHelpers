@@ -60,7 +60,7 @@ function addNewItem(containerId, templateId, data) {
   
         itemDiv.id = itemId;
 
-        // Update event handlers with the new ID using event listeners (XSS prevention)
+        // Update event handlers with the new ID using event listeners
         const editBtn = itemDiv.querySelector('.edit-item-btn');
         if (editBtn) {
             editBtn.removeAttribute('onclick');
@@ -201,6 +201,8 @@ function toggleEditMode(itemId) {
 
 function markForDeletion(itemId) {
     const item = document.getElementById(itemId);
+    if (!item) return;
+    
     const deleteButton = item.querySelector('.delete-item-btn');
     const editButton = item.querySelector('.edit-item-btn');
     const isDeletedInput = item.querySelector('input[data-is-deleted-marker]');
@@ -246,42 +248,37 @@ function markForDeletion(itemId) {
         return;
     }
     
-    // remove the cancel button if it exists
+    if (item.getAttribute('data-deleted') === 'true') {
+        // Undo deletion
+        item.removeAttribute('data-deleted');
+        item.classList.remove('deleted');
+        if (isDeletedInput) {
+            isDeletedInput.value = 'false';
+        }
+        if (deleteButton) {
+            deleteButton.textContent = 'Delete';
+        }
+        if (editButton) {
+            editButton.disabled = false;
+        }
+    } else {
+        // Mark as deleted
+        item.setAttribute('data-deleted', 'true');
+        item.classList.add('deleted');
+        if (isDeletedInput) {
+            isDeletedInput.value = 'true';
+        }
+        if (deleteButton) {
+            deleteButton.textContent = 'Undelete';
+        }
+        if (editButton) {
+            editButton.disabled = true;
+        }
 
-
-    if (item) {
-        if (item.getAttribute('data-deleted') === 'true') {
-            // Undo deletion
-            item.removeAttribute('data-deleted');
-            item.classList.remove('deleted');
-            if (isDeletedInput) {
-                isDeletedInput.value = 'false';
-            }
-            if (deleteButton) {
-                deleteButton.textContent = 'Delete';
-            }
-            if (editButton) {
-                editButton.disabled = false;
-            }
-        } else {
-            // Mark as deleted
-            item.setAttribute('data-deleted', 'true');
-            item.classList.add('deleted');
-            if (isDeletedInput) {
-                isDeletedInput.value = 'true';
-            }
-            if (deleteButton) {
-                deleteButton.textContent = 'Undelete';
-            }
-            if (editButton) {
-                editButton.disabled = true;
-            }
-
-            // Safely invoke OnDelete callback if defined (XSS prevention: validate function exists)
-            const onDelete = item.dataset.onDelete;
-            if (onDelete && typeof window[onDelete] === 'function') {
-                window[onDelete](itemId);
-            }
+        // Safely invoke OnDelete callback if defined (XSS prevention: validate function exists)
+        const onDelete = item.dataset.onDelete;
+        if (onDelete && typeof window[onDelete] === 'function') {
+            window[onDelete](itemId);
         }
     }
 }
