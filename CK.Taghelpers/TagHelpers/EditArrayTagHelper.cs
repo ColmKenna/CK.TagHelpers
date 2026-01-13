@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.Primitives;
 using System.Text;
 using System.Text.Encodings.Web;
 
@@ -89,7 +90,7 @@ public class EditArrayTagHelper : TagHelper
     /// </para>
     /// </remarks>
     [HtmlAttributeName("id")]
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     // ============================================================
     // OPTIONAL PROPERTIES (Core Functionality)
@@ -137,10 +138,10 @@ public class EditArrayTagHelper : TagHelper
 
     /// <summary>
     /// Gets or sets the name of the partial view used to render each item in display mode.
-    /// Required when <see cref="DisplayMode"/> is <c>true</c>.
+    /// This property is required.
     /// </summary>
     /// <value>
-    /// The path to the partial view for display mode, or <c>null</c> if display mode is not used.
+    /// The path to the partial view for display mode. Must not be <c>null</c>.
     /// </value>
     /// <remarks>
     /// <para>
@@ -148,12 +149,11 @@ public class EditArrayTagHelper : TagHelper
     /// Users can toggle between display and edit modes using Edit/Done buttons.
     /// </para>
     /// <para>
-    /// If <see cref="DisplayMode"/> is <c>true</c> and this property is <c>null</c>, empty, or whitespace,
-    /// an <see cref="InvalidOperationException"/> will be thrown during validation.
+    /// This property must always be specified, even if <see cref="DisplayMode"/> is <c>false</c>.
     /// </para>
     /// </remarks>
     [HtmlAttributeName(DisplayViewNameAttributeName)]
-    public string? DisplayViewName { get; set; }
+    public required string DisplayViewName { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to render a template section for adding new items.
@@ -311,7 +311,7 @@ public class EditArrayTagHelper : TagHelper
     /// The value is HTML-encoded before output to prevent XSS attacks.
     /// </remarks>
     [HtmlAttributeName(ContainerCssClassAttributeName)]
-    public string ContainerCssClass { get; set; } 
+    public string? ContainerCssClass { get; set; } 
 
     /// <summary>
     /// Gets or sets the CSS class(es) to apply to each item wrapper element.
@@ -325,7 +325,7 @@ public class EditArrayTagHelper : TagHelper
     /// The value is HTML-encoded before output to prevent XSS attacks.
     /// </remarks>
     [HtmlAttributeName(ItemCssClassAttributeName)]
-    public string ItemCssClass { get; set; } 
+    public string? ItemCssClass { get; set; } 
 
     /// <summary>
     /// Gets or sets the base CSS class(es) to apply to all buttons (Edit, Delete, Done, Add).
@@ -573,14 +573,14 @@ public class EditArrayTagHelper : TagHelper
                 Model = item
             };
 
-            if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
-            {
+            //if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
+            //{
                 await RenderItemDisplayMode(sb, item, itemId, viewData);
-            }
-            else
-            {
-                await RenderItemEditMode(sb, item, viewData);
-            }
+            //}
+            //else
+            //{
+            //    await RenderItemEditMode(sb, item, viewData);
+            //}
 
             AppendReorderButtons(sb, containerId, itemId);
 
@@ -604,8 +604,11 @@ public class EditArrayTagHelper : TagHelper
     private async Task RenderItemDisplayMode(StringBuilder sb, object item, string itemId, ViewDataDictionary<object> viewData)
     {
         sb.Append("<div class=\"display-container\" id=\"")
-          .Append(itemId)
-          .Append("-display\">");
+            .Append(itemId)
+            .Append("-display\" ");
+        if (!DisplayMode)
+            sb.Append("style=\"display: none;\" ");
+        sb.Append(">");
 
         var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, item, viewData);
         using (var writer = new StringWriter())
@@ -619,8 +622,12 @@ public class EditArrayTagHelper : TagHelper
         sb.Append("</div>");
 
         sb.Append("<div class=\"edit-container\" id=\"")
-          .Append(itemId)
-          .Append("-edit\" style=\"display: none;\">");
+            .Append(itemId)
+            .Append("-edit\" ");
+        if (DisplayMode)
+            sb.Append("style=\"display: none;\" ");
+
+        sb.Append('>');
 
         var editorViewContent = await _htmlHelper.PartialAsync(ViewName, item, viewData);
         using (var writer = new StringWriter())
@@ -672,7 +679,7 @@ public class EditArrayTagHelper : TagHelper
 
         var name = $"{templateFieldName}.IsDeleted";
 
-        if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
+        if (!string.IsNullOrWhiteSpace(DisplayViewName))
         {
             sb.Append("<div class=\"display-container\" style=\"display: none;\">");
             if (templateModel != null)
@@ -709,11 +716,11 @@ public class EditArrayTagHelper : TagHelper
             }
         }
 
-        if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
-        {
+        //if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
+        //{
             sb.Append(GenerateButton("done", null, true));
             sb.Append("</div>");
-        }
+        //}
 
         AppendTemplateReorderButtons(sb, containerId);
 

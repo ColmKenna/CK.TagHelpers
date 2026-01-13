@@ -3,7 +3,7 @@
  * @param {string} containerId - The ID of the edit-array container
  * @param {string} templateId - The ID of the template to clone
  */
-function addNewItem(containerId, templateId) {
+function addNewItem(containerId, templateId, data) {
     const container = document.getElementById(containerId + '-items');
     const template = document.getElementById(templateId);
     const clone = template.content.cloneNode(true);
@@ -102,7 +102,13 @@ function addNewItem(containerId, templateId) {
 
 
     container.appendChild(clone);
-    
+
+    // Hide the placeholder if it exists
+    const placeholder = container.querySelector('.edit-array-placeholder');
+    if (placeholder) {
+        placeholder.style.display = 'none';
+    }
+
     // disable the add button
     const addButton = document.getElementById(containerId + '-add');
     if (addButton) {
@@ -214,6 +220,18 @@ function markForDeletion(itemId) {
             const addButton = document.getElementById(containerId + '-add');
             if (addButton) {
                 addButton.disabled = false;
+            }
+
+            // Show placeholder if there are no items left
+            const itemsContainer = document.getElementById(containerId + '-items');
+            if (itemsContainer) {
+                const itemCount = itemsContainer.querySelectorAll('.edit-array-item').length;
+                if (itemCount === 0) {
+                    const placeholder = itemsContainer.querySelector('.edit-array-placeholder');
+                    if (placeholder) {
+                        placeholder.style.display = '';
+                    }
+                }
             }
         }
         return;
