@@ -134,14 +134,15 @@ function addNewItem(containerId, templateId, data) {
     }
     
     // Re-parse validation for the new elements if jQuery validation is available
-    if (typeof $.validator !== 'undefined' && $.validator.unobtrusive) {
-        var $form = $(container.closest('form'));
+    const $jq = window.jQuery;
+    if ($jq && $jq.validator && $jq.validator.unobtrusive) {
+        var $form = $jq(container.closest('form'));
         $form.removeData('validator');
         $form.removeData('unobtrusiveValidator');
-        $.validator.unobtrusive.parse($form);
+        $jq.validator.unobtrusive.parse($form);
         // Ensure blur validation is attached to all inputs in the container
-        $(container).find('input, select, textarea').off('blur.validate').on('blur.validate', function () {
-            $(this).valid();
+        $jq(container).find('input, select, textarea').off('blur.validate').on('blur.validate', function () {
+            $jq(this).valid();
         });
     }
 }
