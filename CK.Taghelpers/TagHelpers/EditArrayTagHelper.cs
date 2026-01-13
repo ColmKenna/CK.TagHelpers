@@ -569,14 +569,10 @@ public class EditArrayTagHelper : TagHelper
 
             sb.Append(">");
 
-            var isDeletedProperty = item.GetType().GetProperty("IsDeleted");
-
-            if (isDeletedProperty == null)
-            {
-                sb.Append("<input type=\"hidden\" name=\"")
-                  .Append(fieldName)
-                  .Append(".IsDeleted\" value=\"false\" data-is-deleted-marker />");
-            }
+            // Always emit the IsDeleted marker input for consistent JS contract
+            sb.Append("<input type=\"hidden\" name=\"")
+              .Append(fieldName)
+              .Append(".IsDeleted\" value=\"false\" data-is-deleted-marker />");
 
             var originalPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
             ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = fieldName;
@@ -725,12 +721,10 @@ public class EditArrayTagHelper : TagHelper
                 viewContent.WriteTo(writer, HtmlEncoder.Default);
                 var templateContent = writer.ToString();
                 sb.Append(templateContent);
-                if (!templateContent.Contains($"name=\"{name}\"", StringComparison.OrdinalIgnoreCase))
-                {
-                    sb.Append("<input type=\"hidden\" name=\"")
-                      .Append(name)
-                      .Append("\" value=\"false\" data-is-deleted-marker />");
-                }
+                // Always emit the IsDeleted marker input for consistent JS contract
+                sb.Append("<input type=\"hidden\" name=\"")
+                  .Append(name)
+                  .Append("\" value=\"false\" data-is-deleted-marker />");
             }
         }
 
