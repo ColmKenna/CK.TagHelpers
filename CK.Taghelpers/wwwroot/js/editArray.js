@@ -81,25 +81,25 @@ function addNewItem(containerId, templateId, data) {
 
         // For newly added items in display mode, show edit container first and hide display container
         const displayContainer = itemDiv.querySelector('.display-container');
-        // set the id on the displayContainer
-        displayContainer.id = `${itemId}-display`;
         const editContainer = itemDiv.querySelector('.edit-container');
-        editContainer.id = `${itemId}-edit`;
+
         if (displayContainer && editContainer) {
+            displayContainer.id = `${itemId}-display`;
+            editContainer.id = `${itemId}-edit`;
             displayContainer.style.display = 'none';
             editContainer.style.display = 'block';
+
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = `__newItem__${newIndex}`;
+            hiddenInput.value = 'true';
+            hiddenInput.setAttribute('data-new-item-marker', 'true');
+            hiddenInput.setAttribute('data-id', `__newItem__${newIndex}`);
+            hiddenInput.setAttribute('data-display-for', `__newItem__${newIndex}`);
+
+            // Append the hidden input to the edit container
+            editContainer.appendChild(hiddenInput);
         }
-
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = `__newItem__${newIndex}`;
-        hiddenInput.value = 'true';
-        hiddenInput.setAttribute('data-new-item-marker', 'true');
-        hiddenInput.setAttribute('data-id', `__newItem__${newIndex}`);
-        hiddenInput.setAttribute('data-display-for', `__newItem__${newIndex}`);
-
-        // Append the hidden input to the edit container
-        editContainer.appendChild(hiddenInput);
     }
     
 
@@ -307,9 +307,16 @@ function updateDisplayFromForm(itemId) {
 }
 
 function moveItem(containerId, itemId, offset) {
+    const mainContainer = document.getElementById(containerId);
     const container = document.getElementById(`${containerId}-items`);
     const item = document.getElementById(itemId);
     if (!container || !item || offset === 0) return;
+
+    // Guard reorder operations - only allow if reordering is enabled on the container
+    if (!mainContainer || mainContainer.getAttribute('data-reorder-enabled') !== 'true') {
+        console.warn(`Reordering is not enabled for container: ${containerId}`);
+        return;
+    }
 
     const items = Array.from(container.querySelectorAll('.edit-array-item'));
     const currentIndex = items.indexOf(item);
