@@ -188,6 +188,18 @@ function toggleEditMode(itemId) {
             // Switch from display to edit
             displayContainer.style.display = 'none';
             editContainer.style.display = 'block';
+
+            // Re-validate form when entering edit mode to ensure validation state is current
+            const $jq = window.jQuery;
+            if ($jq && $jq.validator && $jq.validator.unobtrusive) {
+                const form = editContainer.closest('form');
+                if (form) {
+                    const $form = $jq(form);
+                    $form.removeData('validator');
+                    $form.removeData('unobtrusiveValidator');
+                    $jq.validator.unobtrusive.parse($form);
+                }
+            }
         }
     }
     // re-enable the add button
