@@ -671,10 +671,21 @@ public class EditArrayTagHelper : TagHelper
         ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = templateFieldName;
 
         object? templateModel = null;
-        var itemType = Items.GetType().GetGenericArguments().FirstOrDefault();
+        var itemType = For?.ModelExplorer?.Metadata?.ElementType 
+                       ?? Items.GetType().GetGenericArguments().FirstOrDefault();
+
         if (itemType != null)
         {
-            templateModel = Activator.CreateInstance(itemType);
+            try
+            {
+                templateModel = Activator.CreateInstance(itemType);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to create template instance of type '{itemType.Name}'. " +
+                    $"Ensure the type has a parameterless constructor.", ex);
+            }
         }
 
         var viewData = new ViewDataDictionary<object>(ViewContext.ViewData)
