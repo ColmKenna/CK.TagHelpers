@@ -637,14 +637,7 @@ public class EditArrayTagHelper : TagHelper
                 Model = item
             };
 
-            //if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
-            //{
-                await RenderItemDisplayMode(sb, item, itemId, viewData);
-            //}
-            //else
-            //{
-            //    await RenderItemEditMode(sb, item, viewData);
-            //}
+            await RenderItemDisplayMode(sb, item, itemId, viewData);
 
             AppendReorderButtons(sb, containerId, itemId);
 
@@ -792,11 +785,8 @@ public class EditArrayTagHelper : TagHelper
             }
         }
 
-        //if (DisplayMode && !string.IsNullOrWhiteSpace(DisplayViewName))
-        //{
-            sb.Append(GenerateButton("done", null, true));
-            sb.Append("</div>");
-        //}
+        sb.Append(GenerateButton("done", null, true));
+        sb.Append("</div>");
 
         AppendTemplateReorderButtons(sb, containerId);
 
@@ -1168,10 +1158,10 @@ public class EditArrayTagHelper : TagHelper
             errors.Add($"'id' attribute is required and must not be null, empty, or whitespace. The id is used to generate unique JavaScript function calls and DOM element identifiers.");
         }
 
-        // Validate DisplayMode requires DisplayViewName
-        if (DisplayMode && string.IsNullOrWhiteSpace(DisplayViewName))
+        // Validate DisplayViewName (always required as it's marked with 'required' keyword)
+        if (string.IsNullOrWhiteSpace(DisplayViewName))
         {
-            errors.Add($"'{nameof(DisplayViewName)}' is required when '{nameof(DisplayMode)}' is enabled. Specify a partial view name for display mode, or set '{nameof(DisplayMode)}' to false.");
+            errors.Add($"'{nameof(DisplayViewName)}' is required and must not be null or empty. Specify the name of the partial view to render for display mode.");
         }
 
         // Validate ViewContext and nested properties
