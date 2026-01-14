@@ -77,9 +77,20 @@ public class EditArrayTagHelper : TagHelper
     /// </value>
     /// <remarks>
     /// <para>
+    /// <strong>Important:</strong> The provided id value is automatically prefixed with "edit-array-".
+    /// For example, if you set <c>id="myArray"</c>, the actual DOM element id will be <c>"edit-array-myArray"</c>.
+    /// </para>
+    /// <para>
     /// The id is used to generate unique identifiers for all child elements and is referenced by
     /// JavaScript functions for add, edit, delete, and reorder operations. Each item's id is derived
-    /// from this container id (e.g., if id="myArray", items will have ids like "edit-array-myArray-item-0").
+    /// from this container id:
+    /// <list type="bullet">
+    /// <item><description>Container: <c>edit-array-{id}</c></description></item>
+    /// <item><description>Items container: <c>edit-array-{id}-items</c></description></item>
+    /// <item><description>Individual items: <c>edit-array-{id}-item-{index}</c></description></item>
+    /// <item><description>Template: <c>edit-array-{id}-template</c></description></item>
+    /// <item><description>Add button: <c>edit-array-{id}-add</c></description></item>
+    /// </list>
     /// </para>
     /// <para>
     /// The value is HTML-encoded before output to prevent XSS attacks. The encoded id is safe for use
@@ -89,6 +100,19 @@ public class EditArrayTagHelper : TagHelper
     /// An <see cref="InvalidOperationException"/> is thrown during validation if this property is not set.
     /// </para>
     /// </remarks>
+    /// <example>
+    /// <code>
+    /// &lt;!-- If you specify: --&gt;
+    /// &lt;edit-array id="addresses" asp-items="Model.Addresses" ... /&gt;
+    /// 
+    /// &lt;!-- The rendered HTML will have: --&gt;
+    /// &lt;div id="edit-array-addresses" class="edit-array-container"&gt;
+    ///     &lt;div id="edit-array-addresses-items"&gt;
+    ///         &lt;div id="edit-array-addresses-item-0" class="edit-array-item"&gt;...&lt;/div&gt;
+    ///     &lt;/div&gt;
+    /// &lt;/div&gt;
+    /// </code>
+    /// </example>
     [HtmlAttributeName("id")]
     public required string Id { get; set; }
 
@@ -487,6 +511,11 @@ public class EditArrayTagHelper : TagHelper
 
     private readonly IHtmlHelper _htmlHelper;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EditArrayTagHelper"/> class.
+    /// </summary>
+    /// <param name="htmlHelper">The HTML helper used for rendering partial views. Must not be <c>null</c>.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="htmlHelper"/> is <c>null</c>.</exception>
     public EditArrayTagHelper(IHtmlHelper htmlHelper)
     {
         _htmlHelper = htmlHelper ?? throw new ArgumentNullException(nameof(htmlHelper));

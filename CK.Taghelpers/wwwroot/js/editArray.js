@@ -1,4 +1,15 @@
 /**
+ * EditArray JavaScript Module
+ * 
+ * Provides client-side functionality for dynamic array editing in ASP.NET Core applications.
+ * Works as vanilla JavaScript with optional jQuery integration for form validation.
+ * 
+ * @requires None (vanilla JS)
+ * @optional jQuery - When available with jQuery Validation Unobtrusive, enables 
+ *                    automatic form re-validation after adding new items.
+ */
+
+/**
  * Add a new item to an edit-array container
  * @param {string} containerId - The ID of the edit-array container
  * @param {string} templateId - The ID of the template to clone
@@ -8,8 +19,8 @@ function addNewItem(containerId, templateId, data) {
     const template = document.getElementById(templateId);
     const clone = template.content.cloneNode(true);
 
-    // Get current count of items to use as new index
-    const newIndex = container.children.length;
+    // Get current count of items to use as new index (only count actual items, not placeholders)
+    const newIndex = container.querySelectorAll('.edit-array-item').length;
 
     // Replace '__index__' with the actual index in all input names and ids
     const allInputs = clone.querySelectorAll('*');
