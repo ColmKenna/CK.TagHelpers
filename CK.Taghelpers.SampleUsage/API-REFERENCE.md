@@ -64,6 +64,7 @@ asp-reorder-button-class="btn btn-outline"      <!-- Reorder button class -->
 asp-add-text="Add Item"                         <!-- Add button text -->
 asp-edit-text="Edit"                            <!-- Edit button text -->
 asp-delete-text="Delete"                        <!-- Delete button text -->
+asp-undelete-text="Undelete"                    <!-- Undelete button text (when item is deleted) -->
 asp-done-text="Done"                            <!-- Done button text -->
 asp-move-up-text="↑"                            <!-- Move up button text -->
 asp-move-down-text="↓"                          <!-- Move down button text -->
@@ -210,6 +211,8 @@ renumberItems('edit-array-mylist');
 
 ### Used by TagHelper
 - `data-reorder-enabled="true"` - Set on container when reordering is enabled
+- `data-delete-text="{text}"` - Configurable Delete button text (set on container)
+- `data-undelete-text="{text}"` - Configurable Undelete button text (set on container)
 - `data-is-deleted-marker` - Marks the IsDeleted hidden input
 - `data-display-for="{inputId}"` - Links display element to input for updates
 
@@ -401,6 +404,7 @@ Requires:
 | `asp-reorder-button-class` | `"btn btn-outline-secondary"` |
 | `asp-edit-text` | `"Edit"` |
 | `asp-delete-text` | `"Delete"` |
+| `asp-undelete-text` | `"Undelete"` |
 | `asp-done-text` | `"Done"` |
 | `asp-add-text` | `"Add New Item"` |
 | `asp-move-up-text` | `"Move Up"` |

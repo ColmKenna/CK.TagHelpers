@@ -28,6 +28,7 @@ public class EditArrayTagHelper : TagHelper
     private const string MoveDownButtonTextAttributeName = "asp-move-down-text";
     private const string EditButtonTextAttributeName = "asp-edit-text";
     private const string DeleteButtonTextAttributeName = "asp-delete-text";
+    private const string UndeleteButtonTextAttributeName = "asp-undelete-text";
     private const string DoneButtonTextAttributeName = "asp-done-text";
     private const string AddButtonTextAttributeName = "asp-add-text";
     private const string ContainerCssClassDefault = "edit-array-container";
@@ -452,6 +453,24 @@ public class EditArrayTagHelper : TagHelper
     public string DeleteButtonText { get; set; } = "Delete";
 
     /// <summary>
+    /// Gets or sets the text displayed on the "Undelete" button (shown when an item is marked for deletion).
+    /// </summary>
+    /// <value>
+    /// The button text. Default is "Undelete".
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// This property is used when an item has been marked for deletion. Clicking the button with this text
+    /// will restore the item. The value is passed to JavaScript via a data attribute on the container.
+    /// </para>
+    /// <para>
+    /// The value is HTML-encoded before output to prevent XSS attacks.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(UndeleteButtonTextAttributeName)]
+    public string UndeleteButtonText { get; set; } = "Undelete";
+
+    /// <summary>
     /// Gets or sets the text displayed on the "Done" button.
     /// </summary>
     /// <value>
@@ -548,6 +567,10 @@ public class EditArrayTagHelper : TagHelper
         {
             output.Attributes.SetAttribute("data-reorder-enabled", "true");
         }
+
+        // Add button text data attributes for JavaScript consumption
+        output.Attributes.SetAttribute("data-delete-text", DeleteButtonText);
+        output.Attributes.SetAttribute("data-undelete-text", UndeleteButtonText);
 
         // Setup HtmlHelper to be used in our views
         (_htmlHelper as IViewContextAware)?.Contextualize(ViewContext);

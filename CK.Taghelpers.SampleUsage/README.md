@@ -145,6 +145,7 @@ public class TeamViewModel
 |-----------|---------|
 | `asp-edit-text` | "Edit" |
 | `asp-delete-text` | "Delete" |
+| `asp-undelete-text` | "Undelete" |
 | `asp-done-text` | "Done" |
 | `asp-add-text` | "Add New Item" |
 | `asp-move-up-text` | "Move Up" |

@@ -272,6 +272,10 @@ function markForDeletion(itemId) {
         return;
     }
     
+    // Get button text from container data attributes, with fallback defaults
+    const deleteText = container?.dataset?.deleteText || 'Delete';
+    const undeleteText = container?.dataset?.undeleteText || 'Undelete';
+
     if (item.getAttribute('data-deleted') === 'true') {
         // Undo deletion
         item.removeAttribute('data-deleted');
@@ -280,7 +284,7 @@ function markForDeletion(itemId) {
             isDeletedInput.value = 'false';
         }
         if (deleteButton) {
-            deleteButton.textContent = 'Delete';
+            deleteButton.textContent = deleteText;
         }
         if (editButton) {
             editButton.disabled = false;
@@ -293,7 +297,7 @@ function markForDeletion(itemId) {
             isDeletedInput.value = 'true';
         }
         if (deleteButton) {
-            deleteButton.textContent = 'Undelete';
+            deleteButton.textContent = undeleteText;
         }
         if (editButton) {
             editButton.disabled = true;
