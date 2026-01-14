@@ -327,12 +327,23 @@ function moveItem(containerId, itemId, offset) {
 
 function renumberItems(containerId) {
     const container = document.getElementById(`${containerId}-items`);
-    if (!container) return;
+    if (!container) {
+        console.error(`Container not found: ${containerId}-items`);
+        return;
+    }
 
     const items = Array.from(container.querySelectorAll('.edit-array-item'));
+    if (items.length === 0) return;
+
     items.forEach((item, newIndex) => {
         const oldId = item.id;
         const newId = `${containerId}-item-${newIndex}`;
+
+        // Validate uniqueness - skip if new ID already exists and isn't the current item
+        if (document.getElementById(newId) && newId !== oldId) {
+            console.warn(`Duplicate ID detected: ${newId}. Skipping renumbering for this item.`);
+            return;
+        }
 
         updateAttributeWithIndex(item, 'id', newIndex, oldId, newId);
 
