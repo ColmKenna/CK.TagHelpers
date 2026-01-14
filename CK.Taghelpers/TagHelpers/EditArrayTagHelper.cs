@@ -574,7 +574,7 @@ public class EditArrayTagHelper : TagHelper
         output.Content.SetHtmlContent(sb.ToString());
     }
 
-    private async Task<bool> RenderItems(StringBuilder sb, string containerId, string modelExpressionPrefix, string collectionName)
+    private async Task RenderItems(StringBuilder sb, string containerId, string modelExpressionPrefix, string collectionName)
     {
         sb.Append("<div class=\"edit-array-items\" id=\"")
           .Append(containerId)
@@ -638,8 +638,6 @@ public class EditArrayTagHelper : TagHelper
         }
 
         sb.Append("</div>");
-
-        return hasItems;
     }
 
     private async Task RenderItemDisplayMode(StringBuilder sb, object item, string itemId, ViewDataDictionary<object> viewData)
