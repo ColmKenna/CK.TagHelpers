@@ -494,8 +494,11 @@ public class EditArrayTagHelper : TagHelper
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
-        // Validate required configuration
-        ValidateConfiguration();
+        // Validate required configuration - returns false and renders error UI if validation fails
+        if (!ValidateConfiguration(output))
+        {
+            return;
+        }
 
         // Reset the TagHelper output
         output.TagName = "div";
@@ -1095,54 +1098,81 @@ public class EditArrayTagHelper : TagHelper
 
     /// <summary>
     /// Validates that all required configuration properties are properly set.
+    /// Instead of throwing exceptions, renders a diagnostic error panel to improve development experience.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown when any required property is not properly configured.</exception>
-    private void ValidateConfiguration()
+    /// <param name="output">The TagHelperOutput to render error messages to if validation fails.</param>
+    /// <returns>True if validation passed; false if validation failed and error UI was rendered.</returns>
+    private bool ValidateConfiguration(TagHelperOutput output)
     {
+        var errors = new List<string>();
+
         // Validate ViewName
         if (string.IsNullOrWhiteSpace(ViewName))
         {
-            throw new InvalidOperationException(
-                $"The '{nameof(ViewName)}' property is required and must not be null or empty. " +
-                "Please specify the name of the partial view to render for each item.");
+            errors.Add($"'{nameof(ViewName)}' is required and must not be null or empty. Specify the name of the partial view to render for each item.");
         }
 
         // Validate Items
         if (Items == null)
         {
-            throw new InvalidOperationException(
-                $"The '{nameof(Items)}' property is required and must not be null. " +
-                "Use an empty collection if there are no items to render.");
+            errors.Add($"'{nameof(Items)}' is required and must not be null. Use an empty collection if there are no items to render.");
         }
 
         // Validate Id (required for JavaScript functionality)
         if (string.IsNullOrWhiteSpace(Id))
         {
-            throw new InvalidOperationException(
-                $"The 'id' attribute is required and must not be null, empty, or whitespace. " +
-                "The id is used to generate unique JavaScript function calls and DOM element identifiers.");
+            errors.Add($"'id' attribute is required and must not be null, empty, or whitespace. The id is used to generate unique JavaScript function calls and DOM element identifiers.");
         }
 
         // Validate DisplayMode requires DisplayViewName
         if (DisplayMode && string.IsNullOrWhiteSpace(DisplayViewName))
         {
-            throw new InvalidOperationException(
-                $"The '{nameof(DisplayViewName)}' property is required when '{nameof(DisplayMode)}' is enabled. " +
-                $"Please specify a partial view name for display mode, or set '{nameof(DisplayMode)}' to false.");
+            errors.Add($"'{nameof(DisplayViewName)}' is required when '{nameof(DisplayMode)}' is enabled. Specify a partial view name for display mode, or set '{nameof(DisplayMode)}' to false.");
         }
 
         // Validate ViewContext and nested properties
         if (ViewContext == null)
         {
-            throw new InvalidOperationException(
-                $"The '{nameof(ViewContext)}' property is required and must not be null.");
+            errors.Add($"'{nameof(ViewContext)}' is required and must not be null.");
+        }
+        else if (ViewContext.ViewData == null)
+        {
+            errors.Add("ViewContext.ViewData must not be null. Ensure ViewContext is properly initialized.");
         }
 
-        if (ViewContext.ViewData == null)
+        // If there are errors, render diagnostic output instead of throwing
+        if (errors.Count > 0)
         {
-            throw new InvalidOperationException(
-                "ViewContext.ViewData must not be null. Ensure ViewContext is properly initialized.");
+            RenderValidationErrors(output, errors);
+            return false;
         }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Renders a diagnostic error panel showing all configuration errors.
+    /// </summary>
+    /// <param name="output">The TagHelperOutput to render the error panel to.</param>
+    /// <param name="errors">The list of error messages to display.</param>
+    private void RenderValidationErrors(TagHelperOutput output, List<string> errors)
+    {
+        output.TagName = "div";
+        output.Attributes.SetAttribute("class", "edit-array-error alert alert-danger");
+        output.TagMode = TagMode.StartTagAndEndTag;
+
+        var sb = new StringBuilder();
+        sb.Append("<strong>EditArrayTagHelper Configuration Error:</strong>");
+        sb.Append("<ul>");
+        foreach (var error in errors)
+        {
+            sb.Append("<li>");
+            sb.Append(HtmlEncoder.Default.Encode(error));
+            sb.Append("</li>");
+        }
+        sb.Append("</ul>");
+
+        output.Content.SetHtmlContent(sb.ToString());
     }
 
 }

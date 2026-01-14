@@ -28,11 +28,11 @@ public class EditArrayTagHelperTests
     }
 
     // ========================================================================
-    // 1. Validation Tests
+    // 1. Validation Tests (Graceful Degradation)
     // ========================================================================
 
     [Fact]
-    public async Task Should_ThrowInvalidOperationException_When_ViewNameIsNull()
+    public async Task Should_RenderErrorMessage_When_ViewNameIsNull()
     {
         // Arrange
         var tagHelper = CreateTagHelper();
@@ -41,15 +41,21 @@ public class EditArrayTagHelperTests
         var context = CreateContext();
         var output = CreateOutput();
 
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            tagHelper.ProcessAsync(context, output));
+        // Act
+        await tagHelper.ProcessAsync(context, output);
         
-        Assert.Contains("ViewName", exception.Message);
+        // Assert - should render error panel instead of throwing
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        Assert.Contains("alert-danger", output.Attributes["class"].Value.ToString());
+        
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("ViewName", content);
     }
 
     [Fact]
-    public async Task Should_ThrowInvalidOperationException_When_ItemsIsNull()
+    public async Task Should_RenderErrorMessage_When_ItemsIsNull()
     {
         // Arrange
         var tagHelper = CreateTagHelper();
@@ -58,15 +64,20 @@ public class EditArrayTagHelperTests
         var context = CreateContext();
         var output = CreateOutput();
 
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            tagHelper.ProcessAsync(context, output));
+        // Act
+        await tagHelper.ProcessAsync(context, output);
         
-        Assert.Contains("Items", exception.Message);
+        // Assert - should render error panel instead of throwing
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("Items", content);
     }
 
     [Fact]
-    public async Task Should_ThrowInvalidOperationException_When_IdIsNull()
+    public async Task Should_RenderErrorMessage_When_IdIsNull()
     {
         // Arrange
         var tagHelper = CreateTagHelper();
@@ -75,15 +86,20 @@ public class EditArrayTagHelperTests
         var context = CreateContext();
         var output = CreateOutput();
 
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            tagHelper.ProcessAsync(context, output));
+        // Act
+        await tagHelper.ProcessAsync(context, output);
         
-        Assert.Contains("id", exception.Message);
+        // Assert - should render error panel instead of throwing
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("id", content.ToLowerInvariant());
     }
 
     [Fact]
-    public async Task Should_ThrowInvalidOperationException_When_DisplayModeIsTrueAndDisplayViewNameIsNull()
+    public async Task Should_RenderErrorMessage_When_DisplayModeIsTrueAndDisplayViewNameIsNull()
     {
         // Arrange
         var tagHelper = CreateTagHelper();
@@ -93,15 +109,20 @@ public class EditArrayTagHelperTests
         var context = CreateContext();
         var output = CreateOutput();
 
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            tagHelper.ProcessAsync(context, output));
+        // Act
+        await tagHelper.ProcessAsync(context, output);
         
-        Assert.Contains("DisplayViewName", exception.Message);
+        // Assert - should render error panel instead of throwing
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("DisplayViewName", content);
     }
 
     [Fact]
-    public async Task Should_ThrowInvalidOperationException_When_ViewContextIsNull()
+    public async Task Should_RenderErrorMessage_When_ViewContextIsNull()
     {
         // Arrange
         var tagHelper = CreateTagHelper();
@@ -110,11 +131,43 @@ public class EditArrayTagHelperTests
         var context = CreateContext();
         var output = CreateOutput();
 
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            tagHelper.ProcessAsync(context, output));
+        // Act
+        await tagHelper.ProcessAsync(context, output);
         
-        Assert.Contains("ViewContext", exception.Message);
+        // Assert - should render error panel instead of throwing
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("ViewContext", content);
+    }
+
+    [Fact]
+    public async Task Should_RenderAllErrors_When_MultipleValidationErrorsExist()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.ViewName = null!;
+        tagHelper.Items = null!;
+        tagHelper.Id = null!;
+        
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+        
+        // Assert - should render all errors in a single panel
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("ViewName", content);
+        Assert.Contains("Items", content);
+        Assert.Contains("id", content.ToLowerInvariant());
+        
+        // Verify it's rendered as a list
+        Assert.Contains("<ul>", content);
+        Assert.Contains("<li>", content);
     }
 
     // ========================================================================
