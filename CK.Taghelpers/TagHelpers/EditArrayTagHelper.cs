@@ -810,11 +810,11 @@ public class EditArrayTagHelper : TagHelper
               .Append(GetButtonCssClass())
               .Append(" btn-primary mt-2\" id=\"")
               .Append(containerId)
-              .Append("-add\" aria-label=\"Add new item\" onclick=\"addNewItem('")
+              .Append("-add\" aria-label=\"Add new item\" data-action=\"add\" data-container-id=\"")
               .Append(containerId)
-              .Append("', '")
+              .Append("\" data-template-id=\"")
               .Append(templateId)
-              .Append("')\">")
+              .Append("\">")
               .Append(HtmlEncoder.Default.Encode(AddButtonText))
               .Append("</button>");
         }
@@ -848,22 +848,22 @@ public class EditArrayTagHelper : TagHelper
             .Append(encodedCssClass)
             .Append(" reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" aria-label=\"Move item ")
             .Append(itemId)
-            .Append(" up\" onclick=\"moveItem('")
+            .Append(" up\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
-            .Append("','")
+            .Append("\" data-item-id=\"")
             .Append(itemId)
-            .Append("',-1)\">");
+            .Append("\" data-direction=\"-1\">");
         sb.Append(upText);
         sb.Append("</button>");
         sb.Append("<button type=\"button\" class=\"")
             .Append(encodedCssClass)
             .Append(" reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" aria-label=\"Move item ")
             .Append(itemId)
-            .Append(" down\" onclick=\"moveItem('")
+            .Append(" down\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
-            .Append("','")
+            .Append("\" data-item-id=\"")
             .Append(itemId)
-            .Append("',1)\">");
+            .Append("\" data-direction=\"1\">");
         sb.Append(downText);
         sb.Append("</button>");
         sb.Append("</div>");
@@ -883,16 +883,16 @@ public class EditArrayTagHelper : TagHelper
         sb.Append("<div class=\"reorder-controls\">");
         sb.Append("<button type=\"button\" class=\"")
             .Append(encodedCssClass)
-            .Append(" reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" aria-label=\"Move item up\" onclick=\"moveItem('")
+            .Append(" reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" aria-label=\"Move item up\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
-            .Append("', this.closest('.edit-array-item').id, -1)\">");
+            .Append("\" data-item-id=\"closest\" data-direction=\"-1\">");
         sb.Append(upText);
         sb.Append("</button>");
         sb.Append("<button type=\"button\" class=\"")
             .Append(encodedCssClass)
-            .Append(" reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" aria-label=\"Move item down\" onclick=\"moveItem('")
+            .Append(" reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" aria-label=\"Move item down\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
-            .Append("', this.closest('.edit-array-item').id, 1)\">");
+            .Append("\" data-item-id=\"closest\" data-direction=\"1\">");
         sb.Append(downText);
         sb.Append("</button>");
         sb.Append("</div>");
@@ -1078,25 +1078,22 @@ public class EditArrayTagHelper : TagHelper
         var sb = new StringBuilder();
 
         // Determine button-specific properties
-        string cssModifier, buttonText, primaryAction, ariaLabel;
+        string cssModifier, buttonText, ariaLabel;
         switch (buttonType.ToLowerInvariant())
         {
             case "edit":
                 cssModifier = "btn-sm btn-primary edit-item-btn mt-2";
                 buttonText = EditButtonText;
-                primaryAction = "toggleEditMode";
                 ariaLabel = isTemplate ? "Edit item" : $"Edit item {itemId}";
                 break;
             case "delete":
                 cssModifier = "btn-sm btn-danger delete-item-btn mt-2";
                 buttonText = DeleteButtonText;
-                primaryAction = "markForDeletion";
                 ariaLabel = isTemplate ? "Delete item" : $"Delete item {itemId}";
                 break;
             case "done":
                 cssModifier = "btn-sm btn-success done-edit-btn mt-2";
                 buttonText = DoneButtonText;
-                primaryAction = "toggleEditMode";
                 ariaLabel = isTemplate ? "Done editing item" : $"Done editing item {itemId}";
                 break;
             default:
@@ -1112,17 +1109,14 @@ public class EditArrayTagHelper : TagHelper
           .Append(HtmlEncoder.Default.Encode(ariaLabel))
           .Append("\"");
 
-        // Build onclick handler
-        var targetId = isTemplate ? "this.closest('.edit-array-item').id" : $"'{itemId}'";
-        sb.Append(" onclick=\"")
-          .Append(primaryAction)
-          .Append('(')
-          .Append(targetId)
-          .Append(')');
+        // Build data attributes for event delegation (replaces inline onclick)
+        sb.Append(" data-action=\"")
+          .Append(buttonType.ToLowerInvariant())
+          .Append("\" data-item-id=\"")
+          .Append(isTemplate ? "closest" : itemId)
+          .Append("\">");
 
-
-        sb.Append("\">")
-          .Append(HtmlEncoder.Default.Encode(buttonText))
+        sb.Append(HtmlEncoder.Default.Encode(buttonText))
           .Append("</button>");
 
         return sb.ToString();

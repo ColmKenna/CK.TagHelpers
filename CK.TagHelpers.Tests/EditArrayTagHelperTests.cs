@@ -297,8 +297,9 @@ public class EditArrayTagHelperTests
         Assert.Contains("style=\"display: none;\"", content);
         Assert.Contains("<input>", content); // Edit content
         
-        // Check toggle buttons
-        Assert.Contains("toggleEditMode", content);
+        // Check toggle buttons (use data attributes for event delegation, not inline onclick)
+        Assert.Contains("data-action=\"edit\"", content);
+        Assert.Contains("data-action=\"done\"", content);
         Assert.Contains("Edit", content); // Edit button text
         Assert.Contains("Done", content); // Done button text
     }
@@ -357,7 +358,7 @@ public class EditArrayTagHelperTests
         var content = output.Content.GetContent();
         Assert.Contains("<button", content);
         Assert.Contains("Add One", content);
-        Assert.Contains("addNewItem", content);
+        Assert.Contains("data-action=\"add\"", content);
     }
 
     // ========================================================================
@@ -430,10 +431,10 @@ public class EditArrayTagHelperTests
         // Verify data attributes are present (XSS-safe approach)
         Assert.Contains("data-on-update=\"myUpdateCallback\"", content);
         Assert.Contains("data-on-delete=\"myDeleteCallback\"", content);
-        
-        // Verify core button handlers are still present
-        Assert.Contains("markForDeletion", content);
-        Assert.Contains("toggleEditMode", content);
+
+        // Verify core button data-action attributes are present (event delegation, not inline onclick)
+        Assert.Contains("data-action=\"delete\"", content);
+        Assert.Contains("data-action=\"edit\"", content);
     }
 
     // ========================================================================
@@ -470,8 +471,9 @@ public class EditArrayTagHelperTests
         Assert.Contains("reorder-controls", templateContent);
         Assert.Contains("reorder-up-btn", templateContent);
         Assert.Contains("reorder-down-btn", templateContent);
-        // Template reorder buttons use a different ID selector logic (this.closest)
-        Assert.Contains("this.closest('.edit-array-item').id", templateContent);
+        // Template reorder buttons use data-item-id="closest" for event delegation
+        Assert.Contains("data-item-id=\"closest\"", templateContent);
+        Assert.Contains("data-action=\"move\"", templateContent);
     }
 
     [Fact]
@@ -498,7 +500,7 @@ public class EditArrayTagHelperTests
         Assert.Contains("reorder-down-btn", content);
         Assert.Contains("Go Up", content);
         Assert.Contains("Go Down", content);
-        Assert.Contains("moveItem", content);
+        Assert.Contains("data-action=\"move\"", content);
     }
 
     // ========================================================================

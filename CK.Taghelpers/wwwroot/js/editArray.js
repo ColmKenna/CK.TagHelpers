@@ -68,27 +68,14 @@ function addNewItem(containerId, templateId, data) {
     const itemDiv = clone.querySelector('.edit-array-item');
     const itemId = `${containerId}-item-${newIndex}`;
     if (itemDiv) {
-  
         itemDiv.id = itemId;
 
-        // Update event handlers with the new ID using event listeners
-        const editBtn = itemDiv.querySelector('.edit-item-btn');
-        if (editBtn) {
-            editBtn.removeAttribute('onclick');
-            editBtn.addEventListener('click', () => toggleEditMode(itemId));
-        }
-
-        const doneBtn = itemDiv.querySelector('.done-edit-btn');
-        if (doneBtn) {
-            doneBtn.removeAttribute('onclick');
-            doneBtn.addEventListener('click', () => toggleEditMode(itemId));
-        }
-
-        const deleteBtn = itemDiv.querySelector('.delete-item-btn');
-        if (deleteBtn) {
-            deleteBtn.removeAttribute('onclick');
-            deleteBtn.addEventListener('click', () => markForDeletion(itemId));
-        }
+        // Update data-item-id attributes from "closest" to the actual item ID
+        // This allows event delegation to resolve the correct item
+        const buttonsWithClosest = itemDiv.querySelectorAll('button[data-item-id="closest"]');
+        buttonsWithClosest.forEach(btn => {
+            btn.dataset.itemId = itemId;
+        });
 
         // For newly added items in display mode, show edit container first and hide display container
         const displayContainer = itemDiv.querySelector('.display-container');
@@ -391,14 +378,8 @@ function renumberItems(containerId) {
             updateAttributeWithIndex(child, 'data-valmsg-for', newIndex, oldId, newId);
             updateAttributeWithIndex(child, 'data-new-item-marker', newIndex, oldId, newId);
             updateAttributeWithIndex(child, 'aria-describedby', newIndex, oldId, newId);
-
-            const onclick = child.getAttribute('onclick');
-            if (onclick && oldId) {
-                const updatedOnclick = onclick.replaceAll(oldId, newId);
-                if (updatedOnclick !== onclick) {
-                    child.setAttribute('onclick', updatedOnclick);
-                }
-            }
+            // Update data-item-id for event delegation (no longer using onclick)
+            updateAttributeWithIndex(child, 'data-item-id', newIndex, oldId, newId);
         });
     });
 }
@@ -442,5 +423,72 @@ function getContainerIdFromItemId(itemId) {
     if (!itemId) return null;
     const match = itemId.match(/^(.*)-item-\d+$/);
     return match && match[1] ? match[1] : null;
+}
+
+/**
+ * Resolves the item ID from a button's data-item-id attribute.
+ * If the value is "closest", finds the nearest .edit-array-item ancestor's ID.
+ * @param {HTMLElement} button - The button element
+ * @returns {string|null} The resolved item ID
+ */
+function resolveItemId(button) {
+    const itemIdAttr = button.dataset.itemId;
+    if (itemIdAttr === 'closest') {
+        const item = button.closest('.edit-array-item');
+        return item ? item.id : null;
+    }
+    return itemIdAttr || null;
+}
+
+/**
+ * Event delegation handler for edit-array button actions.
+ * Handles all button clicks via data-action attributes instead of inline onclick handlers.
+ * This improves security (CSP compliance), testability, and maintainability.
+ */
+function handleEditArrayAction(event) {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+
+    const action = button.dataset.action;
+    const containerId = button.dataset.containerId;
+    const templateId = button.dataset.templateId;
+    const itemId = resolveItemId(button);
+    const direction = button.dataset.direction ? parseInt(button.dataset.direction, 10) : 0;
+
+    switch (action) {
+        case 'add':
+            if (containerId && templateId) {
+                addNewItem(containerId, templateId);
+            }
+            break;
+        case 'edit':
+        case 'done':
+            if (itemId) {
+                toggleEditMode(itemId);
+            }
+            break;
+        case 'delete':
+            if (itemId) {
+                markForDeletion(itemId);
+            }
+            break;
+        case 'move':
+            if (containerId && itemId && direction !== 0) {
+                moveItem(containerId, itemId, direction);
+            }
+            break;
+        default:
+            // Unknown action, ignore
+            break;
+    }
+}
+
+// Initialize event delegation when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('click', handleEditArrayAction);
+    });
+} else {
+    document.addEventListener('click', handleEditArrayAction);
 }
 
