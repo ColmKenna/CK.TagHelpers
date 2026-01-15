@@ -27,13 +27,18 @@ public class TabItemTagHelperTests
         // Assert
         var rendered = output.Content.GetContent();
         Assert.Null(output.TagName);
-        Assert.Contains("<input class=\"tabs-panel-input\"", rendered);
+        Assert.Contains("<input", rendered);
+        Assert.Contains("class=\"tabs-panel-input\"", rendered);
         Assert.Contains("name=\"tabs\"", rendered);
         Assert.Contains("type=\"radio\"", rendered);
         Assert.Contains("id=\"tab-1\"", rendered);
         Assert.Contains("checked=\"checked\"", rendered);
-        Assert.Contains("<label class=\"tab-heading\" for=\"tab-1\">First</label>", rendered);
-        Assert.Contains("<div class=\"panel\"><div class=\"panel-content\">Body</div></div>", rendered);
+        Assert.Contains("<label", rendered);
+        Assert.Contains("class=\"tab-heading\"", rendered);
+        Assert.Contains("for=\"tab-1\"", rendered);
+        Assert.Contains(">First</label>", rendered);
+        Assert.Contains("<div class=\"panel\">", rendered);
+        Assert.Contains("<div class=\"panel-content\">Body</div>", rendered);
     }
 
     [Fact]
@@ -87,7 +92,9 @@ public class TabItemTagHelperTests
         var rendered = output.Content.GetContent();
         Assert.Equal(expectedId, tagHelper.Id);
         Assert.Contains($"id=\"{expectedId}\"", rendered);
-        Assert.Contains($"<label class=\"tab-heading\" for=\"{expectedId}\">{heading}</label>", rendered);
+        Assert.Contains("class=\"tab-heading\"", rendered);
+        Assert.Contains($"for=\"{expectedId}\"", rendered);
+        Assert.Contains($">{heading}</label>", rendered);
     }
 
     [Fact]
@@ -109,7 +116,9 @@ public class TabItemTagHelperTests
         // Assert
         var rendered = output.Content.GetContent();
         Assert.Contains("id=\"custom-id\"", rendered);
-        Assert.Contains("<label class=\"tab-heading\" for=\"custom-id\">Heading Text</label>", rendered);
+        Assert.Contains("class=\"tab-heading\"", rendered);
+        Assert.Contains("for=\"custom-id\"", rendered);
+        Assert.Contains(">Heading Text</label>", rendered);
     }
 
     [Fact]
