@@ -1,5 +1,5 @@
-using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace CK.Taghelpers.TagHelpers;
@@ -25,18 +25,39 @@ public class TabItemTagHelper : TagHelper
         }
 
         var content = await output.GetChildContentAsync();
-        var sb = new StringBuilder();
 
         if (string.IsNullOrEmpty(Id))
         {
             Id = GenerateIdFromHeading(Heading);
         }
-        sb.Append($"<input class=\"tabs-panel-input\" name=\"tabs\" type=\"radio\" id=\"{Id}\" {(Selected ? "checked=\"checked\"" : "")}/>");
-        sb.Append($"<label class=\"tab-heading\" for=\"{Id}\">{Heading}</label>");
-        sb.Append($"<div class=\"panel\"><div class=\"panel-content\">{content.GetContent()}</div></div>");
+
+        var input = new TagBuilder("input");
+        input.TagRenderMode = TagRenderMode.SelfClosing;
+        input.AddCssClass("tabs-panel-input");
+        input.Attributes["name"] = "tabs";
+        input.Attributes["type"] = "radio";
+        input.Attributes["id"] = Id;
+        if (Selected)
+        {
+            input.Attributes["checked"] = "checked";
+        }
+
+        var label = new TagBuilder("label");
+        label.AddCssClass("tab-heading");
+        label.Attributes["for"] = Id;
+        label.InnerHtml.Append(Heading);
+
+        var panel = new TagBuilder("div");
+        panel.AddCssClass("panel");
+        var panelContent = new TagBuilder("div");
+        panelContent.AddCssClass("panel-content");
+        panelContent.InnerHtml.AppendHtml(content);
+        panel.InnerHtml.AppendHtml(panelContent);
 
         output.TagName = null; // Remove the original <tab-item> tag
-        output.Content.SetHtmlContent(sb.ToString());
+        output.Content.SetHtmlContent(input);
+        output.Content.AppendHtml(label);
+        output.Content.AppendHtml(panel);
     }
     
     private string GenerateIdFromHeading(string heading)

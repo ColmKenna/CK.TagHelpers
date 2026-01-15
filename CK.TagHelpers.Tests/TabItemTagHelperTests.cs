@@ -128,6 +128,30 @@ public class TabItemTagHelperTests
         Assert.Equal(string.Empty, output.Content.GetContent());
     }
 
+    [Fact]
+    public async Task Should_EncodeHeadingAndId_When_Rendering()
+    {
+        // Arrange
+        var tagHelper = new TabItemTagHelper
+        {
+            Id = "tab-\"1\"",
+            Heading = "<strong>Tab</strong>",
+            Selected = false
+        };
+        var context = CreateContext();
+        var output = CreateOutput(childContent: "Body");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var rendered = output.Content.GetContent();
+        Assert.Contains("id=\"tab-&quot;1&quot;\"", rendered);
+        Assert.Contains("for=\"tab-&quot;1&quot;\"", rendered);
+        Assert.Contains("&lt;strong&gt;Tab&lt;/strong&gt;", rendered);
+        Assert.DoesNotContain("<strong>Tab</strong>", rendered);
+    }
+
     private static TagHelperContext CreateContext(
         string tagName = "tab-item",
         TagHelperAttributeList? attributes = null)
