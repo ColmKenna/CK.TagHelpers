@@ -697,14 +697,20 @@ public class EditArrayTagHelper : TagHelper
 
     private async Task RenderItemDisplayMode(StringBuilder sb, object item, string itemId, ViewDataDictionary<object> viewData)
     {
+        var displayVisibility = GetVisibilityStyle(!DisplayMode);
+        var editVisibility = GetVisibilityStyle(DisplayMode);
+
         sb.Append("<div class=\"")
             .Append(CssClasses.DisplayContainer)
             .Append("\" id=\"")
             .Append(itemId)
-            .Append("-display\" ");
-        if (!DisplayMode)
-            sb.Append("style=\"display: none;\" ");
-        sb.Append(">");
+            .Append("-display\"");
+        if (!string.IsNullOrEmpty(displayVisibility))
+        {
+            sb.Append(' ')
+              .Append(displayVisibility);
+        }
+        sb.Append('>');
 
         var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, item, viewData);
         using (var writer = new StringWriter())
@@ -721,10 +727,12 @@ public class EditArrayTagHelper : TagHelper
             .Append(CssClasses.EditContainer)
             .Append("\" id=\"")
             .Append(itemId)
-            .Append("-edit\" ");
-        if (DisplayMode)
-            sb.Append("style=\"display: none;\" ");
-
+            .Append("-edit\"");
+        if (!string.IsNullOrEmpty(editVisibility))
+        {
+            sb.Append(' ')
+              .Append(editVisibility);
+        }
         sb.Append('>');
 
         var editorViewContent = await _htmlHelper.PartialAsync(ViewName, item, viewData);
@@ -795,9 +803,17 @@ public class EditArrayTagHelper : TagHelper
 
         if (!string.IsNullOrWhiteSpace(DisplayViewName))
         {
+            var templateDisplayVisibility = GetVisibilityStyle(true);
+
             sb.Append("<div class=\"")
               .Append(CssClasses.DisplayContainer)
-              .Append("\" style=\"display: none;\">");
+              .Append("\"");
+            if (!string.IsNullOrEmpty(templateDisplayVisibility))
+            {
+                sb.Append(' ')
+                  .Append(templateDisplayVisibility);
+            }
+            sb.Append('>');
             if (templateModel != null)
             {
                 var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, templateModel, viewData);
@@ -1096,6 +1112,11 @@ public class EditArrayTagHelper : TagHelper
     {
         ValidateCssClass(ButtonCssClass, nameof(ButtonCssClass));
         return ButtonCssClass; // Return raw, Razor will encode
+    }
+
+    private static string GetVisibilityStyle(bool shouldHide)
+    {
+        return shouldHide ? "style=\"display: none;\"" : string.Empty;
     }
 
     private string EncodeButtonText(string text, string fallback)
