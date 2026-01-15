@@ -982,6 +982,24 @@ public class EditArrayTagHelper : TagHelper
         }
     }
 
+    private string EnsureDefaultCssClass(string? cssClass, string defaultClass, string propertyName)
+    {
+        if (string.IsNullOrWhiteSpace(cssClass))
+        {
+            return defaultClass;
+        }
+
+        ValidateCssClass(cssClass, propertyName);
+
+        var classes = cssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (classes.Contains(defaultClass, StringComparer.OrdinalIgnoreCase))
+        {
+            return cssClass;
+        }
+
+        return $"{defaultClass} {cssClass}";
+    }
+
     /// <summary>
     /// Gets the reorder button CSS class with validation for safe output.
     /// </summary>
@@ -999,21 +1017,7 @@ public class EditArrayTagHelper : TagHelper
     /// <returns>The raw container CSS class (Razor will encode).</returns>
     private string GetContainerCssClass()
     {
-        var cssClass = ContainerCssClass;
-        if (string.IsNullOrWhiteSpace(cssClass))
-        {
-            return ContainerCssClassDefault;
-        }
-
-        ValidateCssClass(cssClass, nameof(ContainerCssClass));
-
-        var classes = cssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (!classes.Contains(ContainerCssClassDefault, StringComparer.OrdinalIgnoreCase))
-        {
-            cssClass = ContainerCssClassDefault + " " + cssClass;
-        }
-
-        return cssClass; // Return raw, Razor will encode
+        return EnsureDefaultCssClass(ContainerCssClass, ContainerCssClassDefault, nameof(ContainerCssClass));
     }
 
     /// <summary>
@@ -1022,21 +1026,7 @@ public class EditArrayTagHelper : TagHelper
     /// <returns>The raw item CSS class (Razor will encode).</returns>
     private string GetItemCssClass()
     {
-        var cssClass = ItemCssClass;
-        if (string.IsNullOrWhiteSpace(cssClass))
-        {
-            return ItemCssClassDefault;
-        }
-
-        ValidateCssClass(cssClass, nameof(ItemCssClass));
-
-        var classes = cssClass.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (!classes.Contains(ItemCssClassDefault, StringComparer.OrdinalIgnoreCase))
-        {
-            cssClass = ItemCssClassDefault + " " + cssClass;
-        }
-
-        return cssClass; // Return raw, Razor will encode
+        return EnsureDefaultCssClass(ItemCssClass, ItemCssClassDefault, nameof(ItemCssClass));
     }
 
     /// <summary>
