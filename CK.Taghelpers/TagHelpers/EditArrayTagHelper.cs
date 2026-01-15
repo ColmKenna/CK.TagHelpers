@@ -971,14 +971,14 @@ public class EditArrayTagHelper : TagHelper
     /// </summary>
     /// <param name="id">The ID string to validate.</param>
     /// <param name="propertyName">The name of the property being validated (for error messages).</param>
-    /// <exception cref="InvalidOperationException">Thrown when the ID contains invalid characters.</exception>
+    /// <exception cref="ArgumentException">Thrown when the ID contains invalid characters.</exception>
     private void ValidateId(string id, string propertyName)
     {
         if (!System.Text.RegularExpressions.Regex.IsMatch(id, @"^[a-zA-Z0-9\-_]*$"))
         {
-            throw new InvalidOperationException(
-                $"{propertyName} contains invalid characters. " +
-                "Only alphanumeric, hyphens, and underscores allowed.");
+            throw new ArgumentException(
+                "Contains invalid characters. Only alphanumeric, hyphens, and underscores allowed.",
+                propertyName);
         }
     }
 
