@@ -7,6 +7,9 @@ public class TabTagHelper : TagHelper
 {
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
+        var groupName = $"tabs-{context.UniqueId}";
+        context.Items[typeof(TabTagHelper)] = groupName;
+
         output.TagName = "div";
         output.Attributes.SetAttribute("class", "tabs");
 

@@ -31,10 +31,18 @@ public class TabItemTagHelper : TagHelper
             Id = GenerateIdFromHeading(Heading);
         }
 
+        var groupName = "tabs";
+        if (context.Items.TryGetValue(typeof(TabTagHelper), out var groupNameValue)
+            && groupNameValue is string groupNameString
+            && !string.IsNullOrWhiteSpace(groupNameString))
+        {
+            groupName = groupNameString;
+        }
+
         var input = new TagBuilder("input");
         input.TagRenderMode = TagRenderMode.SelfClosing;
         input.AddCssClass("tabs-panel-input");
-        input.Attributes["name"] = "tabs";
+        input.Attributes["name"] = groupName;
         input.Attributes["type"] = "radio";
         input.Attributes["id"] = Id;
         if (Selected)

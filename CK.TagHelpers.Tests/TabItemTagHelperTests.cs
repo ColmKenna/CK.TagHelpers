@@ -152,14 +152,38 @@ public class TabItemTagHelperTests
         Assert.DoesNotContain("<strong>Tab</strong>", rendered);
     }
 
+    [Fact]
+    public async Task Should_UseGroupNameFromContextItems_When_Provided()
+    {
+        // Arrange
+        var groupName = "tabs-group";
+        var tagHelper = new TabItemTagHelper
+        {
+            Id = "tab-1",
+            Heading = "First",
+            Selected = false
+        };
+        var context = CreateContext(
+            items: new Dictionary<object, object> { { typeof(TabTagHelper), groupName } });
+        var output = CreateOutput(childContent: "Body");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var rendered = output.Content.GetContent();
+        Assert.Contains($"name=\"{groupName}\"", rendered);
+    }
+
     private static TagHelperContext CreateContext(
         string tagName = "tab-item",
-        TagHelperAttributeList? attributes = null)
+        TagHelperAttributeList? attributes = null,
+        IDictionary<object, object>? items = null)
     {
         return new TagHelperContext(
             tagName: tagName,
             allAttributes: attributes ?? new TagHelperAttributeList(),
-            items: new Dictionary<object, object>(),
+            items: items ?? new Dictionary<object, object>(),
             uniqueId: "test");
     }
 
