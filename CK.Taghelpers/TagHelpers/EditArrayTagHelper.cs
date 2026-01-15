@@ -542,8 +542,6 @@ public class EditArrayTagHelper : TagHelper
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
-        ArgumentNullException.ThrowIfNull(ViewContext);
-
         // Validate required configuration - returns false and renders error UI if validation fails
         if (!ValidateConfiguration(output))
         {
