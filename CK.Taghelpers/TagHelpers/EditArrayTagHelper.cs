@@ -564,7 +564,8 @@ public class EditArrayTagHelper : TagHelper
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="htmlHelper"/> is <c>null</c>.</exception>
     public EditArrayTagHelper(IHtmlHelper htmlHelper)
     {
-        _htmlHelper = htmlHelper ?? throw new ArgumentNullException(nameof(htmlHelper));
+        ArgumentNullException.ThrowIfNull(htmlHelper);
+        _htmlHelper = htmlHelper;
     }
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
