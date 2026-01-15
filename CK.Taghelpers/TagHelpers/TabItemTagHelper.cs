@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 namespace CK.Taghelpers.TagHelpers;
 
 [HtmlTargetElement("tab-item", ParentTag = "tab")]
+/// <summary>
+/// Renders a CSS-only tab item with a heading and panel content. The <c>heading</c> attribute is required.
+/// </summary>
 public class TabItemTagHelper : TagHelper
 {
     private static readonly Regex IdSanitizerRegex =
