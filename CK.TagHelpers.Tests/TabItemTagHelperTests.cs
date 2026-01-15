@@ -112,6 +112,22 @@ public class TabItemTagHelperTests
         Assert.Contains("<label class=\"tab-heading\" for=\"custom-id\">Heading Text</label>", rendered);
     }
 
+    [Fact]
+    public async Task Should_SuppressOutput_When_HeadingIsMissing()
+    {
+        // Arrange
+        var tagHelper = new TabItemTagHelper();
+        var context = CreateContext();
+        var output = CreateOutput(childContent: "Body");
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => tagHelper.ProcessAsync(context, output));
+
+        // Assert
+        Assert.Null(exception);
+        Assert.Equal(string.Empty, output.Content.GetContent());
+    }
+
     private static TagHelperContext CreateContext(
         string tagName = "tab-item",
         TagHelperAttributeList? attributes = null)

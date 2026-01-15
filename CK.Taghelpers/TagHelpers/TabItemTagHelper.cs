@@ -18,6 +18,12 @@ public class TabItemTagHelper : TagHelper
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
+        if (string.IsNullOrWhiteSpace(Heading))
+        {
+            output.SuppressOutput();
+            return;
+        }
+
         var content = await output.GetChildContentAsync();
         var sb = new StringBuilder();
 
