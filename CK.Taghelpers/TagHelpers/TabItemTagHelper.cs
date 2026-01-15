@@ -9,6 +9,9 @@ namespace CK.Taghelpers.TagHelpers;
 [HtmlTargetElement("tab-item", ParentTag = "tab")]
 public class TabItemTagHelper : TagHelper
 {
+    private static readonly Regex IdSanitizerRegex =
+        new Regex(@"[^a-z0-9\s-]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     [HtmlAttributeName("id")]
     public string Id { get; set; }
 
@@ -90,7 +93,7 @@ public class TabItemTagHelper : TagHelper
     private string GenerateIdFromHeading(string heading)
     {
         // Remove invalid characters and replace spaces with hyphens
-        return Regex.Replace(heading.ToLower(), @"[^a-z0-9\s-]", "").Replace(' ', '-');
+        return IdSanitizerRegex.Replace(heading.ToLower(), "").Replace(' ', '-');
     }
 
     private static HashSet<string> GetOrCreateUsedIds(TagHelperContext context)
