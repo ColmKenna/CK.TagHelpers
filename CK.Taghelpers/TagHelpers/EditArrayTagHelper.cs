@@ -33,7 +33,34 @@ public class EditArrayTagHelper : TagHelper
     private const string AddButtonTextAttributeName = "asp-add-text";
     private const string ContainerCssClassDefault = "edit-array-container";
     private const string ItemCssClassDefault = "edit-array-item";
-    
+
+    private static class CssClasses
+    {
+        public const string Alert = "alert";
+        public const string AlertDanger = "alert-danger";
+        public const string EditArrayError = "edit-array-error";
+        public const string EditArrayItems = "edit-array-items";
+        public const string EditArrayPlaceholder = "edit-array-placeholder";
+        public const string DisplayContainer = "display-container";
+        public const string EditContainer = "edit-container";
+        public const string ReorderControls = "reorder-controls";
+        public const string ReorderButton = "reorder-btn";
+        public const string ReorderUpButton = "reorder-up-btn";
+        public const string ReorderDownButton = "reorder-down-btn";
+        public const string ButtonSmall = "btn-sm";
+        public const string ButtonPrimary = "btn-primary";
+        public const string ButtonDanger = "btn-danger";
+        public const string ButtonSuccess = "btn-success";
+        public const string EditItemButton = "edit-item-btn";
+        public const string DeleteItemButton = "delete-item-btn";
+        public const string DoneEditButton = "done-edit-btn";
+        public const string MarginTop2 = "mt-2";
+        public const string EditButtonModifier = ButtonSmall + " " + ButtonPrimary + " " + EditItemButton + " " + MarginTop2;
+        public const string DeleteButtonModifier = ButtonSmall + " " + ButtonDanger + " " + DeleteItemButton + " " + MarginTop2;
+        public const string DoneButtonModifier = ButtonSmall + " " + ButtonSuccess + " " + DoneEditButton + " " + MarginTop2;
+        public const string AddButtonModifier = ButtonPrimary + " " + MarginTop2;
+        public const string ErrorPanel = EditArrayError + " " + Alert + " " + AlertDanger;
+    }
 
     // ============================================================
     // REQUIRED PROPERTIES
@@ -609,7 +636,9 @@ public class EditArrayTagHelper : TagHelper
 
     private async Task RenderItems(StringBuilder sb, string containerId, string modelExpressionPrefix, string collectionName)
     {
-        sb.Append("<div class=\"edit-array-items\" id=\"")
+        sb.Append("<div class=\"")
+          .Append(CssClasses.EditArrayItems)
+          .Append("\" id=\"")
           .Append(containerId)
           .Append("-items\">");
 
@@ -668,7 +697,9 @@ public class EditArrayTagHelper : TagHelper
 
     private async Task RenderItemDisplayMode(StringBuilder sb, object item, string itemId, ViewDataDictionary<object> viewData)
     {
-        sb.Append("<div class=\"display-container\" id=\"")
+        sb.Append("<div class=\"")
+            .Append(CssClasses.DisplayContainer)
+            .Append("\" id=\"")
             .Append(itemId)
             .Append("-display\" ");
         if (!DisplayMode)
@@ -686,7 +717,9 @@ public class EditArrayTagHelper : TagHelper
         sb.Append(GenerateButton("delete", itemId, false));
         sb.Append("</div>");
 
-        sb.Append("<div class=\"edit-container\" id=\"")
+        sb.Append("<div class=\"")
+            .Append(CssClasses.EditContainer)
+            .Append("\" id=\"")
             .Append(itemId)
             .Append("-edit\" ");
         if (DisplayMode)
@@ -762,7 +795,9 @@ public class EditArrayTagHelper : TagHelper
 
         if (!string.IsNullOrWhiteSpace(DisplayViewName))
         {
-            sb.Append("<div class=\"display-container\" style=\"display: none;\">");
+            sb.Append("<div class=\"")
+              .Append(CssClasses.DisplayContainer)
+              .Append("\" style=\"display: none;\">");
             if (templateModel != null)
             {
                 var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, templateModel, viewData);
@@ -777,7 +812,9 @@ public class EditArrayTagHelper : TagHelper
             sb.Append(GenerateButton("delete", null, true));
             sb.Append("</div>");
 
-            sb.Append("<div class=\"edit-container\">");
+            sb.Append("<div class=\"")
+              .Append(CssClasses.EditContainer)
+              .Append("\">");
         }
 
         if (templateModel != null)
@@ -808,7 +845,9 @@ public class EditArrayTagHelper : TagHelper
         {
             sb.Append("<button type=\"button\" class=\"")
               .Append(GetButtonCssClass())
-              .Append(" btn-primary mt-2\" id=\"")
+              .Append(' ')
+              .Append(CssClasses.AddButtonModifier)
+              .Append("\" id=\"")
               .Append(containerId)
               .Append("-add\" aria-label=\"Add new item\" data-action=\"add\" data-container-id=\"")
               .Append(containerId)
@@ -827,7 +866,9 @@ public class EditArrayTagHelper : TagHelper
             return;
         }
 
-        sb.Append("<div class=\"edit-array-placeholder\">")
+        sb.Append("<div class=\"")
+          .Append(CssClasses.EditArrayPlaceholder)
+          .Append("\">")
           .Append(HtmlEncoder.Default.Encode(EmptyPlaceholder))
           .Append("</div>");
     }
@@ -843,10 +884,16 @@ public class EditArrayTagHelper : TagHelper
         var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
         var encodedCssClass = GetReorderButtonCssClass();
 
-        sb.Append("<div class=\"reorder-controls\">");
+        sb.Append("<div class=\"")
+          .Append(CssClasses.ReorderControls)
+          .Append("\">");
         sb.Append("<button type=\"button\" class=\"")
             .Append(encodedCssClass)
-            .Append(" reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" aria-label=\"Move item ")
+            .Append(' ')
+            .Append(CssClasses.ReorderButton)
+            .Append(' ')
+            .Append(CssClasses.ReorderUpButton)
+            .Append("\" data-reorder-direction=\"up\" aria-label=\"Move item ")
             .Append(itemId)
             .Append(" up\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
@@ -857,7 +904,11 @@ public class EditArrayTagHelper : TagHelper
         sb.Append("</button>");
         sb.Append("<button type=\"button\" class=\"")
             .Append(encodedCssClass)
-            .Append(" reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" aria-label=\"Move item ")
+            .Append(' ')
+            .Append(CssClasses.ReorderButton)
+            .Append(' ')
+            .Append(CssClasses.ReorderDownButton)
+            .Append("\" data-reorder-direction=\"down\" aria-label=\"Move item ")
             .Append(itemId)
             .Append(" down\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
@@ -880,17 +931,27 @@ public class EditArrayTagHelper : TagHelper
         var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
         var encodedCssClass = GetReorderButtonCssClass();
 
-        sb.Append("<div class=\"reorder-controls\">");
+        sb.Append("<div class=\"")
+          .Append(CssClasses.ReorderControls)
+          .Append("\">");
         sb.Append("<button type=\"button\" class=\"")
             .Append(encodedCssClass)
-            .Append(" reorder-btn reorder-up-btn\" data-reorder-direction=\"up\" aria-label=\"Move item up\" data-action=\"move\" data-container-id=\"")
+            .Append(' ')
+            .Append(CssClasses.ReorderButton)
+            .Append(' ')
+            .Append(CssClasses.ReorderUpButton)
+            .Append("\" data-reorder-direction=\"up\" aria-label=\"Move item up\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
             .Append("\" data-item-id=\"closest\" data-direction=\"-1\">");
         sb.Append(upText);
         sb.Append("</button>");
         sb.Append("<button type=\"button\" class=\"")
             .Append(encodedCssClass)
-            .Append(" reorder-btn reorder-down-btn\" data-reorder-direction=\"down\" aria-label=\"Move item down\" data-action=\"move\" data-container-id=\"")
+            .Append(' ')
+            .Append(CssClasses.ReorderButton)
+            .Append(' ')
+            .Append(CssClasses.ReorderDownButton)
+            .Append("\" data-reorder-direction=\"down\" aria-label=\"Move item down\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
             .Append("\" data-item-id=\"closest\" data-direction=\"1\">");
         sb.Append(downText);
@@ -1072,17 +1133,17 @@ public class EditArrayTagHelper : TagHelper
         switch (buttonType.ToLowerInvariant())
         {
             case "edit":
-                cssModifier = "btn-sm btn-primary edit-item-btn mt-2";
+                cssModifier = CssClasses.EditButtonModifier;
                 buttonText = EditButtonText;
                 ariaLabel = isTemplate ? "Edit item" : $"Edit item {itemId}";
                 break;
             case "delete":
-                cssModifier = "btn-sm btn-danger delete-item-btn mt-2";
+                cssModifier = CssClasses.DeleteButtonModifier;
                 buttonText = DeleteButtonText;
                 ariaLabel = isTemplate ? "Delete item" : $"Delete item {itemId}";
                 break;
             case "done":
-                cssModifier = "btn-sm btn-success done-edit-btn mt-2";
+                cssModifier = CssClasses.DoneButtonModifier;
                 buttonText = DoneButtonText;
                 ariaLabel = isTemplate ? "Done editing item" : $"Done editing item {itemId}";
                 break;
@@ -1192,7 +1253,7 @@ public class EditArrayTagHelper : TagHelper
     private void RenderValidationErrors(TagHelperOutput output, List<string> errors)
     {
         output.TagName = "div";
-        output.Attributes.SetAttribute("class", "edit-array-error alert alert-danger");
+        output.Attributes.SetAttribute("class", CssClasses.ErrorPanel);
         output.TagMode = TagMode.StartTagAndEndTag;
 
         var sb = new StringBuilder();
