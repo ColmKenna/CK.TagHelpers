@@ -96,7 +96,7 @@ public class TabItemTagHelper : TagHelper
     private string GenerateIdFromHeading(string heading)
     {
         // Remove invalid characters and replace spaces with hyphens
-        return IdSanitizerRegex.Replace(heading.ToLower(), "").Replace(' ', '-');
+        return IdSanitizerRegex.Replace(heading.ToLowerInvariant(), "").Replace(' ', '-');
     }
 
     private static HashSet<string> GetOrCreateUsedIds(TagHelperContext context)
