@@ -746,16 +746,6 @@ public class EditArrayTagHelper : TagHelper
         sb.Append("</div>");
     }
 
-    private async Task RenderItemEditMode(StringBuilder sb, object item, ViewDataDictionary<object> viewData)
-    {
-        var viewContent = await _htmlHelper.PartialAsync(ViewName, item, viewData);
-        using (var writer = new StringWriter())
-        {
-            viewContent.WriteTo(writer, HtmlEncoder.Default);
-            sb.Append(writer.ToString());
-        }
-    }
-
     private async Task RenderTemplateSection(StringBuilder sb, string containerId, string modelExpressionPrefix, string collectionName)
     {
         var templateId = $"{containerId}-template";
