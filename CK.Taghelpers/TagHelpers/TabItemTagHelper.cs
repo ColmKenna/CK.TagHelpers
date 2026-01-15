@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -26,9 +28,26 @@ public class TabItemTagHelper : TagHelper
 
         var content = await output.GetChildContentAsync();
 
-        if (string.IsNullOrEmpty(Id))
+        var idWasProvided = !string.IsNullOrWhiteSpace(Id);
+        if (!idWasProvided)
         {
             Id = GenerateIdFromHeading(Heading);
+        }
+
+        if (string.IsNullOrWhiteSpace(Id))
+        {
+            Id = $"tab-{context.UniqueId}";
+            idWasProvided = false;
+        }
+
+        var usedIds = GetOrCreateUsedIds(context);
+        if (idWasProvided)
+        {
+            usedIds.Add(Id);
+        }
+        else
+        {
+            Id = EnsureUniqueId(Id, usedIds);
         }
 
         var groupName = "tabs";
@@ -72,5 +91,31 @@ public class TabItemTagHelper : TagHelper
     {
         // Remove invalid characters and replace spaces with hyphens
         return Regex.Replace(heading.ToLower(), @"[^a-z0-9\s-]", "").Replace(' ', '-');
+    }
+
+    private static HashSet<string> GetOrCreateUsedIds(TagHelperContext context)
+    {
+        if (context.Items.TryGetValue(TabTagHelper.UsedIdsKey, out var value)
+            && value is HashSet<string> usedIds)
+        {
+            return usedIds;
+        }
+
+        usedIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        context.Items[TabTagHelper.UsedIdsKey] = usedIds;
+        return usedIds;
+    }
+
+    private static string EnsureUniqueId(string baseId, HashSet<string> usedIds)
+    {
+        var uniqueId = baseId;
+        var suffix = 1;
+        while (!usedIds.Add(uniqueId))
+        {
+            uniqueId = $"{baseId}-{suffix}";
+            suffix++;
+        }
+
+        return uniqueId;
     }
 }

@@ -175,16 +175,66 @@ public class TabItemTagHelperTests
         Assert.Contains($"name=\"{groupName}\"", rendered);
     }
 
+    [Fact]
+    public async Task Should_AppendSuffix_When_GeneratedIdAlreadyUsed()
+    {
+        // Arrange
+        var sharedItems = new Dictionary<object, object>();
+        var first = new TabItemTagHelper
+        {
+            Heading = "First",
+            Selected = false
+        };
+        var second = new TabItemTagHelper
+        {
+            Heading = "First",
+            Selected = false
+        };
+        var firstContext = CreateContext(items: sharedItems, uniqueId: "first");
+        var secondContext = CreateContext(items: sharedItems, uniqueId: "second");
+        var firstOutput = CreateOutput(childContent: "One");
+        var secondOutput = CreateOutput(childContent: "Two");
+
+        // Act
+        await first.ProcessAsync(firstContext, firstOutput);
+        await second.ProcessAsync(secondContext, secondOutput);
+
+        // Assert
+        Assert.Equal("first", first.Id);
+        Assert.Equal("first-1", second.Id);
+    }
+
+    [Fact]
+    public async Task Should_FallbackToContextUniqueId_When_GeneratedIdIsEmpty()
+    {
+        // Arrange
+        var tagHelper = new TabItemTagHelper
+        {
+            Heading = "!!!",
+            Selected = false
+        };
+        var context = CreateContext(uniqueId: "empty");
+        var output = CreateOutput(childContent: "Body");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("tab-empty", tagHelper.Id);
+        Assert.Contains("id=\"tab-empty\"", output.Content.GetContent());
+    }
+
     private static TagHelperContext CreateContext(
         string tagName = "tab-item",
         TagHelperAttributeList? attributes = null,
-        IDictionary<object, object>? items = null)
+        IDictionary<object, object>? items = null,
+        string uniqueId = "test")
     {
         return new TagHelperContext(
             tagName: tagName,
             allAttributes: attributes ?? new TagHelperAttributeList(),
             items: items ?? new Dictionary<object, object>(),
-            uniqueId: "test");
+            uniqueId: uniqueId);
     }
 
     private static TagHelperOutput CreateOutput(

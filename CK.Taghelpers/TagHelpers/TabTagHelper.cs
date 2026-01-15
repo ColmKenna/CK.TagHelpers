@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace CK.Taghelpers.TagHelpers;
@@ -5,8 +7,12 @@ namespace CK.Taghelpers.TagHelpers;
 [HtmlTargetElement("tab")]
 public class TabTagHelper : TagHelper
 {
+    internal static readonly object UsedIdsKey = new object();
+
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
+        context.Items[UsedIdsKey] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         var groupName = $"tabs-{context.UniqueId}";
         context.Items[typeof(TabTagHelper)] = groupName;
 
