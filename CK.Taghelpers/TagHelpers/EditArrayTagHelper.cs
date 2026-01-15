@@ -896,8 +896,8 @@ public class EditArrayTagHelper : TagHelper
             return;
         }
 
-        var upText = EncodeButtonText(MoveUpButtonText, "Move Up");
-        var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
+        var upText = GetEncodedButtonText(MoveUpButtonText, "Move Up");
+        var downText = GetEncodedButtonText(MoveDownButtonText, "Move Down");
         var encodedCssClass = GetReorderButtonCssClass();
 
         sb.Append("<div class=\"")
@@ -943,8 +943,8 @@ public class EditArrayTagHelper : TagHelper
             return;
         }
 
-        var upText = EncodeButtonText(MoveUpButtonText, "Move Up");
-        var downText = EncodeButtonText(MoveDownButtonText, "Move Down");
+        var upText = GetEncodedButtonText(MoveUpButtonText, "Move Up");
+        var downText = GetEncodedButtonText(MoveDownButtonText, "Move Down");
         var encodedCssClass = GetReorderButtonCssClass();
 
         sb.Append("<div class=\"")
@@ -1119,7 +1119,7 @@ public class EditArrayTagHelper : TagHelper
         return shouldHide ? "style=\"display: none;\"" : string.Empty;
     }
 
-    private string EncodeButtonText(string text, string fallback)
+    private string GetEncodedButtonText(string text, string fallback)
     {
         return HtmlEncoder.Default.Encode(string.IsNullOrWhiteSpace(text) ? fallback : text);
     }
