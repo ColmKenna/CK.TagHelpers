@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 
 namespace CK.Taghelpers.TagHelpers;
-    
+
 public class EditArrayTagHelper : TagHelper
 {
     private const string ItemsAttributeName = "asp-items";
