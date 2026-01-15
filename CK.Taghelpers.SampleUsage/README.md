@@ -37,7 +37,7 @@ In `_Layout.cshtml`:
 ### 3. Create Your Model
 
 ```csharp
-public class PersonViewModel
+public record class PersonViewModel
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -47,7 +47,7 @@ public class PersonViewModel
 
 public class TeamViewModel
 {
-    public List<PersonViewModel> Members { get; set; } = new();
+    public List<PersonViewModel> Members { get; set; } = [];
 }
 ```
 
