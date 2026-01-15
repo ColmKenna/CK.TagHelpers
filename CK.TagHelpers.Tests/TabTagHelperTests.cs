@@ -85,15 +85,51 @@ public class TabTagHelperTests
         Assert.Equal(childContent, output.Content.GetContent());
     }
 
+    [Fact]
+    public async Task Should_RenderDistinctRadioGroupNames_When_MultipleTabSetsAreRendered()
+    {
+        // Arrange
+        var firstItems = new Dictionary<object, object>();
+        var secondItems = new Dictionary<object, object>();
+        var tagHelper = new TabTagHelper();
+
+        var firstContext = CreateContext(items: firstItems, uniqueId: "first");
+        var firstOutput = CreateOutputWithChildContent(() =>
+            BuildTabItemsAsync(
+                new[] { ("First", true), ("Second", false) },
+                firstItems));
+
+        var secondContext = CreateContext(items: secondItems, uniqueId: "second");
+        var secondOutput = CreateOutputWithChildContent(() =>
+            BuildTabItemsAsync(
+                new[] { ("Third", true), ("Fourth", false) },
+                secondItems));
+
+        // Act
+        await tagHelper.ProcessAsync(firstContext, firstOutput);
+        await tagHelper.ProcessAsync(secondContext, secondOutput);
+
+        // Assert
+        var firstHtml = firstOutput.Content.GetContent();
+        var secondHtml = secondOutput.Content.GetContent();
+
+        Assert.Equal(2, CountOccurrences(firstHtml, "name=\"tabs-first\""));
+        Assert.Equal(2, CountOccurrences(secondHtml, "name=\"tabs-second\""));
+        Assert.DoesNotContain("name=\"tabs-second\"", firstHtml);
+        Assert.DoesNotContain("name=\"tabs-first\"", secondHtml);
+    }
+
     private static TagHelperContext CreateContext(
         string tagName = "tab",
-        TagHelperAttributeList? attributes = null)
+        TagHelperAttributeList? attributes = null,
+        IDictionary<object, object>? items = null,
+        string uniqueId = "test")
     {
         return new TagHelperContext(
             tagName: tagName,
             allAttributes: attributes ?? new TagHelperAttributeList(),
-            items: new Dictionary<object, object>(),
-            uniqueId: "test");
+            items: items ?? new Dictionary<object, object>(),
+            uniqueId: uniqueId);
     }
 
     private static TagHelperOutput CreateOutput(
@@ -113,6 +149,58 @@ public class TabTagHelperTests
         {
             TagMode = tagMode
         };
+    }
+
+    private static TagHelperOutput CreateOutputWithChildContent(
+        Func<Task<TagHelperContent>> getChildContentAsync)
+    {
+        return new TagHelperOutput(
+            tagName: "tab",
+            attributes: new TagHelperAttributeList(),
+            getChildContentAsync: (useCached, encoder) => getChildContentAsync())
+        {
+            TagMode = TagMode.StartTagAndEndTag
+        };
+    }
+
+    private static async Task<TagHelperContent> BuildTabItemsAsync(
+        IReadOnlyList<(string Heading, bool Selected)> items,
+        IDictionary<object, object> sharedItems)
+    {
+        var content = new DefaultTagHelperContent();
+
+        for (var index = 0; index < items.Count; index++)
+        {
+            var item = new TabItemTagHelper
+            {
+                Heading = items[index].Heading,
+                Selected = items[index].Selected
+            };
+            var itemContext = CreateContext(
+                tagName: "tab-item",
+                items: sharedItems,
+                uniqueId: $"item-{index}");
+            var itemOutput = CreateTabItemOutput(childContent: $"Body {index}");
+
+            await item.ProcessAsync(itemContext, itemOutput);
+            content.AppendHtml(itemOutput.Content);
+        }
+
+        return content;
+    }
+
+    private static TagHelperOutput CreateTabItemOutput(
+        string childContent,
+        TagHelperAttributeList? attributes = null)
+    {
+        var content = new DefaultTagHelperContent();
+        content.SetHtmlContent(childContent);
+
+        return new TagHelperOutput(
+            tagName: "tab-item",
+            attributes: attributes ?? new TagHelperAttributeList(),
+            getChildContentAsync: (useCached, encoder) =>
+                Task.FromResult<TagHelperContent>(content));
     }
 
     private static string BuildTabItemMarkup(string id, string heading, string content, bool selected)
