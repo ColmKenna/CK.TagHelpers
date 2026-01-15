@@ -550,20 +550,39 @@ public class EditArrayTagHelper : TagHelper
             return;
         }
 
+        var containerId = ConfigureContainerElement(output);
+
+        // Create container for rendered items and template sections
+        var sb = new StringBuilder(EstimateInitialCapacity());
+
+        // Get the model expression prefix from ViewContext
+        var modelExpressionPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
+
+        // Extract the property name from the ModelExpression if provided
+        string collectionName = For?.Name ?? string.Empty;
+
+        await RenderItemsAndTemplate(sb, containerId, modelExpressionPrefix, collectionName);
+
+        // Set the output content
+        output.Content.SetHtmlContent(sb.ToString());
+    }
+
+    private string ConfigureContainerElement(TagHelperOutput output)
+    {
         // Reset the TagHelper output
         output.TagName = "div";
         output.TagMode = TagMode.StartTagAndEndTag;
-        
+
         // Merge with existing class attribute to preserve user-specified classes
         var existingClass = output.Attributes["class"]?.Value?.ToString();
         var containerClass = GetContainerCssClass();
-        var finalClass = string.IsNullOrEmpty(existingClass) 
-            ? containerClass 
+        var finalClass = string.IsNullOrEmpty(existingClass)
+            ? containerClass
             : $"{existingClass} {containerClass}";
         output.Attributes.SetAttribute("class", finalClass);
 
         // Create an ID for the container to use with JavaScript
-        string containerId = GetContainerId();
+        var containerId = GetContainerId();
         output.Attributes.SetAttribute("id", containerId);
         if (EnableReordering)
         {
@@ -577,26 +596,17 @@ public class EditArrayTagHelper : TagHelper
         // Setup HtmlHelper to be used in our views
         (_htmlHelper as IViewContextAware)?.Contextualize(ViewContext);
 
-        // Create container for rendered items and template sections
-        var sb = new StringBuilder(EstimateInitialCapacity());
+        return containerId;
+    }
 
-        // Get the model expression prefix from ViewContext
-        var modelExpressionPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
-
-        // Extract the property name from the ModelExpression if provided
-        string collectionName = For?.Name ?? string.Empty;
-
-        // Render items
+    private async Task RenderItemsAndTemplate(StringBuilder sb, string containerId, string modelExpressionPrefix, string collectionName)
+    {
         await RenderItems(sb, containerId, modelExpressionPrefix, collectionName);
 
-        // Render template section when requested
         if (RenderTemplate)
         {
             await RenderTemplateSection(sb, containerId, modelExpressionPrefix, collectionName);
         }
-
-        // Set the output content
-        output.Content.SetHtmlContent(sb.ToString());
     }
 
     private async Task RenderItems(StringBuilder sb, string containerId, string modelExpressionPrefix, string collectionName)
