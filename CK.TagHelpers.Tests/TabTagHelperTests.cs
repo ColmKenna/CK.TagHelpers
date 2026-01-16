@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CK.Taghelpers.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -34,19 +35,43 @@ public class TabTagHelperTests
     {
         // Arrange
         var tagHelper = new TabTagHelper();
-        var context = CreateContext();
-        var childContent = BuildTabItemMarkup(id: "tab1", heading: "Tab 1", content: "One", selected: false)
-            + BuildTabItemMarkup(id: "tab2", heading: "Tab 2", content: "Two", selected: false);
-        var output = CreateOutput(tagName: "tab", childContent: childContent);
+        var sharedItems = new Dictionary<object, object>();
+        var context = CreateContext(items: sharedItems);
+        var output = CreateOutputWithChildContent(() =>
+            BuildTabItemsAsync(
+                new[] { ("Tab 1", false, "One"), ("Tab 2", false, "Two") },
+                sharedItems));
 
         // Act
         await tagHelper.ProcessAsync(context, output);
 
         // Assert
         var rendered = output.Content.GetContent();
-        Assert.Contains("id=\"tab1\" checked=\"checked\"/>", rendered);
-        Assert.DoesNotContain("id=\"tab2\" checked=\"checked\"/>", rendered);
-        Assert.Equal(1, CountOccurrences(rendered, "checked=\"checked\""));
+        Assert.True(InputHasChecked(rendered, "tab-1"));
+        Assert.False(InputHasChecked(rendered, "tab-2"));
+        Assert.Equal(1, CountCheckedInputs(rendered));
+    }
+
+    [Fact]
+    public async Task Should_SelectFirstTabItem_When_CheckedAppearsInPanelContent()
+    {
+        // Arrange
+        var tagHelper = new TabTagHelper();
+        var sharedItems = new Dictionary<object, object>();
+        var context = CreateContext(items: sharedItems);
+        var output = CreateOutputWithChildContent(() =>
+            BuildTabItemsAsync(
+                new[] { ("Tab 1", false, "<span>checked=\"checked\"</span>"), ("Tab 2", false, "Two") },
+                sharedItems));
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var rendered = output.Content.GetContent();
+        Assert.True(InputHasChecked(rendered, "tab-1"));
+        Assert.False(InputHasChecked(rendered, "tab-2"));
+        Assert.Equal(1, CountCheckedInputs(rendered));
     }
 
     [Fact]
@@ -54,19 +79,21 @@ public class TabTagHelperTests
     {
         // Arrange
         var tagHelper = new TabTagHelper();
-        var context = CreateContext();
-        var childContent = BuildTabItemMarkup(id: "tab1", heading: "Tab 1", content: "One", selected: false)
-            + BuildTabItemMarkup(id: "tab2", heading: "Tab 2", content: "Two", selected: true);
-        var output = CreateOutput(tagName: "tab", childContent: childContent);
+        var sharedItems = new Dictionary<object, object>();
+        var context = CreateContext(items: sharedItems);
+        var output = CreateOutputWithChildContent(() =>
+            BuildTabItemsAsync(
+                new[] { ("Tab 1", false, "One"), ("Tab 2", true, "Two") },
+                sharedItems));
 
         // Act
         await tagHelper.ProcessAsync(context, output);
 
         // Assert
         var rendered = output.Content.GetContent();
-        Assert.DoesNotContain("id=\"tab1\" checked=\"checked\"/>", rendered);
-        Assert.Contains("id=\"tab2\" checked=\"checked\"/>", rendered);
-        Assert.Equal(1, CountOccurrences(rendered, "checked=\"checked\""));
+        Assert.False(InputHasChecked(rendered, "tab-1"));
+        Assert.True(InputHasChecked(rendered, "tab-2"));
+        Assert.Equal(1, CountCheckedInputs(rendered));
     }
 
     [Fact]
@@ -96,13 +123,13 @@ public class TabTagHelperTests
         var firstContext = CreateContext(items: firstItems, uniqueId: "first");
         var firstOutput = CreateOutputWithChildContent(() =>
             BuildTabItemsAsync(
-                new[] { ("First", true), ("Second", false) },
+                new[] { ("First", true, "Body 0"), ("Second", false, "Body 1") },
                 firstItems));
 
         var secondContext = CreateContext(items: secondItems, uniqueId: "second");
         var secondOutput = CreateOutputWithChildContent(() =>
             BuildTabItemsAsync(
-                new[] { ("Third", true), ("Fourth", false) },
+                new[] { ("Third", true, "Body 2"), ("Fourth", false, "Body 3") },
                 secondItems));
 
         // Act
@@ -164,7 +191,7 @@ public class TabTagHelperTests
     }
 
     private static async Task<TagHelperContent> BuildTabItemsAsync(
-        IReadOnlyList<(string Heading, bool Selected)> items,
+        IReadOnlyList<(string Heading, bool Selected, string Body)> items,
         IDictionary<object, object> sharedItems)
     {
         var content = new DefaultTagHelperContent();
@@ -180,7 +207,7 @@ public class TabTagHelperTests
                 tagName: "tab-item",
                 items: sharedItems,
                 uniqueId: $"item-{index}");
-            var itemOutput = CreateTabItemOutput(childContent: $"Body {index}");
+            var itemOutput = CreateTabItemOutput(childContent: items[index].Body ?? string.Empty);
 
             await item.ProcessAsync(itemContext, itemOutput);
             content.AppendHtml(itemOutput.Content);
@@ -203,14 +230,6 @@ public class TabTagHelperTests
                 Task.FromResult<TagHelperContent>(content));
     }
 
-    private static string BuildTabItemMarkup(string id, string heading, string content, bool selected)
-    {
-        var checkedAttribute = selected ? "checked=\"checked\"" : string.Empty;
-        return $"<input class=\"tabs-panel-input\" name=\"tabs\" type=\"radio\" id=\"{id}\" {checkedAttribute}/>"
-            + $"<label class=\"tab-heading\" for=\"{id}\">{heading}</label>"
-            + $"<div class=\"panel\"><div class=\"panel-content\">{content}</div></div>";
-    }
-
     private static int CountOccurrences(string content, string value)
     {
         if (string.IsNullOrEmpty(content) || string.IsNullOrEmpty(value))
@@ -227,5 +246,34 @@ public class TabTagHelperTests
         }
 
         return count;
+    }
+
+    private static int CountCheckedInputs(string content)
+    {
+        if (string.IsNullOrEmpty(content))
+        {
+            return 0;
+        }
+
+        return Regex.Matches(
+            content,
+            "<input[^>]*checked=\"checked\"[^>]*>",
+            RegexOptions.CultureInvariant | RegexOptions.IgnoreCase).Count;
+    }
+
+    private static bool InputHasChecked(string content, string id)
+    {
+        if (string.IsNullOrEmpty(content) || string.IsNullOrEmpty(id))
+        {
+            return false;
+        }
+
+        var match = Regex.Match(
+            content,
+            $"<input[^>]*id=\"{Regex.Escape(id)}\"[^>]*>",
+            RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+        return match.Success
+            && match.Value.Contains("checked=\"checked\"", System.StringComparison.OrdinalIgnoreCase);
     }
 }

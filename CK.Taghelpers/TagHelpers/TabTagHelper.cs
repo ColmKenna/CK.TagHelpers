@@ -8,6 +8,7 @@ namespace CK.Taghelpers.TagHelpers;
 public class TabTagHelper : TagHelper
 {
     internal static readonly object UsedIdsKey = new object();
+    internal static readonly object TabContextKey = new object();
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
@@ -15,23 +16,49 @@ public class TabTagHelper : TagHelper
 
         var groupName = $"tabs-{context.UniqueId}";
         context.Items[typeof(TabTagHelper)] = groupName;
+        var tabContext = new TabContext();
+        context.Items[TabContextKey] = tabContext;
 
         output.TagName = "div";
         output.Attributes.SetAttribute("class", "tabs");
 
         var childContent = await output.GetChildContentAsync();
-        var content = childContent.GetContent();
-
-        // Check if any tab-item is selected
-        if (!content.Contains("checked=\"checked\""))
+        if (tabContext.Items.Count == 0)
         {
-            // Find the first tab-item and set it as selected
-            var firstTabItemIndex = content.IndexOf("<input class=\"tabs-panel-input\"");
-            if (firstTabItemIndex != -1)
+            output.Content.SetHtmlContent(childContent);
+            return;
+        }
+
+        var hasSelection = false;
+        foreach (var item in tabContext.Items)
+        {
+            if (item.Selected)
             {
-                var insertIndex = content.IndexOf("/>", firstTabItemIndex);
-                content = content.Insert(insertIndex, "checked=\"checked\"");
+                hasSelection = true;
+                break;
             }
+        }
+
+        if (!hasSelection)
+        {
+            tabContext.Items[0].Selected = true;
+        }
+
+        var content = new DefaultTagHelperContent();
+        foreach (var item in tabContext.Items)
+        {
+            if (item.Selected)
+            {
+                item.Input.Attributes["checked"] = "checked";
+            }
+            else
+            {
+                item.Input.Attributes.Remove("checked");
+            }
+
+            content.AppendHtml(item.Input);
+            content.AppendHtml(item.Label);
+            content.AppendHtml(item.Panel);
         }
 
         output.Content.SetHtmlContent(content);

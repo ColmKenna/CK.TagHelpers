@@ -87,6 +87,14 @@ public class TabItemTagHelper : TagHelper
         panelContent.InnerHtml.AppendHtml(content);
         panel.InnerHtml.AppendHtml(panelContent);
 
+        if (context.Items.TryGetValue(TabTagHelper.TabContextKey, out var value)
+            && value is TabContext tabContext)
+        {
+            tabContext.Items.Add(new TabItemDescriptor(input, label, panel, Selected));
+            output.SuppressOutput();
+            return;
+        }
+
         output.TagName = null; // Remove the original <tab-item> tag
         output.Content.SetHtmlContent(input);
         output.Content.AppendHtml(label);
