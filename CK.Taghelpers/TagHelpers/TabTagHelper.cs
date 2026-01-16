@@ -20,7 +20,13 @@ public class TabTagHelper : TagHelper
         context.Items[TabContextKey] = tabContext;
 
         output.TagName = "div";
-        output.Attributes.SetAttribute("class", "tabs");
+        var existingClass = output.Attributes["class"]?.Value?.ToString();
+        var mergedClass = string.IsNullOrWhiteSpace(existingClass)
+            ? "tabs"
+            : existingClass.Contains("tabs", StringComparison.OrdinalIgnoreCase)
+                ? existingClass
+                : $"tabs {existingClass}";
+        output.Attributes.SetAttribute("class", mergedClass);
 
         var childContent = await output.GetChildContentAsync();
         if (tabContext.Items.Count == 0)

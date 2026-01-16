@@ -17,8 +17,7 @@ public class TabTagHelperTests
         var context = CreateContext();
         var output = CreateOutput(
             tagName: "tab",
-            childContent: "<div>Content</div>",
-            attributes: new TagHelperAttributeList { { "class", "custom" } });
+            childContent: "<div>Content</div>");
 
         // Act
         await tagHelper.ProcessAsync(context, output);
@@ -28,6 +27,24 @@ public class TabTagHelperTests
         Assert.Equal(TagMode.StartTagAndEndTag, output.TagMode);
         Assert.Equal("tabs", output.Attributes["class"].Value);
         Assert.Contains("Content", output.Content.GetContent());
+    }
+
+    [Fact]
+    public async Task Should_MergeClass_When_CustomClassProvided()
+    {
+        // Arrange
+        var tagHelper = new TabTagHelper();
+        var context = CreateContext();
+        var output = CreateOutput(
+            tagName: "tab",
+            childContent: "<div>Content</div>",
+            attributes: new TagHelperAttributeList { { "class", "custom" } });
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("tabs custom", output.Attributes["class"].Value);
     }
 
     [Fact]
