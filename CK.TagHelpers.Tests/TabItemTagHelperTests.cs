@@ -262,6 +262,42 @@ public class TabItemTagHelperTests
         Assert.Contains($"for=\"{expectedId}\"", rendered);
     }
 
+    [Fact]
+    public async Task Should_AppendSuffix_When_ExplicitIdAlreadyUsed()
+    {
+        // Arrange
+        var sharedItems = new Dictionary<object, object>();
+        var first = new TabItemTagHelper
+        {
+            Id = "my-tab",
+            Heading = "First",
+            Selected = false
+        };
+        var second = new TabItemTagHelper
+        {
+            Id = "my-tab", // Duplicate explicit ID
+            Heading = "Second",
+            Selected = false
+        };
+        var firstContext = CreateContext(items: sharedItems, uniqueId: "first");
+        var secondContext = CreateContext(items: sharedItems, uniqueId: "second");
+        var firstOutput = CreateOutput(childContent: "One");
+        var secondOutput = CreateOutput(childContent: "Two");
+
+        // Act
+        await first.ProcessAsync(firstContext, firstOutput);
+        await second.ProcessAsync(secondContext, secondOutput);
+
+        // Assert - both should have unique IDs
+        Assert.Equal("my-tab", first.Id);
+        Assert.Equal("my-tab-1", second.Id); // Should get suffix appended
+        
+        var firstRendered = firstOutput.Content.GetContent();
+        var secondRendered = secondOutput.Content.GetContent();
+        Assert.Contains("id=\"my-tab\"", firstRendered);
+        Assert.Contains("id=\"my-tab-1\"", secondRendered);
+    }
+
     private static TagHelperContext CreateContext(
         string tagName = "tab-item",
         TagHelperAttributeList? attributes = null,

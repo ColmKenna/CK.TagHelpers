@@ -34,8 +34,7 @@ public class TabItemTagHelper : TagHelper
 
         var content = await output.GetChildContentAsync();
 
-        var idWasProvided = !string.IsNullOrWhiteSpace(Id);
-        if (!idWasProvided)
+        if (string.IsNullOrWhiteSpace(Id))
         {
             Id = GenerateIdFromHeading(Heading);
         }
@@ -43,18 +42,10 @@ public class TabItemTagHelper : TagHelper
         if (string.IsNullOrWhiteSpace(Id))
         {
             Id = $"tab-{context.UniqueId}";
-            idWasProvided = false;
         }
 
         var usedIds = GetOrCreateUsedIds(context);
-        if (idWasProvided)
-        {
-            usedIds.Add(Id);
-        }
-        else
-        {
-            Id = EnsureUniqueId(Id, usedIds);
-        }
+        Id = EnsureUniqueId(Id, usedIds);
 
         var groupName = "tabs";
         if (context.Items.TryGetValue(typeof(TabTagHelper), out var groupNameValue)
