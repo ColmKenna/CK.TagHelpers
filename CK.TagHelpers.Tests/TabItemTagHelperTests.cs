@@ -233,6 +233,35 @@ public class TabItemTagHelperTests
         Assert.Contains("id=\"tab-empty\"", output.Content.GetContent());
     }
 
+    [Theory]
+    [InlineData("Hello World", "hello-world")]
+    [InlineData("HELLO WORLD", "hello-world")]
+    [InlineData("HeLLo WoRLD", "hello-world")]
+    [InlineData("Tab #1: Overview!", "tab-1-overview")]
+    [InlineData("Section (A) & Details", "section-a--details")]
+    public async Task Should_GenerateConsistentLowercaseId_When_HeadingHasMixedCase(
+        string heading,
+        string expectedId)
+    {
+        // Arrange
+        var tagHelper = new TabItemTagHelper
+        {
+            Heading = heading,
+            Selected = false
+        };
+        var context = CreateContext();
+        var output = CreateOutput(childContent: "Body");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal(expectedId, tagHelper.Id);
+        var rendered = output.Content.GetContent();
+        Assert.Contains($"id=\"{expectedId}\"", rendered);
+        Assert.Contains($"for=\"{expectedId}\"", rendered);
+    }
+
     private static TagHelperContext CreateContext(
         string tagName = "tab-item",
         TagHelperAttributeList? attributes = null,
