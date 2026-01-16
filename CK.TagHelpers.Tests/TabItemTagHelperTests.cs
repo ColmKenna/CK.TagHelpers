@@ -240,6 +240,37 @@ public class TabItemTagHelperTests
         Assert.Contains("id=\"tab-empty\"", output.Content.GetContent());
     }
 
+    [Fact]
+    public async Task Should_GenerateUniqueIds_When_MultipleHeadingsGenerateEmptyIds()
+    {
+        // Arrange - both headings contain only special characters
+        var sharedItems = new Dictionary<object, object>();
+        var first = new TabItemTagHelper
+        {
+            Heading = "!!!",
+            Selected = false
+        };
+        var second = new TabItemTagHelper
+        {
+            Heading = "@#$",
+            Selected = false
+        };
+        var firstContext = CreateContext(items: sharedItems, uniqueId: "a");
+        var secondContext = CreateContext(items: sharedItems, uniqueId: "b");
+        var firstOutput = CreateOutput(childContent: "One");
+        var secondOutput = CreateOutput(childContent: "Two");
+
+        // Act
+        await first.ProcessAsync(firstContext, firstOutput);
+        await second.ProcessAsync(secondContext, secondOutput);
+
+        // Assert - each should get a unique fallback ID
+        Assert.Equal("tab-a", first.Id);
+        Assert.Equal("tab-b", second.Id);
+        Assert.Contains("id=\"tab-a\"", firstOutput.Content.GetContent());
+        Assert.Contains("id=\"tab-b\"", secondOutput.Content.GetContent());
+    }
+
     [Theory]
     [InlineData("Hello World", "hello-world")]
     [InlineData("HELLO WORLD", "hello-world")]
