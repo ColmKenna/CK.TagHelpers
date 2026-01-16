@@ -16,13 +16,13 @@ public class TabItemTagHelper : TagHelper
         new Regex(@"[^a-z0-9\s-]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     [HtmlAttributeName("id")]
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     [HtmlAttributeName("selected")]
     public bool Selected { get; set; }
     
     [HtmlAttributeName("heading")]
-    public string Heading { get; set; }
+    public string? Heading { get; set; }
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
