@@ -20,6 +20,7 @@ public class TabTagHelper : TagHelper
         context.Items[TabContextKey] = tabContext;
 
         output.TagName = "div";
+        output.TagMode = TagMode.StartTagAndEndTag;
         var existingClass = output.Attributes["class"]?.Value?.ToString();
         var mergedClass = string.IsNullOrWhiteSpace(existingClass)
             ? "tabs"
