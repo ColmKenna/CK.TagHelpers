@@ -1,6 +1,6 @@
-# EditArray TagHelper - Documentation Index
+# CK.TagHelpers - Documentation Index
 
-Welcome! This is your starting point for learning about the EditArray TagHelper.
+Welcome! This is your starting point for learning about the CK.TagHelpers library.
 
 > **📖 How to Read This Documentation**
 > This file and all other `.md` files should be opened in your IDE's Markdown viewer or a Markdown editor.
@@ -8,23 +8,51 @@ Welcome! This is your starting point for learning about the EditArray TagHelper.
 
 ## 📚 Documentation Overview
 
-This project contains comprehensive documentation and working examples for the `EditArrayTagHelper` from the CK.Taghelpers library.
+This project contains comprehensive documentation and working examples for the TagHelpers from the CK.Taghelpers library.
+
+---
+
+## 📁 Tab TagHelper
+
+Create accessible, CSS-only tabbed interfaces with minimal markup.
 
 ### Quick Navigation
 
 | Document | Best For | Time |
 |----------|----------|------|
-| [QUICKSTART.md](QUICKSTART.md) | Getting started quickly | 5 min |
-| [README.md](README.md) | Full documentation and guide | 20 min |
-| [API-REFERENCE.md](API-REFERENCE.md) | Quick attribute/function lookup | Reference |
-| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Fixing common issues | As needed |
-| [Views/Home/Samples.cshtml](Views/Home/Samples.cshtml) | Working examples | Interactive |
+| [TAB-QUICKSTART.md](TAB-QUICKSTART.md) | Getting started quickly | 5 min |
+| [TAB-README.md](TAB-README.md) | Full documentation | 15 min |
+| [TAB-API-REFERENCE.md](TAB-API-REFERENCE.md) | Quick attribute lookup | Reference |
+| [Views/Home/Tabs.cshtml](Views/Home/Tabs.cshtml) | Working examples | Interactive |
+
+### If you're new to Tab TagHelper:
+
+1. **Start here**: [TAB-QUICKSTART.md](TAB-QUICKSTART.md) (5 minutes)
+2. **Run the sample**: Navigate to `/Home/Tabs` to see live examples
+3. **Read the full guide**: [TAB-README.md](TAB-README.md) (15 minutes)
+
+---
+
+## 📋 EditArray TagHelper
+
+Manage dynamic lists with display/edit modes, add/delete operations, and reordering.
+
+### Quick Navigation
+
+| Document | Best For | Time |
+|----------|----------|------|
+| [EDITARRAY-QUICKSTART.md](EDITARRAY-QUICKSTART.md) | Getting started quickly | 5 min |
+| [EDITARRAY-README.md](EDITARRAY-README.md) | Full documentation and guide | 20 min |
+| [EDITARRAY-API-REFERENCE.md](EDITARRAY-API-REFERENCE.md) | Quick attribute/function lookup | Reference |
+| [EDITARRAY-TROUBLESHOOTING.md](EDITARRAY-TROUBLESHOOTING.md) | Fixing common issues | As needed |
+| [Sample Project](../CK.Taghelpers.SampleUsage/Views/Home/Samples.cshtml) | Working examples | Interactive |
+
 
 ## 🚀 Getting Started
 
 ### If you're new to EditArrayTagHelper:
 
-1. **Start here**: [QUICKSTART.md](QUICKSTART.md) (5 minutes)
+1. **Start here**: [EDITARRAY-QUICKSTART.md](EDITARRAY-QUICKSTART.md) (5 minutes)
    - Minimal working example
    - Copy-paste ready code
    - Progressive feature additions
@@ -35,21 +63,21 @@ This project contains comprehensive documentation and working examples for the `
    ```
    Navigate to `https://localhost:5001` to see 5 live examples
 
-3. **Read the full guide**: [README.md](README.md) (20 minutes)
+3. **Read the full guide**: [EDITARRAY-README.md](EDITARRAY-README.md) (20 minutes)
    - Complete feature documentation
    - Best practices
    - Advanced usage patterns
 
 ### If you're looking for something specific:
 
-- **How do I...?** → [QUICKSTART.md](QUICKSTART.md)
-- **What are all the attributes?** → [API-REFERENCE.md](API-REFERENCE.md)
-- **Something's not working** → [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-- **Show me working code** → [Views/Home/Samples.cshtml](Views/Home/Samples.cshtml)
+- **How do I...?** → [EDITARRAY-QUICKSTART.md](EDITARRAY-QUICKSTART.md)
+- **What are all the attributes?** → [EDITARRAY-API-REFERENCE.md](EDITARRAY-API-REFERENCE.md)
+- **Something's not working** → [EDITARRAY-TROUBLESHOOTING.md](EDITARRAY-TROUBLESHOOTING.md)
+- **Show me working code** → Run the sample project and visit `/Home/Samples`
 
 ## 📖 Document Descriptions
 
-### QUICKSTART.md
+### EDITARRAY-QUICKSTART.md
 **Best for**: Getting up and running quickly
 
 Contains:
@@ -63,7 +91,7 @@ Contains:
 
 ---
 
-### README.md
+### EDITARRAY-README.md
 **Best for**: Comprehensive understanding
 
 Contains:
@@ -81,7 +109,7 @@ Contains:
 
 ---
 
-### API-REFERENCE.md
+### EDITARRAY-API-REFERENCE.md
 **Best for**: Quick lookups while coding
 
 Contains:
@@ -97,7 +125,7 @@ Contains:
 
 ---
 
-### TROUBLESHOOTING.md
+### EDITARRAY-TROUBLESHOOTING.md
 **Best for**: Fixing problems
 
 Contains:
@@ -130,79 +158,80 @@ Contains 5 complete working examples:
 
 ### "I want to add an editable list to my page"
 
-1. Read: [QUICKSTART.md](QUICKSTART.md) - Minimal Example section
+1. Read: [EDITARRAY-QUICKSTART.md](EDITARRAY-QUICKSTART.md) - Minimal Example section
 2. Copy the code
 3. Adjust model/view names
 4. Done!
 
 ### "I want to add/remove items dynamically"
 
-1. Read: [QUICKSTART.md](QUICKSTART.md) - Enable Adding New Items section
+1. Read: [EDITARRAY-QUICKSTART.md](EDITARRAY-QUICKSTART.md) - Enable Adding New Items section
 2. Set `asp-template="true"` and `asp-add-button="true"`
 3. Done!
 
 ### "I want users to reorder items"
 
-1. Read: [QUICKSTART.md](QUICKSTART.md) - Enable Reordering section
+1. Read: [EDITARRAY-QUICKSTART.md](EDITARRAY-QUICKSTART.md) - Enable Reordering section
 2. Set `asp-enable-reordering="true"`
 3. Done!
 
 ### "I want to do something when items are saved/deleted"
 
-1. Read: [README.md](README.md) - Using Callbacks section
+1. Read: [EDITARRAY-README.md](EDITARRAY-README.md) - Using Callbacks section
 2. Set `asp-on-update` and/or `asp-on-delete`
 3. Define JavaScript callback functions
 4. Done!
 
 ### "I want to customize the look"
 
-1. Read: [README.md](README.md) - Styling section
+1. Read: [EDITARRAY-README.md](EDITARRAY-README.md) - Styling section
 2. Use `asp-container-class`, `asp-item-class`, etc.
-3. Check [Views/Home/Samples.cshtml](Views/Home/Samples.cshtml) - Example 3
+3. Check the sample project at `/Home/Samples` - Example 3
 
 ### "Something's broken"
 
-1. Read: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+1. Read: [EDITARRAY-TROUBLESHOOTING.md](EDITARRAY-TROUBLESHOOTING.md)
 2. Check the Debug Checklist
 3. Look for your specific error message
 
 ### "What does attribute X do?"
 
-1. Read: [API-REFERENCE.md](API-REFERENCE.md)
+1. Read: [EDITARRAY-API-REFERENCE.md](EDITARRAY-API-REFERENCE.md)
 2. Ctrl+F to find the attribute
 3. See example usage
 
 ### "How does function X work?"
 
-1. Read: [API-REFERENCE.md](API-REFERENCE.md) - JavaScript Functions section
+1. Read: [EDITARRAY-API-REFERENCE.md](EDITARRAY-API-REFERENCE.md) - JavaScript Functions section
 2. See signature and description
-3. Check working example in [Views/Home/Samples.cshtml](Views/Home/Samples.cshtml)
+3. Check working example in the sample project at `/Home/Samples`
 
 ## 🔧 Sample Project Structure
 
 ```
-CK.Taghelpers.SampleUsage/
-├── Controllers/
-│   └── HomeController.cs          ← Sample controller with data
-├── Models/
-│   ├── PersonViewModel.cs         ← Sample model
-│   └── TeamViewModel.cs           ← Container model
-├── Views/
-│   ├── Home/
-│   │   └── Index.cshtml           ← 5 working examples
-│   └── Shared/
-│       ├── PersonEditors/
-│       │   ├── _PersonEditor.cshtml    ← Edit partial
-│       │   └── _PersonDisplay.cshtml   ← Display partial
-│       └── _Layout.cshtml         ← Includes editArray.js
-├── wwwroot/
-│   └── js/
-│       └── editArray.js           ← Required JavaScript
+docs/                              ← All documentation (this folder)
 ├── DOCUMENTATION-INDEX.md         ← You are here!
-├── QUICKSTART.md                  ← Quick start guide
-├── README.md                      ← Complete documentation
-├── API-REFERENCE.md               ← API reference
-└── TROUBLESHOOTING.md             ← Troubleshooting guide
+│
+├── # EditArray TagHelper Docs
+├── EDITARRAY-QUICKSTART.md        ← Quick start guide
+├── EDITARRAY-README.md            ← Complete documentation
+├── EDITARRAY-API-REFERENCE.md     ← API reference
+├── EDITARRAY-TROUBLESHOOTING.md   ← Troubleshooting guide
+│
+├── # Tab TagHelper Docs
+├── TAB-QUICKSTART.md              ← Quick start guide
+├── TAB-README.md                  ← Complete documentation
+└── TAB-API-REFERENCE.md           ← API reference
+
+CK.Taghelpers.SampleUsage/         ← Sample project with examples
+├── Controllers/
+├── Models/
+├── Views/
+│   └── Home/
+│       ├── Samples.cshtml         ← EditArray examples
+│       ├── Tabs.cshtml            ← Tab examples
+│       └── Documentation.cshtml   ← Documentation hub
+└── wwwroot/
 ```
 
 ## 📝 Examples in Index.cshtml
@@ -251,10 +280,10 @@ CK.Taghelpers.SampleUsage/
 3. Copy the minimal example and modify it for your needs
 
 ### Intermediate
-1. Read [README.md](README.md) (20 min)
-2. Explore all 5 examples in [Views/Home/Samples.cshtml](Views/Home/Samples.cshtml)
+1. Read [EDITARRAY-README.md](EDITARRAY-README.md) (20 min)
+2. Explore all 5 examples in the sample project at `/Home/Samples`
 3. Implement callbacks and custom styling
-4. Keep [API-REFERENCE.md](API-REFERENCE.md) open while coding
+4. Keep [EDITARRAY-API-REFERENCE.md](EDITARRAY-API-REFERENCE.md) open while coding
 
 ### Advanced
 1. Study the JavaScript in [editArray.js](wwwroot/js/editArray.js)
@@ -280,7 +309,7 @@ CK.Taghelpers.SampleUsage/
 4. ❌ Forgetting `method="post"` on the form
 5. ❌ Mismatching controller parameter names
 
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for more details.
+See [EDITARRAY-TROUBLESHOOTING.md](EDITARRAY-TROUBLESHOOTING.md) for more details.
 
 ## 🔗 Related Resources
 
@@ -303,8 +332,8 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for more details.
 
 Found a bug or have a suggestion?
 
-1. Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md) first
-2. Review the working examples in [Views/Home/Samples.cshtml](Views/Home/Samples.cshtml)
+1. Check [EDITARRAY-TROUBLESHOOTING.md](EDITARRAY-TROUBLESHOOTING.md) first
+2. Review the working examples in the sample project
 3. Create an issue with:
    - What you expected
    - What actually happened
@@ -318,10 +347,10 @@ This sample project is provided as-is for demonstration and learning purposes.
 
 ## Need Help?
 
-1. **Start with**: [QUICKSTART.md](QUICKSTART.md)
-2. **Look up syntax**: [API-REFERENCE.md](API-REFERENCE.md)
-3. **Fix issues**: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-4. **Learn more**: [README.md](README.md)
-5. **See examples**: Run `dotnet run` and explore
+1. **Start with**: [EDITARRAY-QUICKSTART.md](EDITARRAY-QUICKSTART.md) or [TAB-QUICKSTART.md](TAB-QUICKSTART.md)
+2. **Look up syntax**: [EDITARRAY-API-REFERENCE.md](EDITARRAY-API-REFERENCE.md) or [TAB-API-REFERENCE.md](TAB-API-REFERENCE.md)
+3. **Fix issues**: [EDITARRAY-TROUBLESHOOTING.md](EDITARRAY-TROUBLESHOOTING.md)
+4. **Learn more**: [EDITARRAY-README.md](EDITARRAY-README.md) or [TAB-README.md](TAB-README.md)
+5. **See examples**: Run the sample project with `dotnet run`
 
 Happy coding! 🚀
