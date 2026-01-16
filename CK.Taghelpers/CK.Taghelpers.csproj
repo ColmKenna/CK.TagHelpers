@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
 	  <PackageId>CK.Taghelpers</PackageId>
-	  <Version>1.0.0-beta.1</Version>
+	  <Version>1.0.0</Version>
 	  <Authors>Colm Kenna</Authors>
 	  <Description>ASP.NET Core TagHelper library for dynamic array management in Razor views. Supports add, edit, delete, and reorder operations.</Description>
 	  <PackageTags>aspnetcore;taghelper;ui;razor;forms;dynamic-arrays</PackageTags>
