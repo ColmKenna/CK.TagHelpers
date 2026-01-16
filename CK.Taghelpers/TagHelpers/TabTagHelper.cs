@@ -7,8 +7,8 @@ namespace CK.Taghelpers.TagHelpers;
 [HtmlTargetElement("tab")]
 public class TabTagHelper : TagHelper
 {
-    internal static readonly object UsedIdsKey = new object();
-    internal static readonly object TabContextKey = new object();
+    internal static readonly string UsedIdsKey = "TabTagHelper.UsedIds";
+    internal static readonly string TabContextKey = "TabTagHelper.TabContext";
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
