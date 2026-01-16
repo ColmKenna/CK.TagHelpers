@@ -4,6 +4,14 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace CK.Taghelpers.TagHelpers;
 
+/// <summary>
+/// Renders a CSS-only tab container. Must contain one or more <c>&lt;tab-item&gt;</c> child elements.
+/// If no tab item has <c>selected="true"</c>, the first tab is automatically selected.
+/// </summary>
+/// <remarks>
+/// Each <c>&lt;tab-item&gt;</c> requires a <c>heading</c> attribute. The container renders as a
+/// <c>&lt;div class="tabs"&gt;</c> with radio inputs for state management.
+/// </remarks>
 [HtmlTargetElement("tab")]
 public class TabTagHelper : TagHelper
 {
