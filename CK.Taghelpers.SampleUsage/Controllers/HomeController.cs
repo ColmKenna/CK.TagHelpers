@@ -21,6 +21,11 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult Tabs()
+    {
+        return View();
+    }
+
     public IActionResult Samples()
     {
         var model = new TeamViewModel
