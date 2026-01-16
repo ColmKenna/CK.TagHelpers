@@ -28,7 +28,8 @@ public class TabItemTagHelper : TagHelper
     {
         if (string.IsNullOrWhiteSpace(Heading))
         {
-            output.SuppressOutput();
+            output.TagName = null;
+            output.Content.SetHtmlContent("<!-- TabItemTagHelper: Missing required 'heading' attribute -->");
             return;
         }
 

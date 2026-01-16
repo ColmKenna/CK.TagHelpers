@@ -122,7 +122,7 @@ public class TabItemTagHelperTests
     }
 
     [Fact]
-    public async Task Should_SuppressOutput_When_HeadingIsMissing()
+    public async Task Should_RenderDiagnosticComment_When_HeadingIsMissing()
     {
         // Arrange
         var tagHelper = new TabItemTagHelper();
@@ -134,7 +134,9 @@ public class TabItemTagHelperTests
 
         // Assert
         Assert.Null(exception);
-        Assert.Equal(string.Empty, output.Content.GetContent());
+        Assert.Null(output.TagName);
+        var content = output.Content.GetContent();
+        Assert.Contains("<!-- TabItemTagHelper: Missing required 'heading' attribute -->", content);
     }
 
     [Fact]
