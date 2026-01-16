@@ -48,6 +48,42 @@ public class TabTagHelperTests
     }
 
     [Fact]
+    public async Task Should_NotDuplicateTabs_When_TabsClassAlreadyExists()
+    {
+        // Arrange
+        var tagHelper = new TabTagHelper();
+        var context = CreateContext();
+        var output = CreateOutput(
+            tagName: "tab",
+            childContent: "<div>Content</div>",
+            attributes: new TagHelperAttributeList { { "class", "tabs custom-class" } });
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - should preserve existing class without adding duplicate 'tabs'
+        Assert.Equal("tabs custom-class", output.Attributes["class"].Value);
+    }
+
+    [Fact]
+    public async Task Should_MergeMultipleClasses_When_MultipleCustomClassesProvided()
+    {
+        // Arrange
+        var tagHelper = new TabTagHelper();
+        var context = CreateContext();
+        var output = CreateOutput(
+            tagName: "tab",
+            childContent: "<div>Content</div>",
+            attributes: new TagHelperAttributeList { { "class", "my-custom another-class" } });
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("tabs my-custom another-class", output.Attributes["class"].Value);
+    }
+
+    [Fact]
     public async Task Should_SelectFirstTabItem_When_NoTabItemIsChecked()
     {
         // Arrange
