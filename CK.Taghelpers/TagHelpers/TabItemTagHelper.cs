@@ -9,18 +9,25 @@ namespace CK.Taghelpers.TagHelpers;
 /// <summary>
 /// Renders a CSS-only tab item with a heading and panel content. The <c>heading</c> attribute is required.
 /// </summary>
+/// <remarks>
+/// If <c>id</c> is not provided, it is auto-generated from the heading text.
+/// ARIA attributes (<c>role</c>, <c>aria-controls</c>, <c>aria-labelledby</c>) are included for accessibility.
+/// </remarks>
 [HtmlTargetElement("tab-item", ParentTag = "tab")]
 public class TabItemTagHelper : TagHelper
 {
     private static readonly Regex IdSanitizerRegex =
         new Regex(@"[^a-zA-Z0-9\s-]", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
+    /// <summary>Optional unique identifier for the tab. Auto-generated from heading if not provided.</summary>
     [HtmlAttributeName("id")]
     public string? Id { get; set; }
 
+    /// <summary>When true, this tab is selected by default.</summary>
     [HtmlAttributeName("selected")]
     public bool Selected { get; set; }
     
+    /// <summary>Required. The text displayed in the tab heading.</summary>
     [HtmlAttributeName("heading")]
     public string? Heading { get; set; }
 
