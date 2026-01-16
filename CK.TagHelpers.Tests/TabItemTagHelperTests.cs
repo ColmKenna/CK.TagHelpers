@@ -33,11 +33,16 @@ public class TabItemTagHelperTests
         Assert.Contains("type=\"radio\"", rendered);
         Assert.Contains("id=\"tab-1\"", rendered);
         Assert.Contains("checked=\"checked\"", rendered);
+        Assert.Contains("role=\"tab\"", rendered);
+        Assert.Contains("aria-controls=\"tab-1-panel\"", rendered);
         Assert.Contains("<label", rendered);
         Assert.Contains("class=\"tab-heading\"", rendered);
         Assert.Contains("for=\"tab-1\"", rendered);
         Assert.Contains(">First</label>", rendered);
-        Assert.Contains("<div class=\"panel\">", rendered);
+        Assert.Contains("class=\"panel\"", rendered);
+        Assert.Contains("id=\"tab-1-panel\"", rendered);
+        Assert.Contains("role=\"tabpanel\"", rendered);
+        Assert.Contains("aria-labelledby=\"tab-1\"", rendered);
         Assert.Contains("<div class=\"panel-content\">Body</div>", rendered);
     }
 

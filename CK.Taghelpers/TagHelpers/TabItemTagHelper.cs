@@ -62,6 +62,8 @@ public class TabItemTagHelper : TagHelper
         input.Attributes["name"] = groupName;
         input.Attributes["type"] = "radio";
         input.Attributes["id"] = Id;
+        input.Attributes["role"] = "tab";
+        input.Attributes["aria-controls"] = $"{Id}-panel";
         if (Selected)
         {
             input.Attributes["checked"] = "checked";
@@ -74,6 +76,9 @@ public class TabItemTagHelper : TagHelper
 
         var panel = new TagBuilder("div");
         panel.AddCssClass("panel");
+        panel.Attributes["id"] = $"{Id}-panel";
+        panel.Attributes["role"] = "tabpanel";
+        panel.Attributes["aria-labelledby"] = Id;
         var panelContent = new TagBuilder("div");
         panelContent.AddCssClass("panel-content");
         panelContent.InnerHtml.AppendHtml(content);
