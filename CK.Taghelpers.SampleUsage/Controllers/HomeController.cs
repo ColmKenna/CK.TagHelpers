@@ -16,12 +16,12 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Documentation()
+    public IActionResult DynamicEditor()
     {
         return View();
     }
 
-    public IActionResult Tabs()
+    public IActionResult Documentation()
     {
         return View();
     }

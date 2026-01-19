@@ -1,0 +1,256 @@
+@{
+    ViewData["Title"] = "Dynamic Editor";
+}
+
+@{
+    // Sample enums for multi-select demonstration
+    var dayOfWeekList = new List<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday };
+
+    // Sample models to edit
+    var userModel = new { FirstName = "John", LastName = "Doe", IsActive = true, BirthDate = DateTime.Now.AddYears(-25) };
+    var productModel = new { Name = "Widget Pro", Price = 29.99m, InStock = true, Category = "Electronics" };
+    var settingsModel = new { Theme = "Dark", NotificationsEnabled = true, Language = "English", MaxItems = 50 };
+    var scheduleModel = new { TaskName = "Weekly Report", Priority = 3, WorkDays = dayOfWeekList };
+}
+
+<div class="container py-4">
+    <h1>Dynamic Editor ViewComponent</h1>
+    <p class="lead">The Dynamic Editor is a ViewComponent that automatically generates a dialog-based form for any model you pass to it.</p>
+    
+    <hr />
+
+    <section class="mb-5">
+        <h2>Features</h2>
+        <ul>
+            <li>Automatically reflects model properties to generate form fields</li>
+            <li>Supports basic types: string, numbers, booleans, DateTime, enums</li>
+            <li>Supports multi-select dropdowns for IEnumerable/List of enums</li>
+            <li>Dispatches custom events on confirm/cancel</li>
+            <li>Each instance gets a unique dialog ID to prevent conflicts</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
+        <h2>Example 1: User Editor</h2>
+        <div class="card">
+            <div class="card-body">
+                <p>Click the button to edit user information:</p>
+                <vc:dynamic-editor model="@userModel" event-name="User"></vc:dynamic-editor>
+                <button class="btn btn-primary" onclick="document.getElementById('user-dialog').showModal()">Edit User</button>
+                <div id="user-output" class="mt-3 text-muted"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <h2>Example 2: Product Editor</h2>
+        <div class="card">
+            <div class="card-body">
+                <p>Edit product details:</p>
+                <vc:dynamic-editor model="@productModel" event-name="Product"></vc:dynamic-editor>
+                <button class="btn btn-success" onclick="document.getElementById('product-dialog').showModal()">Edit Product</button>
+                <div id="product-output" class="mt-3 text-muted"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <h2>Example 3: Settings Editor</h2>
+        <div class="card">
+            <div class="card-body">
+                <p>Modify application settings:</p>
+                <vc:dynamic-editor model="@settingsModel" event-name="Settings"></vc:dynamic-editor>
+                <button class="btn btn-secondary" onclick="document.getElementById('settings-dialog').showModal()">Edit Settings</button>
+                <div id="settings-output" class="mt-3 text-muted"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <h2>Example 4: Multi-Select with Enum Collection</h2>
+        <div class="card">
+            <div class="card-body">
+                <p>Edit schedule with multi-select dropdown for work days:</p>
+                <vc:dynamic-editor model="@scheduleModel" event-name="Schedule"></vc:dynamic-editor>
+                <button class="btn btn-info" onclick="document.getElementById('schedule-dialog').showModal()">Edit Schedule</button>
+                <div id="schedule-output" class="mt-3 text-muted"></div>
+                <div class="alert alert-info mt-3">
+                    <strong>Note:</strong> The WorkDays property is a List&lt;DayOfWeek&gt; and renders as a multi-select dropdown.
+                    Hold Ctrl (or Cmd on Mac) to select multiple days.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <h2>Usage</h2>
+        <pre><code class="language-html">@@{
+    var userModel = new { FirstName = "John", LastName = "Doe", IsActive = true };
+}
+
+&lt;vc:dynamic-editor model="@@userModel" event-name="User"&gt;&lt;/vc:dynamic-editor&gt;
+
+&lt;button onclick="document.querySelector('dialog').showModal()"&gt;Edit User&lt;/button&gt;
+
+&lt;script&gt;
+    document.addEventListener('User-update', function (e) {
+        console.log('Update confirmed!', e.detail);
+    });
+
+    document.addEventListener('User-cancel', function (e) {
+        console.log('Edit cancelled');
+    });
+&lt;/script&gt;</code></pre>
+    </section>
+</div>
+
+<style>
+    .dynamic-editor-dialog {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        padding: 0;
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .dynamic-editor-dialog::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .dynamic-editor-dialog form {
+        padding: 1.5rem;
+    }
+
+    .dynamic-editor-dialog h3 {
+        margin: 0 0 1.5rem 0;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .dynamic-editor-dialog .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .dynamic-editor-dialog label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+
+    .dynamic-editor-dialog input,
+    .dynamic-editor-dialog select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .dynamic-editor-dialog input[type="checkbox"] {
+        width: auto;
+    }
+
+    .dynamic-editor-dialog select[multiple] {
+        height: 150px;
+    }
+
+    .dynamic-editor-dialog .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .dynamic-editor-dialog button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .dynamic-editor-dialog button#*-cancel,
+    .dynamic-editor-dialog .actions button:first-child {
+        background: #6c757d;
+        color: white;
+    }
+
+    .dynamic-editor-dialog .actions button:last-child {
+        background: #0d6efd;
+        color: white;
+    }
+</style>
+
+<script>
+    // Find all dialogs dynamically (since they have unique IDs)
+    document.addEventListener('DOMContentLoaded', function() {
+        const dialogs = document.querySelectorAll('dialog.dynamic-editor-dialog');
+        
+        // Map dialogs to their event names based on order
+        const dialogMap = [
+            { dialog: dialogs[0], name: 'User', buttonId: 'user-dialog' },
+            { dialog: dialogs[1], name: 'Product', buttonId: 'product-dialog' },
+            { dialog: dialogs[2], name: 'Settings', buttonId: 'settings-dialog' },
+            { dialog: dialogs[3], name: 'Schedule', buttonId: 'schedule-dialog' }
+        ];
+        
+        // Assign readable IDs for the buttons
+        dialogMap.forEach((item, index) => {
+            if (item.dialog) {
+                item.dialog.id = item.buttonId;
+            }
+        });
+    });
+
+    // Event listeners for each editor
+    document.addEventListener('User-update', function (e) {
+        document.getElementById('user-output').innerHTML = 
+            '<strong>Updated:</strong> ' + JSON.stringify(e.detail, null, 2);
+    });
+
+    document.addEventListener('User-cancel', function (e) {
+        const output = '<em>User edit cancelled</em><br>' +
+            '<strong>Original Values:</strong> <pre>' + JSON.stringify(e.detail.originalValues, null, 2) + '</pre>' +
+            '<strong>Canceled Values:</strong> <pre>' + JSON.stringify(e.detail.canceledValues, null, 2) + '</pre>';
+        document.getElementById('user-output').innerHTML = output;
+    });
+
+    document.addEventListener('Product-update', function (e) {
+        document.getElementById('product-output').innerHTML = 
+            '<strong>Updated:</strong> ' + JSON.stringify(e.detail, null, 2);
+    });
+
+    document.addEventListener('Product-cancel', function (e) {
+        const output = '<em>Product edit cancelled</em><br>' +
+            '<strong>Original Values:</strong> <pre>' + JSON.stringify(e.detail.originalValues, null, 2) + '</pre>' +
+            '<strong>Canceled Values:</strong> <pre>' + JSON.stringify(e.detail.canceledValues, null, 2) + '</pre>';
+        document.getElementById('product-output').innerHTML = output;
+    });
+
+    document.addEventListener('Settings-update', function (e) {
+        document.getElementById('settings-output').innerHTML =
+            '<strong>Updated:</strong> ' + JSON.stringify(e.detail, null, 2);
+    });
+
+    document.addEventListener('Settings-cancel', function (e) {
+        const output = '<em>Settings edit cancelled</em><br>' +
+            '<strong>Original Values:</strong> <pre>' + JSON.stringify(e.detail.originalValues, null, 2) + '</pre>' +
+            '<strong>Canceled Values:</strong> <pre>' + JSON.stringify(e.detail.canceledValues, null, 2) + '</pre>';
+        document.getElementById('settings-output').innerHTML = output;
+    });
+
+    document.addEventListener('Schedule-update', function (e) {
+        document.getElementById('schedule-output').innerHTML =
+            '<strong>Updated:</strong> <pre>' + JSON.stringify(e.detail, null, 2) + '</pre>';
+    });
+
+    document.addEventListener('Schedule-cancel', function (e) {
+        const output = '<em>Schedule edit cancelled</em><br>' +
+            '<strong>Original Values:</strong> <pre>' + JSON.stringify(e.detail.originalValues, null, 2) + '</pre>' +
+            '<strong>Canceled Values:</strong> <pre>' + JSON.stringify(e.detail.canceledValues, null, 2) + '</pre>';
+        document.getElementById('schedule-output').innerHTML = output;
+    });
+</script>
