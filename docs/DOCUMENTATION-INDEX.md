@@ -47,6 +47,27 @@ Manage dynamic lists with display/edit modes, add/delete operations, and reorder
 | [EDITARRAY-TROUBLESHOOTING.md](EDITARRAY-TROUBLESHOOTING.md) | Fixing common issues | As needed |
 | [Sample Project](../CK.Taghelpers.SampleUsage/Views/Home/Samples.cshtml) | Working examples | Interactive |
 
+---
+
+## 🖊️ DynamicEditor ViewComponent
+
+Render dialog-based form editors automatically from any model using reflection.
+
+### Quick Navigation
+
+| Document | Best For | Time |
+|----------|----------|------|
+| [DYNAMICEDITOR-QUICKSTART.md](DYNAMICEDITOR-QUICKSTART.md) | Getting started quickly | 5 min |
+| [DYNAMICEDITOR-README.md](DYNAMICEDITOR-README.md) | Full documentation | 15 min |
+| [DYNAMICEDITOR-API-REFERENCE.md](DYNAMICEDITOR-API-REFERENCE.md) | Quick parameter lookup | Reference |
+| [Sample Project](../CK.Taghelpers.SampleUsage/Views/Home/DynamicEditor.cshtml) | Working examples | Interactive |
+
+### If you're new to DynamicEditor ViewComponent:
+
+1. **Start here**: [DYNAMICEDITOR-QUICKSTART.md](DYNAMICEDITOR-QUICKSTART.md) (5 minutes)
+2. **Run the sample**: Navigate to `/Home/DynamicEditor` to see live examples
+3. **Read the full guide**: [DYNAMICEDITOR-README.md](DYNAMICEDITOR-README.md) (15 minutes)
+
 
 ## 🚀 Getting Started
 
@@ -221,7 +242,12 @@ docs/                              ← All documentation (this folder)
 ├── # Tab TagHelper Docs
 ├── TAB-QUICKSTART.md              ← Quick start guide
 ├── TAB-README.md                  ← Complete documentation
-└── TAB-API-REFERENCE.md           ← API reference
+├── TAB-API-REFERENCE.md           ← API reference
+│
+├── # DynamicEditor ViewComponent Docs
+├── DYNAMICEDITOR-QUICKSTART.md    ← Quick start guide
+├── DYNAMICEDITOR-README.md        ← Complete documentation
+└── DYNAMICEDITOR-API-REFERENCE.md ← API reference
 
 CK.Taghelpers.SampleUsage/         ← Sample project with examples
 ├── Controllers/
@@ -230,6 +256,7 @@ CK.Taghelpers.SampleUsage/         ← Sample project with examples
 │   └── Home/
 │       ├── Samples.cshtml         ← EditArray examples
 │       ├── Tabs.cshtml            ← Tab examples
+│       ├── DynamicEditor.cshtml   ← DynamicEditor examples
 │       └── Documentation.cshtml   ← Documentation hub
 └── wwwroot/
 ```
