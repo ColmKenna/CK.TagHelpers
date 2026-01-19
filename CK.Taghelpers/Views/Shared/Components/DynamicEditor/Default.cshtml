@@ -1,0 +1,134 @@
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+@model CK.Taghelpers.ViewComponents.DynamicEditorViewModel
+@inject IModelMetadataProvider MetadataProvider
+
+@{
+    var modelMetadata = MetadataProvider.GetMetadataForType(Model.DataModel.GetType());
+    var explorer = new ModelExplorer(MetadataProvider, modelMetadata, Model.DataModel);
+}
+
+<dialog id="@Model.DialogId" class="dynamic-editor-dialog">
+    <form method="dialog" id="@(Model.DialogId)-form">
+        <h3>Edit @Model.EventName</h3>
+
+        <div class="editor-fields">
+            @* Iterate over the properties of the passed model *@
+            @foreach (var prop in explorer.Properties)
+            {
+                // Check if this is a collection type
+                var isCollection = prop.Metadata.IsCollectionType && !prop.Metadata.ModelType.IsAssignableFrom(typeof(string));
+                Type? elementType = null;
+                bool isEnumCollection = false;
+
+                if (isCollection && prop.Metadata.ElementMetadata != null)
+                {
+                    elementType = prop.Metadata.ElementMetadata.ModelType;
+                    isEnumCollection = elementType?.IsEnum ?? false;
+                }
+
+                // Skip complex types except DateTime and supported collections
+                if (prop.Metadata.IsComplexType && prop.Metadata.ModelType != typeof(DateTime) && !isEnumCollection)
+                {
+                    continue;
+                }
+
+                <div class="form-group">
+                    <label for="@prop.Metadata.PropertyName">
+                        @(prop.Metadata.DisplayName ?? prop.Metadata.PropertyName)
+                    </label>
+
+                    @* Determine input type based on model type *@
+                    @if (prop.Metadata.ModelType == typeof(bool))
+                    {
+                        <input type="checkbox"
+                               name="@prop.Metadata.PropertyName"
+                               id="@prop.Metadata.PropertyName"
+                               class="form-control"
+                               checked="@(prop.Model as bool? == true)" />
+                    }
+                    else if (prop.Metadata.ModelType == typeof(DateTime) || prop.Metadata.ModelType == typeof(DateTime?))
+                    {
+                        <input type="datetime-local"
+                               name="@prop.Metadata.PropertyName"
+                               id="@prop.Metadata.PropertyName"
+                               class="form-control"
+                               value="@(((DateTime?)prop.Model)?.ToString("s"))" />
+                    }
+                    else if (isEnumCollection && elementType != null)
+                    {
+                        @* Multi-select for enum collections *@
+                        var selectedValues = new HashSet<string>();
+                        if (prop.Model is System.Collections.IEnumerable enumerable)
+                        {
+                            foreach (var item in enumerable)
+                            {
+                                if (item != null)
+                                {
+                                    selectedValues.Add(item.ToString()!);
+                                }
+                            }
+                        }
+
+                        <select name="@prop.Metadata.PropertyName"
+                                id="@prop.Metadata.PropertyName"
+                                class="form-control"
+                                multiple
+                                data-collection="true">
+                            @foreach (var enumName in Enum.GetNames(elementType))
+                            {
+                                <option value="@enumName" @(selectedValues.Contains(enumName) ? "selected" : "")>
+                                    @enumName
+                                </option>
+                            }
+                        </select>
+                    }
+                    else if (prop.Metadata.IsEnum)
+                    {
+                        <select name="@prop.Metadata.PropertyName" id="@prop.Metadata.PropertyName" class="form-control">
+                            @foreach (var enumName in Enum.GetNames(prop.Metadata.ModelType))
+                            {
+                                <option value="@enumName" @(enumName == prop.Model?.ToString() ? "selected" : "")>
+                                    @enumName
+                                </option>
+                            }
+                        </select>
+                    }
+                    else if (prop.Metadata.ModelType == typeof(int) || prop.Metadata.ModelType == typeof(int?) ||
+                             prop.Metadata.ModelType == typeof(long) || prop.Metadata.ModelType == typeof(long?) ||
+                             prop.Metadata.ModelType == typeof(decimal) || prop.Metadata.ModelType == typeof(decimal?) ||
+                             prop.Metadata.ModelType == typeof(double) || prop.Metadata.ModelType == typeof(double?) ||
+                             prop.Metadata.ModelType == typeof(float) || prop.Metadata.ModelType == typeof(float?))
+                    {
+                        <input type="number"
+                               name="@prop.Metadata.PropertyName"
+                               id="@prop.Metadata.PropertyName"
+                               class="form-control"
+                               value="@prop.Model" />
+                    }
+                    else
+                    {
+                        <input type="text"
+                               name="@prop.Metadata.PropertyName"
+                               id="@prop.Metadata.PropertyName"
+                               class="form-control"
+                               value="@prop.Model" />
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="actions">
+            <button type="button" id="@(Model.DialogId)-cancel">Cancel</button>
+            <button type="button" id="@(Model.DialogId)-confirm">Confirm</button>
+        </div>
+    </form>
+</dialog>
+
+<script src="~/_content/CK.Taghelpers/js/dynamicEditor.js"></script>
+<script>
+    // Initialize this specific dialog instance
+    if (window.DynamicEditor) {
+        DynamicEditor.init('@Model.DialogId', '@Model.EventName');
+    }
+</script>
