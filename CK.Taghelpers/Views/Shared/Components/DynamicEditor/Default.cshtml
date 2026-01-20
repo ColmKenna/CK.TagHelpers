@@ -8,7 +8,7 @@
     var explorer = new ModelExplorer(MetadataProvider, modelMetadata, Model.DataModel);
 }
 
-<dialog id="@Model.DialogId" class="dynamic-editor-dialog">
+<dialog id="@Model.DialogId" class="dynamic-editor-dialog" data-event-name="@Model.EventName">
     <form method="dialog" id="@(Model.DialogId)-form">
         <h3>Edit @Model.EventName</h3>
 
@@ -129,6 +129,6 @@
 <script>
     // Initialize this specific dialog instance
     if (window.DynamicEditor) {
-        DynamicEditor.init('@Model.DialogId', '@Model.EventName');
+        DynamicEditor.init('@Model.DialogId');
     }
 </script>

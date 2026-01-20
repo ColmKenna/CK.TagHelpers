@@ -188,19 +188,19 @@
     // Find all dialogs dynamically (since they have unique IDs)
     document.addEventListener('DOMContentLoaded', function() {
         const dialogs = document.querySelectorAll('dialog.dynamic-editor-dialog');
-        
-        // Map dialogs to their event names based on order
-        const dialogMap = [
-            { dialog: dialogs[0], name: 'User', buttonId: 'user-dialog' },
-            { dialog: dialogs[1], name: 'Product', buttonId: 'product-dialog' },
-            { dialog: dialogs[2], name: 'Settings', buttonId: 'settings-dialog' },
-            { dialog: dialogs[3], name: 'Schedule', buttonId: 'schedule-dialog' }
-        ];
-        
-        // Assign readable IDs for the buttons
-        dialogMap.forEach((item, index) => {
-            if (item.dialog) {
-                item.dialog.id = item.buttonId;
+        const dialogIdMap = {
+            User: 'user-dialog',
+            Product: 'product-dialog',
+            Settings: 'settings-dialog',
+            Schedule: 'schedule-dialog'
+        };
+
+        // Map dialogs to readable IDs using data-event-name
+        dialogs.forEach(dialog => {
+            const eventName = (dialog.dataset.eventName || '').trim();
+            const dialogId = dialogIdMap[eventName];
+            if (dialogId) {
+                dialog.id = dialogId;
             }
         });
     });

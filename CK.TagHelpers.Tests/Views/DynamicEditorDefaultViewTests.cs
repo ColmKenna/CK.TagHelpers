@@ -29,11 +29,27 @@ public class DynamicEditorDefaultViewTests : RazorViewTestBase
         var html = await RenderViewAsync(ViewPath, viewModel);
 
         // Assert
-        Assert.Contains($"<dialog id=\"{dialogId}\" class=\"dynamic-editor-dialog\">", html);
+        Assert.Contains(
+            $"<dialog id=\"{dialogId}\" class=\"dynamic-editor-dialog\" data-event-name=\"{viewModel.EventName}\">",
+            html);
         Assert.Contains($"<form method=\"dialog\" id=\"{dialogId}-form\">", html);
         Assert.Contains($"<h3>Edit {viewModel.EventName}</h3>", html);
         Assert.Contains($"<button type=\"button\" id=\"{dialogId}-cancel\">Cancel</button>", html);
         Assert.Contains($"<button type=\"button\" id=\"{dialogId}-confirm\">Confirm</button>", html);
+    }
+
+    [Fact]
+    public async Task should_render_event_name_as_data_attribute_when_event_name_is_provided()
+    {
+        // Arrange
+        var eventName = "User";
+        var viewModel = CreateViewModel(new HeaderModel(), eventName);
+
+        // Act
+        var html = await RenderViewAsync(ViewPath, viewModel);
+
+        // Assert
+        Assert.Contains($"data-event-name=\"{eventName}\"", html);
     }
 
     [Fact]
@@ -162,8 +178,33 @@ public class DynamicEditorDefaultViewTests : RazorViewTestBase
 
         // Assert
         Assert.Contains("/_content/CK.Taghelpers/js/dynamicEditor.js", html);
-        Assert.Contains($"DynamicEditor.init('{dialogId}', '{eventName}');", html);
+        Assert.Contains($"DynamicEditor.init('{dialogId}');", html);
+        Assert.DoesNotContain($"DynamicEditor.init('{dialogId}',", html);
     }
+
+    #region New Feature - Edge Cases (Auto-Discovered)
+
+    /// <summary>
+    /// EDGE CASE: Event name contains script-breaking characters.
+    /// Reasoning: The feature prevents inline script interpolation from being exploitable.
+    /// </summary>
+    [Fact]
+    public async Task should_not_inline_event_name_in_script_when_event_name_contains_script_markup()
+    {
+        // Arrange
+        var dialogId = "dialog-12345678";
+        var eventName = "User');</script><script>alert(1)</script>";
+        var viewModel = CreateViewModel(new HeaderModel(), eventName, dialogId);
+
+        // Act
+        var html = await RenderViewAsync(ViewPath, viewModel);
+
+        // Assert
+        Assert.Contains($"DynamicEditor.init('{dialogId}');", html);
+        Assert.DoesNotContain($"DynamicEditor.init('{dialogId}',", html);
+    }
+
+    #endregion
 
     private static DynamicEditorViewModel CreateViewModel(
         object dataModel,

@@ -1,8 +1,13 @@
 (function () {
     // Initialize all dynamic editor dialogs on the page
-    function initializeDynamicEditor(dialogId, eventName) {
+    function initializeDynamicEditor(dialogId) {
         const dialog = document.getElementById(dialogId);
         if (!dialog) return;
+
+        const eventName = (dialog.dataset.eventName || "").trim();
+        if (!eventName) {
+            console.warn("DynamicEditor: data-event-name is missing or empty.", { dialogId });
+        }
 
         const confirmBtn = document.getElementById(`${dialogId}-confirm`);
         const cancelBtn = document.getElementById(`${dialogId}-cancel`);
