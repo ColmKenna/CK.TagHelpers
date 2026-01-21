@@ -1,4 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using CK.Taghelpers.ViewComponents;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace CK.TagHelpers.Tests.ViewComponents;
@@ -7,12 +11,13 @@ namespace CK.TagHelpers.Tests.ViewComponents;
 /// Tests for <see cref="DynamicEditorViewComponent"/>
 ///
 /// Dependencies:
-/// - None
+/// - IModelMetadataProvider (provided via MvcCoreMvcBuilder services)
 ///
 /// Test Coverage:
-/// - Happy path: Wraps provided model and event name, uses default event name, generates dialog id
+/// - Happy path: Builds fields from model, uses event name, generates dialog id
 /// - Edge cases: Throws on null model, defaults empty/whitespace event names, throws on invalid characters
-/// - Async: InvokeAsync returns Task<IViewComponentResult>
+/// - Field building: Creates correct field types for different property types
+/// - Async: InvokeAsync returns Task&lt;IViewComponentResult&gt;
 ///
 /// Assumptions:
 /// - The component validates model is not null
@@ -22,17 +27,27 @@ namespace CK.TagHelpers.Tests.ViewComponents;
 public class DynamicEditorViewComponentTests : ViewComponentTestBase
 {
     private readonly DynamicEditorViewComponent _sut;
+    private readonly IModelMetadataProvider _metadataProvider;
 
     public DynamicEditorViewComponentTests()
     {
-        _sut = new DynamicEditorViewComponent();
+        _metadataProvider = CreateMetadataProvider();
+        _sut = new DynamicEditorViewComponent(_metadataProvider);
         SetupViewComponentContext(_sut);
+    }
+
+    private static IModelMetadataProvider CreateMetadataProvider()
+    {
+        var services = new ServiceCollection();
+        services.AddMvc();
+        var serviceProvider = services.BuildServiceProvider();
+        return serviceProvider.GetRequiredService<IModelMetadataProvider>();
     }
 
     #region Happy Path
 
     [Fact]
-    public async Task should_set_data_model_when_model_is_provided()
+    public async Task should_build_fields_from_model_when_model_is_provided()
     {
         // Arrange
         var model = new TestModel { Name = "Test" };
@@ -42,7 +57,23 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
 
         // Assert
         var viewModel = GetViewModel<DynamicEditorViewModel>(result);
-        Assert.Same(model, viewModel.DataModel);
+        Assert.NotEmpty(viewModel.Fields);
+        Assert.Contains(viewModel.Fields, f => f.PropertyName == "Name");
+    }
+
+    [Fact]
+    public async Task should_set_field_value_from_model_property()
+    {
+        // Arrange
+        var model = new TestModel { Name = "TestValue" };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "User");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        var nameField = viewModel.Fields.First(f => f.PropertyName == "Name");
+        Assert.Equal("TestValue", nameField.FormattedValue);
     }
 
     [Fact]
@@ -86,6 +117,121 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
         // Assert
         var viewModel = GetViewModel<DynamicEditorViewModel>(result);
         Assert.Matches("(?i)^dialog-[0-9a-f]{8}$", viewModel.DialogId);
+    }
+
+    [Fact]
+    public async Task should_prefix_field_input_id_with_dialog_id()
+    {
+        // Arrange
+        var model = new TestModel { Name = "Test" };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "User");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        var nameField = viewModel.Fields.First(f => f.PropertyName == "Name");
+        Assert.StartsWith(viewModel.DialogId + "_", nameField.InputId);
+    }
+
+    #endregion
+
+    #region Field Type Tests
+
+    [Fact]
+    public async Task should_create_checkbox_field_for_bool_property()
+    {
+        // Arrange
+        var model = new TypedModel { IsActive = true };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "Test");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        var field = viewModel.Fields.First(f => f.PropertyName == "IsActive");
+        Assert.Equal(FieldInputType.Checkbox, field.InputType);
+    }
+
+    [Fact]
+    public async Task should_create_number_field_for_int_property()
+    {
+        // Arrange
+        var model = new TypedModel { Count = 42 };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "Test");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        var field = viewModel.Fields.First(f => f.PropertyName == "Count");
+        Assert.Equal(FieldInputType.Number, field.InputType);
+        Assert.Equal("42", field.FormattedValue);
+    }
+
+    [Fact]
+    public async Task should_create_datetime_field_for_datetime_property()
+    {
+        // Arrange
+        var testDate = new DateTime(2024, 6, 15, 10, 30, 0);
+        var model = new TypedModel { CreatedAt = testDate };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "Test");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        var field = viewModel.Fields.First(f => f.PropertyName == "CreatedAt");
+        Assert.Equal(FieldInputType.DateTime, field.InputType);
+        Assert.Equal("2024-06-15T10:30:00", field.FormattedValue);
+    }
+
+    [Fact]
+    public async Task should_create_select_field_for_enum_property()
+    {
+        // Arrange
+        var model = new TypedModel { Status = TestStatus.Active };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "Test");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        var field = viewModel.Fields.First(f => f.PropertyName == "Status");
+        Assert.Equal(FieldInputType.Select, field.InputType);
+        Assert.Equal(3, field.Options.Count);
+        Assert.True(field.Options.First(o => o.Value == "Active").IsSelected);
+    }
+
+    [Fact]
+    public async Task should_create_email_field_when_email_attribute_present()
+    {
+        // Arrange
+        var model = new ValidatedModel { Email = "test@example.com" };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "Test");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        var field = viewModel.Fields.First(f => f.PropertyName == "Email");
+        Assert.Equal(FieldInputType.Email, field.InputType);
+    }
+
+    [Fact]
+    public async Task should_mark_field_as_required_when_required_attribute_present()
+    {
+        // Arrange
+        var model = new ValidatedModel { Email = "test@example.com" };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "Test");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        var field = viewModel.Fields.First(f => f.PropertyName == "RequiredField");
+        Assert.True(field.IsRequired);
+        Assert.Contains("required", field.ValidationAttributes.Keys);
     }
 
     #endregion
@@ -164,10 +310,63 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
         Assert.Equal(eventName, viewModel.EventName);
     }
 
+    [Fact]
+    public async Task should_skip_complex_type_properties()
+    {
+        // Arrange
+        var model = new ModelWithComplexProperty
+        {
+            Name = "Test",
+            Nested = new TestModel { Name = "Nested" }
+        };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "Test");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        Assert.DoesNotContain(viewModel.Fields, f => f.PropertyName == "Nested");
+        Assert.Contains(viewModel.Fields, f => f.PropertyName == "Name");
+    }
+
     #endregion
+
+    #region Test Models
 
     private sealed class TestModel
     {
         public string Name { get; set; } = string.Empty;
     }
+
+    private sealed class TypedModel
+    {
+        public bool IsActive { get; set; }
+        public int Count { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public TestStatus Status { get; set; }
+    }
+
+    private enum TestStatus
+    {
+        Pending,
+        Active,
+        Completed
+    }
+
+    private sealed class ValidatedModel
+    {
+        [Required]
+        public string RequiredField { get; set; } = string.Empty;
+
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+    }
+
+    private sealed class ModelWithComplexProperty
+    {
+        public string Name { get; set; } = string.Empty;
+        public TestModel Nested { get; set; } = null!;
+    }
+
+    #endregion
 }
