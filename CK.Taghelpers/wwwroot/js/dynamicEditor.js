@@ -12,6 +12,7 @@
         const confirmBtn = document.getElementById(`${dialogId}-confirm`);
         const cancelBtn = document.getElementById(`${dialogId}-cancel`);
         const form = document.getElementById(`${dialogId}-form`);
+        const validationSummary = document.getElementById(`${dialogId}-validation-summary`);
 
         if (!confirmBtn || !cancelBtn || !form) {
             console.error('DynamicEditor: Could not find required elements', { dialogId, confirmBtn, cancelBtn, form });
@@ -25,6 +26,7 @@
         const originalShowModal = dialog.showModal.bind(dialog);
         dialog.showModal = function() {
             initialFormState = captureFormState();
+            clearValidationErrors();
             originalShowModal();
         };
 
@@ -44,7 +46,7 @@
                         .map(opt => opt.value);
                 } else if (element.tagName === 'SELECT') {
                     state[element.name] = element.value;
-                } else if (element.tagName === 'INPUT') {
+                } else if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
                     state[element.name] = element.value;
                 }
             }
@@ -70,7 +72,7 @@
                     });
                 } else if (element.tagName === 'SELECT') {
                     element.value = initialFormState[element.name];
-                } else if (element.tagName === 'INPUT') {
+                } else if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
                     element.value = initialFormState[element.name];
                 }
             }
@@ -110,8 +112,106 @@
             return data;
         }
 
+        // Clear all validation error displays
+        function clearValidationErrors() {
+            // Clear validation summary
+            if (validationSummary) {
+                validationSummary.style.display = 'none';
+                validationSummary.innerHTML = '';
+            }
+            
+            // Clear individual field errors
+            const errorSpans = form.querySelectorAll('.field-validation-error');
+            errorSpans.forEach(span => {
+                span.textContent = '';
+                span.style.display = 'none';
+            });
+            
+            // Remove invalid class from inputs
+            const inputs = form.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.classList.remove('input-validation-error');
+            });
+        }
+
+        // Validate the form using HTML5 validation API and data attributes
+        function validateForm() {
+            clearValidationErrors();
+            const errors = [];
+            const formElements = form.elements;
+
+            for (let element of formElements) {
+                if (!element.name || element.type === 'button') continue;
+
+                const fieldErrors = [];
+                
+                // Check HTML5 validity
+                if (!element.checkValidity()) {
+                    // Get custom error message from data attributes or use default
+                    if (element.validity.valueMissing) {
+                        const customMsg = element.dataset.valRequired;
+                        fieldErrors.push(customMsg || `${element.name} is required`);
+                    }
+                    if (element.validity.tooShort) {
+                        const customMsg = element.dataset.valMinlength;
+                        fieldErrors.push(customMsg || `${element.name} must be at least ${element.minLength} characters`);
+                    }
+                    if (element.validity.tooLong) {
+                        const customMsg = element.dataset.valMaxlength;
+                        fieldErrors.push(customMsg || `${element.name} must not exceed ${element.maxLength} characters`);
+                    }
+                    if (element.validity.rangeUnderflow) {
+                        const customMsg = element.dataset.valRange;
+                        fieldErrors.push(customMsg || `${element.name} must be at least ${element.min}`);
+                    }
+                    if (element.validity.rangeOverflow) {
+                        const customMsg = element.dataset.valRange;
+                        fieldErrors.push(customMsg || `${element.name} must not exceed ${element.max}`);
+                    }
+                    if (element.validity.typeMismatch) {
+                        fieldErrors.push(`Please enter a valid ${element.type}`);
+                    }
+                    if (element.validity.patternMismatch) {
+                        const customMsg = element.dataset.valRegex;
+                        fieldErrors.push(customMsg || `${element.name} format is invalid`);
+                    }
+                    
+                    // If no specific error was identified, use generic message
+                    if (fieldErrors.length === 0) {
+                        fieldErrors.push(element.validationMessage || `${element.name} is invalid`);
+                    }
+                }
+
+                // Show field-level errors
+                if (fieldErrors.length > 0) {
+                    element.classList.add('input-validation-error');
+                    const errorSpan = form.querySelector(`[data-valmsg-for="${element.name}"]`);
+                    if (errorSpan) {
+                        errorSpan.textContent = fieldErrors[0];
+                        errorSpan.style.display = 'block';
+                    }
+                    errors.push(...fieldErrors);
+                }
+            }
+
+            // Show validation summary if there are errors
+            if (errors.length > 0 && validationSummary) {
+                validationSummary.innerHTML = '<strong>Please fix the following errors:</strong><ul>' +
+                    errors.map(err => `<li>${err}</li>`).join('') +
+                    '</ul>';
+                validationSummary.style.display = 'block';
+            }
+
+            return errors.length === 0;
+        }
+
         // Confirm Event
         confirmBtn.addEventListener('click', () => {
+            // Validate before confirming
+            if (!validateForm()) {
+                return;
+            }
+
             const data = getFormData();
 
             // Dispatch custom "update" event
@@ -134,6 +234,7 @@
 
             // Restore form to initial state
             restoreFormState();
+            clearValidationErrors();
 
             // Dispatch custom "cancel" event with both original and canceled values
             const cancelEvent = new CustomEvent(`${eventName}-cancel`, {

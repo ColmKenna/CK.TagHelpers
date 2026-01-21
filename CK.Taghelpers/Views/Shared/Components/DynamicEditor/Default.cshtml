@@ -1,5 +1,6 @@
 @using Microsoft.AspNetCore.Mvc.ViewFeatures
 @using Microsoft.AspNetCore.Mvc.ModelBinding
+@using System.ComponentModel.DataAnnotations
 @model CK.Taghelpers.ViewComponents.DynamicEditorViewModel
 @inject IModelMetadataProvider MetadataProvider
 
@@ -8,9 +9,135 @@
     var explorer = new ModelExplorer(MetadataProvider, modelMetadata, Model.DataModel);
 }
 
+@functions {
+    /// <summary>
+    /// Extracts validation attributes from a property's metadata and returns them as HTML attribute strings.
+    /// </summary>
+    private Dictionary<string, string> GetValidationAttributes(ModelMetadata metadata)
+    {
+        var attrs = new Dictionary<string, string>();
+        
+        // Get validation attributes from the property
+        var validatorMetadata = metadata.ValidatorMetadata;
+        
+        foreach (var validator in validatorMetadata)
+        {
+            switch (validator)
+            {
+                case RequiredAttribute required:
+                    attrs["required"] = "required";
+                    if (!string.IsNullOrEmpty(required.ErrorMessage))
+                    {
+                        attrs["data-val-required"] = required.ErrorMessage;
+                    }
+                    break;
+                    
+                case MinLengthAttribute minLength:
+                    attrs["minlength"] = minLength.Length.ToString();
+                    if (!string.IsNullOrEmpty(minLength.ErrorMessage))
+                    {
+                        attrs["data-val-minlength"] = minLength.ErrorMessage;
+                    }
+                    break;
+                    
+                case MaxLengthAttribute maxLength:
+                    attrs["maxlength"] = maxLength.Length.ToString();
+                    if (!string.IsNullOrEmpty(maxLength.ErrorMessage))
+                    {
+                        attrs["data-val-maxlength"] = maxLength.ErrorMessage;
+                    }
+                    break;
+                    
+                case StringLengthAttribute stringLength:
+                    if (stringLength.MinimumLength > 0)
+                    {
+                        attrs["minlength"] = stringLength.MinimumLength.ToString();
+                    }
+                    attrs["maxlength"] = stringLength.MaximumLength.ToString();
+                    break;
+                    
+                case RangeAttribute range:
+                    if (range.Minimum != null)
+                    {
+                        attrs["min"] = range.Minimum.ToString()!;
+                    }
+                    if (range.Maximum != null)
+                    {
+                        attrs["max"] = range.Maximum.ToString()!;
+                    }
+                    if (!string.IsNullOrEmpty(range.ErrorMessage))
+                    {
+                        attrs["data-val-range"] = range.ErrorMessage;
+                    }
+                    break;
+                    
+                case RegularExpressionAttribute regex:
+                    attrs["pattern"] = regex.Pattern;
+                    if (!string.IsNullOrEmpty(regex.ErrorMessage))
+                    {
+                        attrs["data-val-regex"] = regex.ErrorMessage;
+                    }
+                    break;
+                    
+                case EmailAddressAttribute:
+                    attrs["type"] = "email";
+                    break;
+                    
+                case PhoneAttribute:
+                    attrs["type"] = "tel";
+                    break;
+                    
+                case UrlAttribute:
+                    attrs["type"] = "url";
+                    break;
+                    
+                case DataTypeAttribute dataType:
+                    switch (dataType.DataType)
+                    {
+                        case DataType.Password:
+                            attrs["type"] = "password";
+                            break;
+                        case DataType.EmailAddress:
+                            attrs["type"] = "email";
+                            break;
+                        case DataType.PhoneNumber:
+                            attrs["type"] = "tel";
+                            break;
+                        case DataType.Url:
+                            attrs["type"] = "url";
+                            break;
+                        case DataType.Date:
+                            attrs["type"] = "date";
+                            break;
+                        case DataType.Time:
+                            attrs["type"] = "time";
+                            break;
+                        case DataType.MultilineText:
+                            attrs["data-multiline"] = "true";
+                            break;
+                    }
+                    break;
+            }
+        }
+        
+        return attrs;
+    }
+    
+    /// <summary>
+    /// Renders validation attributes as an HTML string.
+    /// </summary>
+    private string RenderValidationAttributes(Dictionary<string, string> attrs)
+    {
+        if (attrs.Count == 0) return string.Empty;
+        return string.Join(" ", attrs.Select(a => $"{a.Key}=\"{a.Value}\""));
+    }
+}
+
 <dialog id="@Model.DialogId" class="dynamic-editor-dialog" data-event-name="@Model.EventName">
-    <form method="dialog" id="@(Model.DialogId)-form">
+    <form method="dialog" id="@(Model.DialogId)-form" novalidate>
         <h3>Edit @Model.EventName</h3>
+        
+        <div id="@(Model.DialogId)-validation-summary" class="validation-summary" style="display: none;"></div>
 
         <div class="editor-fields">
             @* Iterate over the properties of the passed model *@
@@ -34,13 +161,20 @@
                 }
 
                 var inputId = $"{Model.DialogId}_{prop.Metadata.PropertyName}";
+                var validationAttrs = GetValidationAttributes(prop.Metadata);
+                var validationAttrString = RenderValidationAttributes(validationAttrs);
+                var isRequired = validationAttrs.ContainsKey("required");
 
                 <div class="form-group">
                     <label for="@inputId">
                         @(prop.Metadata.DisplayName ?? prop.Metadata.PropertyName)
+                        @if (isRequired)
+                        {
+                            <span class="required-indicator">*</span>
+                        }
                     </label>
 
-                    @* Determine input type based on model type *@
+                    @* Determine input type based on model type and validation attributes *@
                     @if (prop.Metadata.ModelType == typeof(bool))
                     {
                         <input type="checkbox"
@@ -51,11 +185,13 @@
                     }
                     else if (prop.Metadata.ModelType == typeof(DateTime) || prop.Metadata.ModelType == typeof(DateTime?))
                     {
-                        <input type="datetime-local"
+                        var dateType = validationAttrs.ContainsKey("type") ? validationAttrs["type"] : "datetime-local";
+                        <input type="@dateType"
                                name="@prop.Metadata.PropertyName"
                                id="@inputId"
                                class="form-control"
-                               value="@(((DateTime?)prop.Model)?.ToString("s"))" />
+                               value="@(((DateTime?)prop.Model)?.ToString("s"))"
+                               @Html.Raw(validationAttrString) />
                     }
                     else if (isEnumCollection && elementType != null)
                     {
@@ -76,7 +212,8 @@
                                 id="@inputId"
                                 class="form-control"
                                 multiple
-                                data-collection="true">
+                                data-collection="true"
+                                @Html.Raw(validationAttrString)>
                             @foreach (var enumName in Enum.GetNames(elementType))
                             {
                                 <option value="@enumName" @(selectedValues.Contains(enumName) ? "selected" : "")>
@@ -87,7 +224,7 @@
                     }
                     else if (prop.Metadata.IsEnum)
                     {
-                        <select name="@prop.Metadata.PropertyName" id="@inputId" class="form-control">
+                        <select name="@prop.Metadata.PropertyName" id="@inputId" class="form-control" @Html.Raw(validationAttrString)>
                             @foreach (var enumName in Enum.GetNames(prop.Metadata.ModelType))
                             {
                                 <option value="@enumName" @(enumName == prop.Model?.ToString() ? "selected" : "")>
@@ -106,16 +243,33 @@
                                name="@prop.Metadata.PropertyName"
                                id="@inputId"
                                class="form-control"
-                               value="@prop.Model" />
+                               value="@prop.Model"
+                               @Html.Raw(validationAttrString) />
+                    }
+                    else if (validationAttrs.ContainsKey("data-multiline"))
+                    {
+                        <textarea name="@prop.Metadata.PropertyName"
+                                  id="@inputId"
+                                  class="form-control"
+                                  @Html.Raw(validationAttrString)>@prop.Model</textarea>
                     }
                     else
                     {
-                        <input type="text"
+                        @* Use type from validation attributes (email, password, tel, url) or default to text *@
+                        var inputType = validationAttrs.ContainsKey("type") ? validationAttrs["type"] : "text";
+                        // Remove type from validation attrs since we're setting it explicitly
+                        validationAttrs.Remove("type");
+                        validationAttrString = RenderValidationAttributes(validationAttrs);
+                        
+                        <input type="@inputType"
                                name="@prop.Metadata.PropertyName"
                                id="@inputId"
                                class="form-control"
-                               value="@prop.Model" />
+                               value="@prop.Model"
+                               @Html.Raw(validationAttrString) />
                     }
+                    
+                    <span class="field-validation-error" data-valmsg-for="@prop.Metadata.PropertyName"></span>
                 </div>
             }
         </div>
