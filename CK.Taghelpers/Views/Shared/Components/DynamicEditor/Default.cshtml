@@ -12,9 +12,9 @@
     }
 }
 
-<dialog id="@Model.DialogId" class="dynamic-editor-dialog" data-event-name="@Model.EventName">
+<dialog id="@Model.DialogId" class="dynamic-editor-dialog" data-event-name="@Model.EventName" aria-labelledby="@(Model.DialogId)-title" aria-modal="true">
     <form method="dialog" id="@(Model.DialogId)-form" novalidate>
-        <h3>Edit @Model.EventName</h3>
+        <h3 id="@(Model.DialogId)-title">Edit @Model.EventName</h3>
 
         <div id="@(Model.DialogId)-validation-summary" class="validation-summary" style="display: none;"></div>
 
@@ -166,7 +166,7 @@
             }
         </div>
 
-        <div class="actions">
+        <div class="actions" role="group" aria-label="Dialog actions">
             <button type="button" id="@(Model.DialogId)-cancel">Cancel</button>
             <button type="button" id="@(Model.DialogId)-confirm">Confirm</button>
         </div>

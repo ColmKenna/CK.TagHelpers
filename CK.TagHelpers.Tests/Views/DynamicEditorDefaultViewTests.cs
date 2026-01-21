@@ -299,6 +299,50 @@ public class DynamicEditorDefaultViewTests : RazorViewTestBase
         Assert.Contains("Some long text</textarea>", html);
     }
 
+    [Fact]
+    public async Task should_render_dialog_with_aria_labelledby_attribute()
+    {
+        // Arrange
+        var dialogId = "dialog-12345678";
+        var viewModel = CreateViewModel(dialogId, "User", CreateTextField("Name", "Test", dialogId));
+
+        // Act
+        var html = await RenderViewAsync(ViewPath, viewModel);
+
+        // Assert
+        Assert.Contains($"aria-labelledby=\"{dialogId}-title\"", html);
+        Assert.Contains($"id=\"{dialogId}-title\"", html);
+    }
+
+    [Fact]
+    public async Task should_render_dialog_with_aria_modal_attribute()
+    {
+        // Arrange
+        var dialogId = "dialog-12345678";
+        var viewModel = CreateViewModel(dialogId, "User", CreateTextField("Name", "Test", dialogId));
+
+        // Act
+        var html = await RenderViewAsync(ViewPath, viewModel);
+
+        // Assert
+        Assert.Contains("aria-modal=\"true\"", html);
+    }
+
+    [Fact]
+    public async Task should_render_actions_group_with_role_and_aria_label()
+    {
+        // Arrange
+        var dialogId = "dialog-12345678";
+        var viewModel = CreateViewModel(dialogId, "User", CreateTextField("Name", "Test", dialogId));
+
+        // Act
+        var html = await RenderViewAsync(ViewPath, viewModel);
+
+        // Assert
+        Assert.Contains("role=\"group\"", html);
+        Assert.Contains("aria-label=\"Dialog actions\"", html);
+    }
+
     private static DynamicEditorViewModel CreateViewModel(
         string dialogId,
         string eventName,
