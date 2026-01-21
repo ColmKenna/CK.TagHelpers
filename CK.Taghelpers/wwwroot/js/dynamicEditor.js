@@ -1,6 +1,13 @@
 (function () {
+    // Registry to store initialized dialogs and their handlers for cleanup
+    const initializedDialogs = new Map();
+
     // Initialize all dynamic editor dialogs on the page
     function initializeDynamicEditor(dialogId) {
+        // Prevent double initialization
+        if (initializedDialogs.has(dialogId)) {
+            return;
+        }
         const dialog = document.getElementById(dialogId);
         if (!dialog) return;
 
@@ -22,13 +29,23 @@
         // Store initial form state
         let initialFormState = null;
 
-        // Also capture on first show if using showModal()
-        const originalShowModal = dialog.showModal.bind(dialog);
-        dialog.showModal = function() {
-            initialFormState = captureFormState();
-            clearValidationErrors();
-            originalShowModal();
-        };
+        // Use MutationObserver to detect when dialog opens (via 'open' attribute)
+        const observer = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.attributeName === 'open' && dialog.hasAttribute('open')) {
+                    // Dialog was just opened - capture state and clear errors
+                    initialFormState = captureFormState();
+                    clearValidationErrors();
+                    break;
+                }
+            }
+        });
+
+        // Observe the dialog for 'open' attribute changes
+        observer.observe(dialog, {
+            attributes: true,
+            attributeFilter: ['open']
+        });
 
         // Capture the current form state
         function captureFormState() {
@@ -205,8 +222,8 @@
             return errors.length === 0;
         }
 
-        // Confirm Event
-        confirmBtn.addEventListener('click', () => {
+        // Confirm Event handler
+        function handleConfirm() {
             // Validate before confirming
             if (!validateForm()) {
                 return;
@@ -225,10 +242,10 @@
             initialFormState = captureFormState();
 
             dialog.close();
-        });
+        }
 
-        // Cancel Event
-        cancelBtn.addEventListener('click', () => {
+        // Cancel Event handler
+        function handleCancel() {
             // Capture the canceled values (what the user changed to before canceling)
             const canceledData = getFormData();
 
@@ -246,11 +263,48 @@
             });
             dialog.dispatchEvent(cancelEvent);
             dialog.close();
+        }
+
+        // Add event listeners
+        confirmBtn.addEventListener('click', handleConfirm);
+        cancelBtn.addEventListener('click', handleCancel);
+
+        // Store references for cleanup
+        initializedDialogs.set(dialogId, {
+            dialog,
+            confirmBtn,
+            cancelBtn,
+            handleConfirm,
+            handleCancel,
+            observer
         });
     }
 
-    // Expose initialization function globally
+    // Cleanup function to remove event listeners and restore original state
+    function destroyDynamicEditor(dialogId) {
+        const registration = initializedDialogs.get(dialogId);
+        if (!registration) {
+            return;
+        }
+
+        const { confirmBtn, cancelBtn, handleConfirm, handleCancel, observer } = registration;
+
+        // Remove event listeners
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleCancel);
+
+        // Disconnect the MutationObserver
+        if (observer) {
+            observer.disconnect();
+        }
+
+        // Remove from registry
+        initializedDialogs.delete(dialogId);
+    }
+
+    // Expose initialization and cleanup functions globally
     window.DynamicEditor = {
-        init: initializeDynamicEditor
+        init: initializeDynamicEditor,
+        destroy: destroyDynamicEditor
     };
 })();

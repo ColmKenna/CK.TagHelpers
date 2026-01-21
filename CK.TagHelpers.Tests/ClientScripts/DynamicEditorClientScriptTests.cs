@@ -43,6 +43,75 @@ public class DynamicEditorClientScriptTests
         Assert.Contains("data-event-name", script);
     }
 
+    #region ReplaceWithProperJsTests
+    // TODO: Replace with js tests
+
+    [Fact]
+    public void should_expose_destroy_function_for_cleanup()
+    {
+        var script = LoadScript();
+
+        // The DynamicEditor object should expose a destroy function
+        Assert.Matches(new Regex(@"destroy\s*:", RegexOptions.Singleline), script);
+    }
+
+    [Fact]
+    public void should_store_handler_references_for_removal()
+    {
+        var script = LoadScript();
+
+        // Should have a registry or storage for initialized dialogs
+        Assert.Matches(new Regex(@"initializedDialogs\s*=", RegexOptions.Singleline), script);
+    }
+
+    [Fact]
+    public void should_remove_event_listeners_in_destroy()
+    {
+        var script = LoadScript();
+
+        // Should call removeEventListener for cleanup
+        Assert.Contains("removeEventListener", script);
+    }
+
+    [Fact]
+    public void should_use_mutation_observer_instead_of_patching_showModal()
+    {
+        var script = LoadScript();
+
+        // Should create a MutationObserver
+        Assert.Contains("MutationObserver", script);
+        // Should observe the dialog for attribute changes
+        Assert.Contains(".observe(", script);
+    }
+
+    [Fact]
+    public void should_observe_open_attribute_for_dialog_state()
+    {
+        var script = LoadScript();
+
+        // Should check for 'open' attribute to detect dialog open state
+        Assert.Matches(new Regex(@"['""]open['""]", RegexOptions.Singleline), script);
+        Assert.Contains("attributeFilter", script);
+    }
+
+    [Fact]
+    public void should_disconnect_observer_in_destroy()
+    {
+        var script = LoadScript();
+
+        // Should disconnect the observer during cleanup
+        Assert.Contains(".disconnect()", script);
+    }
+
+    [Fact]
+    public void should_not_patch_showModal()
+    {
+        var script = LoadScript();
+
+        // Should NOT override dialog.showModal
+        Assert.DoesNotContain("dialog.showModal =", script);
+    }
+
     private static string LoadScript()
     {
         var baseDir = AppContext.BaseDirectory;
@@ -67,4 +136,6 @@ public class DynamicEditorClientScriptTests
 
         throw new FileNotFoundException("dynamicEditor.js not found.", baseDir);
     }
+    #endregion
+    
 }

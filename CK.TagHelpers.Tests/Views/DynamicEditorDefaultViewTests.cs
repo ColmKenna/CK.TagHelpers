@@ -26,11 +26,9 @@ public class DynamicEditorDefaultViewTests : RazorViewTestBase
         var html = await RenderViewAsync(ViewPath, viewModel);
 
         // Assert
-        Assert.Contains(
-            $"<dialog id=\"{dialogId}\" class=\"dynamic-editor-dialog\" data-event-name=\"{viewModel.EventName}\">",
-            html);
+        Assert.Contains($"<dialog id=\"{dialogId}\" class=\"dynamic-editor-dialog\" data-event-name=\"{viewModel.EventName}\"", html);
         Assert.Contains($"<form method=\"dialog\" id=\"{dialogId}-form\"", html);
-        Assert.Contains($"<h3>Edit {viewModel.EventName}</h3>", html);
+        Assert.Contains($"id=\"{dialogId}-title\">Edit {viewModel.EventName}</h3>", html);
         Assert.Contains($"<button type=\"button\" id=\"{dialogId}-cancel\">Cancel</button>", html);
         Assert.Contains($"<button type=\"button\" id=\"{dialogId}-confirm\">Confirm</button>", html);
     }
