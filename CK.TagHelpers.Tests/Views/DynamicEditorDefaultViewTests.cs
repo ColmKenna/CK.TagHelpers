@@ -62,7 +62,7 @@ public class DynamicEditorDefaultViewTests : RazorViewTestBase
         var html = await RenderViewAsync(ViewPath, viewModel);
 
         // Assert
-        Assert.Contains("for=\"Name\"", html);
+        Assert.Contains($"for=\"{viewModel.DialogId}_Name\"", html);
         Assert.Contains("Full Name", html);
     }
 

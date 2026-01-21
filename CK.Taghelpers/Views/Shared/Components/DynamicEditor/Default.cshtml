@@ -33,8 +33,10 @@
                     continue;
                 }
 
+                var inputId = $"{Model.DialogId}_{prop.Metadata.PropertyName}";
+
                 <div class="form-group">
-                    <label for="@prop.Metadata.PropertyName">
+                    <label for="@inputId">
                         @(prop.Metadata.DisplayName ?? prop.Metadata.PropertyName)
                     </label>
 
@@ -43,7 +45,7 @@
                     {
                         <input type="checkbox"
                                name="@prop.Metadata.PropertyName"
-                               id="@prop.Metadata.PropertyName"
+                               id="@inputId"
                                class="form-control"
                                checked="@(prop.Model as bool? == true)" />
                     }
@@ -51,7 +53,7 @@
                     {
                         <input type="datetime-local"
                                name="@prop.Metadata.PropertyName"
-                               id="@prop.Metadata.PropertyName"
+                               id="@inputId"
                                class="form-control"
                                value="@(((DateTime?)prop.Model)?.ToString("s"))" />
                     }
@@ -71,7 +73,7 @@
                         }
 
                         <select name="@prop.Metadata.PropertyName"
-                                id="@prop.Metadata.PropertyName"
+                                id="@inputId"
                                 class="form-control"
                                 multiple
                                 data-collection="true">
@@ -85,7 +87,7 @@
                     }
                     else if (prop.Metadata.IsEnum)
                     {
-                        <select name="@prop.Metadata.PropertyName" id="@prop.Metadata.PropertyName" class="form-control">
+                        <select name="@prop.Metadata.PropertyName" id="@inputId" class="form-control">
                             @foreach (var enumName in Enum.GetNames(prop.Metadata.ModelType))
                             {
                                 <option value="@enumName" @(enumName == prop.Model?.ToString() ? "selected" : "")>
@@ -102,7 +104,7 @@
                     {
                         <input type="number"
                                name="@prop.Metadata.PropertyName"
-                               id="@prop.Metadata.PropertyName"
+                               id="@inputId"
                                class="form-control"
                                value="@prop.Model" />
                     }
@@ -110,7 +112,7 @@
                     {
                         <input type="text"
                                name="@prop.Metadata.PropertyName"
-                               id="@prop.Metadata.PropertyName"
+                               id="@inputId"
                                class="form-control"
                                value="@prop.Model" />
                     }
