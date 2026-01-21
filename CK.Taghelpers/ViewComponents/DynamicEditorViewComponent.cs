@@ -10,12 +10,12 @@ namespace CK.Taghelpers.ViewComponents;
 public class DynamicEditorViewComponent : ViewComponent
 {
     /// <summary>
-    /// Invokes the ViewComponent to render a dynamic editor dialog.
+    /// Invokes the ViewComponent asynchronously to render a dynamic editor dialog.
     /// </summary>
     /// <param name="model">The model object to edit. Properties will be reflected to create form fields.</param>
     /// <param name="eventName">The prefix for custom events dispatched by the dialog (e.g., "User" creates "User-update" and "User-cancel" events).</param>
-    /// <returns>The rendered view result containing the dialog HTML.</returns>
-    public IViewComponentResult Invoke(object model, string eventName = "entity")
+    /// <returns>A task representing the asynchronous operation, containing the rendered view result.</returns>
+    public Task<IViewComponentResult> InvokeAsync(object model, string eventName = "entity")
     {
         var wrapper = new DynamicEditorViewModel
         {
@@ -25,7 +25,7 @@ public class DynamicEditorViewComponent : ViewComponent
             DialogId = $"dialog-{Guid.NewGuid().ToString("N")[..8]}"
         };
 
-        return View(wrapper);
+        return Task.FromResult<IViewComponentResult>(View(wrapper));
     }
 }
 

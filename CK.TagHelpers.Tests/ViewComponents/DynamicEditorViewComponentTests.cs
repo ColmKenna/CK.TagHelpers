@@ -12,6 +12,7 @@ namespace CK.TagHelpers.Tests.ViewComponents;
 /// Test Coverage:
 /// - Happy path: Wraps provided model and event name, uses default event name, generates dialog id
 /// - Edge cases: Accepts null model, preserves empty event name
+/// - Async: InvokeAsync returns Task<IViewComponentResult>
 ///
 /// Assumptions:
 /// - The component does not perform parameter validation; null model and empty event names are allowed.
@@ -29,13 +30,13 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
     #region Happy Path
 
     [Fact]
-    public void should_set_data_model_when_model_is_provided()
+    public async Task should_set_data_model_when_model_is_provided()
     {
         // Arrange
         var model = new TestModel { Name = "Test" };
 
         // Act
-        var result = _sut.Invoke(model, "User");
+        var result = await _sut.InvokeAsync(model, "User");
 
         // Assert
         var viewModel = GetViewModel<DynamicEditorViewModel>(result);
@@ -43,14 +44,14 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
     }
 
     [Fact]
-    public void should_set_event_name_when_event_name_is_provided()
+    public async Task should_set_event_name_when_event_name_is_provided()
     {
         // Arrange
         var model = new TestModel { Name = "Test" };
         var eventName = "User";
 
         // Act
-        var result = _sut.Invoke(model, eventName);
+        var result = await _sut.InvokeAsync(model, eventName);
 
         // Assert
         var viewModel = GetViewModel<DynamicEditorViewModel>(result);
@@ -58,13 +59,13 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
     }
 
     [Fact]
-    public void should_use_default_event_name_when_event_name_is_not_provided()
+    public async Task should_use_default_event_name_when_event_name_is_not_provided()
     {
         // Arrange
         var model = new TestModel { Name = "Test" };
 
         // Act
-        var result = _sut.Invoke(model);
+        var result = await _sut.InvokeAsync(model);
 
         // Assert
         var viewModel = GetViewModel<DynamicEditorViewModel>(result);
@@ -72,13 +73,13 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
     }
 
     [Fact]
-    public void should_generate_dialog_id_with_expected_format_when_invoked()
+    public async Task should_generate_dialog_id_with_expected_format_when_invoked()
     {
         // Arrange
         var model = new TestModel { Name = "Test" };
 
         // Act
-        var result = _sut.Invoke(model, "User");
+        var result = await _sut.InvokeAsync(model, "User");
 
         // Assert
         var viewModel = GetViewModel<DynamicEditorViewModel>(result);
@@ -90,13 +91,13 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
     #region Edge Cases
 
     [Fact]
-    public void should_allow_null_model_when_model_is_null()
+    public async Task should_allow_null_model_when_model_is_null()
     {
         // Arrange
         object model = null!;
 
         // Act
-        var result = _sut.Invoke(model, "User");
+        var result = await _sut.InvokeAsync(model, "User");
 
         // Assert
         var viewModel = GetViewModel<DynamicEditorViewModel>(result);
@@ -104,13 +105,13 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
     }
 
     [Fact]
-    public void should_preserve_empty_event_name_when_event_name_is_empty()
+    public async Task should_preserve_empty_event_name_when_event_name_is_empty()
     {
         // Arrange
         var model = new TestModel { Name = "Test" };
 
         // Act
-        var result = _sut.Invoke(model, string.Empty);
+        var result = await _sut.InvokeAsync(model, string.Empty);
 
         // Assert
         var viewModel = GetViewModel<DynamicEditorViewModel>(result);
