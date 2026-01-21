@@ -11,11 +11,13 @@ namespace CK.TagHelpers.Tests.ViewComponents;
 ///
 /// Test Coverage:
 /// - Happy path: Wraps provided model and event name, uses default event name, generates dialog id
-/// - Edge cases: Throws on null model, preserves empty event name
+/// - Edge cases: Throws on null model, defaults empty/whitespace event names, throws on invalid characters
 /// - Async: InvokeAsync returns Task<IViewComponentResult>
 ///
 /// Assumptions:
-/// - The component validates model is not null; empty event names are allowed.
+/// - The component validates model is not null
+/// - Event names must contain only letters, digits, hyphens, and underscores
+/// - Empty or whitespace event names default to "entity"
 /// </summary>
 public class DynamicEditorViewComponentTests : ViewComponentTestBase
 {
@@ -101,7 +103,7 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
     }
 
     [Fact]
-    public async Task should_preserve_empty_event_name_when_event_name_is_empty()
+    public async Task should_use_default_event_name_when_event_name_is_empty()
     {
         // Arrange
         var model = new TestModel { Name = "Test" };
@@ -111,7 +113,55 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
 
         // Assert
         var viewModel = GetViewModel<DynamicEditorViewModel>(result);
-        Assert.Equal(string.Empty, viewModel.EventName);
+        Assert.Equal("entity", viewModel.EventName);
+    }
+
+    [Fact]
+    public async Task should_use_default_event_name_when_event_name_is_whitespace()
+    {
+        // Arrange
+        var model = new TestModel { Name = "Test" };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, "   ");
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        Assert.Equal("entity", viewModel.EventName);
+    }
+
+    [Theory]
+    [InlineData("User<script>")]
+    [InlineData("User'")]
+    [InlineData("User\"")]
+    [InlineData("User Event")]
+    [InlineData("User.Event")]
+    public async Task should_throw_argument_exception_when_event_name_contains_invalid_characters(string eventName)
+    {
+        // Arrange
+        var model = new TestModel { Name = "Test" };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => _sut.InvokeAsync(model, eventName));
+    }
+
+    [Theory]
+    [InlineData("User")]
+    [InlineData("user-event")]
+    [InlineData("user_event")]
+    [InlineData("User123")]
+    [InlineData("my-custom-event_name")]
+    public async Task should_accept_valid_event_names(string eventName)
+    {
+        // Arrange
+        var model = new TestModel { Name = "Test" };
+
+        // Act
+        var result = await _sut.InvokeAsync(model, eventName);
+
+        // Assert
+        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
+        Assert.Equal(eventName, viewModel.EventName);
     }
 
     #endregion
