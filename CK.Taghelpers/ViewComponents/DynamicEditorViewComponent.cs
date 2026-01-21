@@ -17,6 +17,8 @@ public class DynamicEditorViewComponent : ViewComponent
     /// <returns>A task representing the asynchronous operation, containing the rendered view result.</returns>
     public Task<IViewComponentResult> InvokeAsync(object model, string eventName = "entity")
     {
+        ArgumentNullException.ThrowIfNull(model);
+
         var wrapper = new DynamicEditorViewModel
         {
             DataModel = model,

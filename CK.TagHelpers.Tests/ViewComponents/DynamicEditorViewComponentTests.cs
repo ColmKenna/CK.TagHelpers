@@ -11,11 +11,11 @@ namespace CK.TagHelpers.Tests.ViewComponents;
 ///
 /// Test Coverage:
 /// - Happy path: Wraps provided model and event name, uses default event name, generates dialog id
-/// - Edge cases: Accepts null model, preserves empty event name
+/// - Edge cases: Throws on null model, preserves empty event name
 /// - Async: InvokeAsync returns Task<IViewComponentResult>
 ///
 /// Assumptions:
-/// - The component does not perform parameter validation; null model and empty event names are allowed.
+/// - The component validates model is not null; empty event names are allowed.
 /// </summary>
 public class DynamicEditorViewComponentTests : ViewComponentTestBase
 {
@@ -91,17 +91,13 @@ public class DynamicEditorViewComponentTests : ViewComponentTestBase
     #region Edge Cases
 
     [Fact]
-    public async Task should_allow_null_model_when_model_is_null()
+    public async Task should_throw_argument_null_exception_when_model_is_null()
     {
         // Arrange
         object model = null!;
 
-        // Act
-        var result = await _sut.InvokeAsync(model, "User");
-
-        // Assert
-        var viewModel = GetViewModel<DynamicEditorViewModel>(result);
-        Assert.Null(viewModel.DataModel);
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentNullException>(() => _sut.InvokeAsync(model, "User"));
     }
 
     [Fact]
