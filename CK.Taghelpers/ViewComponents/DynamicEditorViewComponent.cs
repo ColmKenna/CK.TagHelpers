@@ -163,7 +163,7 @@ public partial class DynamicEditorViewComponent : ViewComponent
                 nameof(eventName));
         }
 
-        var dialogId = $"dialog-{Guid.NewGuid().ToString("N")[..8]}";
+        var dialogId = GenerateDialogId();
         var fields = BuildFields(model, dialogId);
 
         var viewModel = new DynamicEditorViewModel
@@ -340,6 +340,16 @@ public partial class DynamicEditorViewComponent : ViewComponent
             }
             field.FormattedValue = value?.ToString();
         }
+    }
+
+    /// <summary>
+    /// Generates a unique dialog ID using GUID bytes directly to avoid intermediate string allocation.
+    /// </summary>
+    private static string GenerateDialogId()
+    {
+        Span<byte> bytes = stackalloc byte[16];
+        Guid.NewGuid().TryWriteBytes(bytes);
+        return $"dialog-{bytes[0]:x2}{bytes[1]:x2}{bytes[2]:x2}{bytes[3]:x2}";
     }
 
     private static bool IsNumericType(Type type)
