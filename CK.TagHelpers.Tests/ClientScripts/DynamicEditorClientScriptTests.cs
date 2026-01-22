@@ -112,6 +112,24 @@ public class DynamicEditorClientScriptTests
         Assert.DoesNotContain("dialog.showModal =", script);
     }
 
+    [Fact]
+    public void should_have_get_element_value_helper()
+    {
+        var script = LoadScript();
+
+        // Should have a helper function for getting element values
+        Assert.Matches(new Regex(@"function\s+getElementValue\s*\(", RegexOptions.Singleline), script);
+    }
+
+    [Fact]
+    public void should_have_set_element_value_helper()
+    {
+        var script = LoadScript();
+
+        // Should have a helper function for setting element values
+        Assert.Matches(new Regex(@"function\s+setElementValue\s*\(", RegexOptions.Singleline), script);
+    }
+
     private static string LoadScript()
     {
         var baseDir = AppContext.BaseDirectory;

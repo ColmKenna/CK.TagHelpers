@@ -47,51 +47,48 @@
             attributeFilter: ['open']
         });
 
+        // Helper to get value from a form element based on its type
+        function getElementValue(element) {
+            if (element.type === 'checkbox') {
+                return element.checked;
+            } else if (element.type === 'select-multiple') {
+                return Array.from(element.options)
+                    .filter(opt => opt.selected)
+                    .map(opt => opt.value);
+            } else {
+                return element.value;
+            }
+        }
+
+        // Helper to set value on a form element based on its type
+        function setElementValue(element, value) {
+            if (element.type === 'checkbox') {
+                element.checked = value;
+            } else if (element.type === 'select-multiple') {
+                Array.from(element.options).forEach(opt => {
+                    opt.selected = value.includes(opt.value);
+                });
+            } else {
+                element.value = value;
+            }
+        }
+
         // Capture the current form state
         function captureFormState() {
             const state = {};
-            const formElements = form.elements;
-
-            for (let element of formElements) {
+            for (let element of form.elements) {
                 if (!element.name) continue;
-
-                if (element.type === 'checkbox') {
-                    state[element.name] = element.checked;
-                } else if (element.type === 'select-multiple') {
-                    state[element.name] = Array.from(element.options)
-                        .filter(opt => opt.selected)
-                        .map(opt => opt.value);
-                } else if (element.tagName === 'SELECT') {
-                    state[element.name] = element.value;
-                } else if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                    state[element.name] = element.value;
-                }
+                state[element.name] = getElementValue(element);
             }
-
             return state;
         }
 
         // Restore form to its initial state
         function restoreFormState() {
             if (!initialFormState) return;
-
-            const formElements = form.elements;
-
-            for (let element of formElements) {
+            for (let element of form.elements) {
                 if (!element.name || !(element.name in initialFormState)) continue;
-
-                if (element.type === 'checkbox') {
-                    element.checked = initialFormState[element.name];
-                } else if (element.type === 'select-multiple') {
-                    const selectedValues = initialFormState[element.name];
-                    Array.from(element.options).forEach(opt => {
-                        opt.selected = selectedValues.includes(opt.value);
-                    });
-                } else if (element.tagName === 'SELECT') {
-                    element.value = initialFormState[element.name];
-                } else if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                    element.value = initialFormState[element.name];
-                }
+                setElementValue(element, initialFormState[element.name]);
             }
         }
 
