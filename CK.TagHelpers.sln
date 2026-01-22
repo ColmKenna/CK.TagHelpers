@@ -9,6 +9,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CK.Taghelpers.SampleUsage",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CK.TagHelpers.Tests", "CK.TagHelpers.Tests\CK.TagHelpers.Tests.csproj", "{91FF33C8-3F50-4210-A4CA-065CDCF2E23D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CK.TagHelpers.JsTests", "CK.TagHelpers.JsTests", "{B8F3A1C2-5D4E-6F7A-8B9C-0D1E2F3A4B5C}"
+	ProjectSection(SolutionItems) = preProject
+		CK.TagHelpers.JsTests\package.json = CK.TagHelpers.JsTests\package.json
+		CK.TagHelpers.JsTests\jest.config.js = CK.TagHelpers.JsTests\jest.config.js
+		CK.TagHelpers.JsTests\tests\dynamicEditor.test.js = CK.TagHelpers.JsTests\tests\dynamicEditor.test.js
+		CK.TagHelpers.JsTests\tests\editArray.test.js = CK.TagHelpers.JsTests\tests\editArray.test.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
