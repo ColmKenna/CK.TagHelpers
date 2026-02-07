@@ -1,0 +1,551 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CK.Taghelpers.TagHelpers.FlipCard;
+using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Razor.TagHelpers;
+using Xunit;
+
+namespace CK.TagHelpers.Tests;
+
+/// <summary>
+/// Unit tests for <see cref="FlipCardFaceTagHelper"/>.
+/// Tests the card-front and card-back child TagHelpers that set content and titles
+/// on the parent FlipCardContext.
+/// </summary>
+public class FlipCardFaceTagHelperTests
+{
+    #region Helper Methods
+
+    private static FlipCardFaceTagHelper CreateTagHelper(string? title = null)
+    {
+        var tagHelper = new FlipCardFaceTagHelper();
+        if (title != null)
+        {
+            tagHelper.Title = title;
+        }
+        return tagHelper;
+    }
+
+    private static TagHelperContext CreateContext(
+        string tagName = "card-front",
+        TagHelperAttributeList? attributes = null,
+        IDictionary<object, object>? items = null,
+        string uniqueId = "test")
+    {
+        return new TagHelperContext(
+            tagName: tagName,
+            allAttributes: attributes ?? new TagHelperAttributeList(),
+            items: items ?? new Dictionary<object, object>(),
+            uniqueId: uniqueId);
+    }
+
+    private static TagHelperOutput CreateOutput(
+        string tagName = "card-front",
+        string childContent = "Test Content",
+        TagHelperAttributeList? attributes = null)
+    {
+        var content = new DefaultTagHelperContent();
+        content.SetHtmlContent(childContent);
+
+        return new TagHelperOutput(
+            tagName: tagName,
+            attributes: attributes ?? new TagHelperAttributeList(),
+            getChildContentAsync: (useCached, encoder) =>
+                Task.FromResult<TagHelperContent>(content));
+    }
+
+    private static FlipCardContext CreateFlipCardContextAndAddToItems(
+        IDictionary<object, object> items)
+    {
+        var cardContext = new FlipCardContext();
+        items[typeof(FlipCardContext)] = cardContext;
+        return cardContext;
+    }
+
+    #endregion
+
+    #region Happy Path Tests
+
+    [Fact]
+    public async Task ProcessAsync_WithCardFrontTagAndValidContext_SetsFrontContent()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "Front Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.NotNull(cardContext.FrontContent);
+        Assert.Null(output.TagName); // SuppressOutput should set this to null
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithCardBackTagAndValidContext_SetsBackContent()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext(tagName: "card-back", items: items);
+        var output = CreateOutput(tagName: "card-back", childContent: "Back Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.NotNull(cardContext.BackContent);
+        Assert.Null(output.TagName);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithBothFaces_SetsBothContents()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        
+        var frontTagHelper = CreateTagHelper(title: "My Front");
+        var backTagHelper = CreateTagHelper(title: "My Back");
+        
+        var frontContext = CreateContext(tagName: "card-front", items: items);
+        var backContext = CreateContext(tagName: "card-back", items: items);
+        
+        var frontOutput = CreateOutput(tagName: "card-front", childContent: "Front Data");
+        var backOutput = CreateOutput(tagName: "card-back", childContent: "Back Data");
+
+        // Act
+        await frontTagHelper.ProcessAsync(frontContext, frontOutput);
+        await backTagHelper.ProcessAsync(backContext, backOutput);
+
+        // Assert
+        Assert.NotNull(cardContext.FrontContent);
+        Assert.NotNull(cardContext.BackContent);
+        Assert.Equal("My Front", cardContext.FrontTitle);
+        Assert.Equal("My Back", cardContext.BackTitle);
+    }
+
+    #endregion
+
+    #region Title Property Tests
+
+    [Fact]
+    public async Task ProcessAsync_WithCustomTitle_SetsCustomFrontTitle()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper(title: "Custom Front Title");
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("Custom Front Title", cardContext.FrontTitle);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithCustomTitle_SetsCustomBackTitle()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper(title: "Custom Back Title");
+        var context = CreateContext(tagName: "card-back", items: items);
+        var output = CreateOutput(tagName: "card-back", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("Custom Back Title", cardContext.BackTitle);
+    }
+
+    [Theory]
+    [InlineData(null, "Front")]
+    [InlineData("", "Front")]
+    public async Task ProcessAsync_WithNullOrEmptyTitle_UsesDefaultFrontTitle(
+        string? title, string expectedTitle)
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = new FlipCardFaceTagHelper { Title = title ?? "" };
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal(expectedTitle, cardContext.FrontTitle);
+    }
+
+    [Theory]
+    [InlineData(null, "Back")]
+    [InlineData("", "Back")]
+    public async Task ProcessAsync_WithNullOrEmptyTitle_UsesDefaultBackTitle(
+        string? title, string expectedTitle)
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = new FlipCardFaceTagHelper { Title = title ?? "" };
+        var context = CreateContext(tagName: "card-back", items: items);
+        var output = CreateOutput(tagName: "card-back", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal(expectedTitle, cardContext.BackTitle);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithWhitespaceTitle_UsesWhitespaceAsTitle()
+    {
+        // Arrange - whitespace is not considered "empty" by string.IsNullOrEmpty
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper(title: "   ");
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("   ", cardContext.FrontTitle);
+    }
+
+    #endregion
+
+    #region Context.Items State Management Tests
+
+    [Fact]
+    public async Task ProcessAsync_WithoutFlipCardContext_ReturnsEarly()
+    {
+        // Arrange - no FlipCardContext in items
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext(tagName: "card-front", items: new Dictionary<object, object>());
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - should suppress output and return without error
+        Assert.Null(output.TagName);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithWrongTypeInContextItems_ReturnsEarly()
+    {
+        // Arrange - wrong type stored in context items
+        var items = new Dictionary<object, object>
+        {
+            { typeof(FlipCardContext), "not a FlipCardContext" }
+        };
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - should suppress output and return without error
+        Assert.Null(output.TagName);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithNullInContextItems_ReturnsEarly()
+    {
+        // Arrange - null stored in context items
+        var items = new Dictionary<object, object>
+        {
+            { typeof(FlipCardContext), null! }
+        };
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - should suppress output and return without error
+        Assert.Null(output.TagName);
+    }
+
+    #endregion
+
+    #region Tag Name Detection Tests
+
+    [Fact]
+    public async Task ProcessAsync_IsCaseInsensitiveForTagName()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper(title: "Test Title");
+        var context = CreateContext(tagName: "CARD-FRONT", items: items);
+        var output = CreateOutput(tagName: "CARD-FRONT", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - should still be recognized as front
+        Assert.Equal("Test Title", cardContext.FrontTitle);
+        Assert.NotNull(cardContext.FrontContent);
+        Assert.Null(cardContext.BackContent);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithMixedCaseCardBack_SetsBackContent()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper(title: "Back Test");
+        var context = CreateContext(tagName: "Card-Back", items: items);
+        var output = CreateOutput(tagName: "Card-Back", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("Back Test", cardContext.BackTitle);
+        Assert.NotNull(cardContext.BackContent);
+        Assert.Null(cardContext.FrontContent);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_UsesContextTagNameWhenOutputTagNameIsNull()
+    {
+        // Arrange - after SuppressOutput, output.TagName may be null
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper(title: "Front Face");
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+        
+        // Pre-condition: output has tag name before processing
+        Assert.Equal("card-front", output.TagName);
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - TagName identification should work via context.TagName
+        Assert.Equal("Front Face", cardContext.FrontTitle);
+        Assert.NotNull(cardContext.FrontContent);
+    }
+
+    #endregion
+
+    #region Output Suppression Tests
+
+    [Fact]
+    public async Task ProcessAsync_AlwaysSuppressesOutput()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+        output.Attributes.Add("class", "test-class");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Null(output.TagName);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_SuppressesOutputEvenWhenContextMissing()
+    {
+        // Arrange - no FlipCardContext
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext(tagName: "card-front");
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - output should still be suppressed
+        Assert.Null(output.TagName);
+    }
+
+    #endregion
+
+    #region Child Content Tests
+
+    [Fact]
+    public async Task ProcessAsync_RetrievesChildContent()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "<p>Complex HTML Content</p>");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.NotNull(cardContext.FrontContent);
+        // The content should be the TagHelperContent from GetChildContentAsync
+    }
+
+    [Fact]
+    public async Task ProcessAsync_WithEmptyChildContent_SetsFrontContent()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - content is set even if empty
+        Assert.NotNull(cardContext.FrontContent);
+    }
+
+    #endregion
+
+    #region Default Title Tests
+
+    [Fact]
+    public async Task ProcessAsync_DefaultTitleProperty_IsEmptyString()
+    {
+        // Arrange
+        var tagHelper = new FlipCardFaceTagHelper();
+
+        // Assert - verify default value
+        Assert.Equal("", tagHelper.Title);
+    }
+
+    #endregion
+
+    #region FlipCardContext Class Tests
+
+    [Fact]
+    public void FlipCardContext_DefaultFrontTitle_IsFront()
+    {
+        // Arrange & Act
+        var context = new FlipCardContext();
+
+        // Assert
+        Assert.Equal("Front", context.FrontTitle);
+    }
+
+    [Fact]
+    public void FlipCardContext_DefaultBackTitle_IsBack()
+    {
+        // Arrange & Act
+        var context = new FlipCardContext();
+
+        // Assert
+        Assert.Equal("Back", context.BackTitle);
+    }
+
+    [Fact]
+    public void FlipCardContext_DefaultFrontContent_IsNull()
+    {
+        // Arrange & Act
+        var context = new FlipCardContext();
+
+        // Assert
+        Assert.Null(context.FrontContent);
+    }
+
+    [Fact]
+    public void FlipCardContext_DefaultBackContent_IsNull()
+    {
+        // Arrange & Act
+        var context = new FlipCardContext();
+
+        // Assert
+        Assert.Null(context.BackContent);
+    }
+
+    [Fact]
+    public void FlipCardContext_CanSetAllProperties()
+    {
+        // Arrange
+        var context = new FlipCardContext();
+        var frontContent = new HtmlString("Front HTML");
+        var backContent = new HtmlString("Back HTML");
+
+        // Act
+        context.FrontContent = frontContent;
+        context.BackContent = backContent;
+        context.FrontTitle = "Custom Front";
+        context.BackTitle = "Custom Back";
+
+        // Assert
+        Assert.Same(frontContent, context.FrontContent);
+        Assert.Same(backContent, context.BackContent);
+        Assert.Equal("Custom Front", context.FrontTitle);
+        Assert.Equal("Custom Back", context.BackTitle);
+    }
+
+    #endregion
+
+    #region Edge Case Tests
+
+    [Theory]
+    [InlineData("A very long title that contains many words and should still work correctly as a title")]
+    [InlineData("Title with special chars: <>&\"'")]
+    [InlineData("Unicode: 你好世界 🎉")]
+    public async Task ProcessAsync_WithSpecialTitles_SetsTitleCorrectly(string title)
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        var tagHelper = CreateTagHelper(title: title);
+        var context = CreateContext(tagName: "card-front", items: items);
+        var output = CreateOutput(tagName: "card-front", childContent: "Content");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal(title, cardContext.FrontTitle);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_SecondCallOverwritesPreviousContent()
+    {
+        // Arrange
+        var items = new Dictionary<object, object>();
+        var cardContext = CreateFlipCardContextAndAddToItems(items);
+        
+        var firstTagHelper = CreateTagHelper(title: "First Title");
+        var secondTagHelper = CreateTagHelper(title: "Second Title");
+        
+        var firstContext = CreateContext(tagName: "card-front", items: items);
+        var secondContext = CreateContext(tagName: "card-front", items: items);
+        
+        var firstOutput = CreateOutput(tagName: "card-front", childContent: "First Content");
+        var secondOutput = CreateOutput(tagName: "card-front", childContent: "Second Content");
+
+        // Act
+        await firstTagHelper.ProcessAsync(firstContext, firstOutput);
+        await secondTagHelper.ProcessAsync(secondContext, secondOutput);
+
+        // Assert - second call should overwrite
+        Assert.Equal("Second Title", cardContext.FrontTitle);
+    }
+
+    #endregion
+}

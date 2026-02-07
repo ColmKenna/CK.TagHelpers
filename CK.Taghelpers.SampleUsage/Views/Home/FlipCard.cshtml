@@ -1,0 +1,650 @@
+@{
+    ViewData["Title"] = "FlipCard TagHelper Examples";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/flip-card.css" asp-append-version="true" />
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">FlipCard TagHelper</li>
+                </ol>
+            </nav>
+
+            <h1 class="display-4 mb-3">FlipCard TagHelper</h1>
+            <p class="lead text-muted mb-5">
+                Create interactive 3D flip cards with minimal markup using the <code>&lt;flip-card&gt;</code>,
+                <code>&lt;card-front&gt;</code>, and <code>&lt;card-back&gt;</code> TagHelpers.
+            </p>
+
+            <!-- Example 1: Basic Horizontal Flip -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-1-circle text-warning"></i> Basic Horizontal Flip
+                </h2>
+                <p class="text-muted mb-3">The default flip card flips horizontally. Click the "Flip" button to see the back.</p>
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex justify-content-center">
+                        <flip-card>
+                            <card-front title="Welcome">
+                                <p>This is the front of the card.</p>
+                                <p>Click the <strong>Flip</strong> button to reveal the back.</p>
+                            </card-front>
+                            <card-back title="Details">
+                                <p>This is the back of the card!</p>
+                                <p>The card uses a 3D CSS transform for a smooth flip animation.</p>
+                            </card-back>
+                        </flip-card>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Code</h5>
+                    <pre class="bg-light p-3 rounded"><code>&lt;flip-card&gt;
+    &lt;card-front title="Welcome"&gt;
+        &lt;p&gt;Front content here&lt;/p&gt;
+    &lt;/card-front&gt;
+    &lt;card-back title="Details"&gt;
+        &lt;p&gt;Back content here&lt;/p&gt;
+    &lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+                </div>
+            </section>
+
+            <!-- Example 2: Vertical Flip -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-2-circle text-warning"></i> Vertical Flip
+                </h2>
+                <p class="text-muted mb-3">Set <code>flip-direction="Vertical"</code> to flip the card top-to-bottom.</p>
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex justify-content-center">
+                        <flip-card flip-direction="Vertical">
+                            <card-front title="Question">
+                                <p><strong>What is ASP.NET Core?</strong></p>
+                                <p>Flip the card to find out!</p>
+                            </card-front>
+                            <card-back title="Answer">
+                                <p>ASP.NET Core is a cross-platform, high-performance framework for building modern, cloud-based, Internet-connected applications.</p>
+                            </card-back>
+                        </flip-card>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Code</h5>
+                    <pre class="bg-light p-3 rounded"><code>&lt;flip-card <strong>flip-direction="Vertical"</strong>&gt;
+    &lt;card-front title="Question"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Answer"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+                </div>
+            </section>
+
+            <!-- Example 3: Custom Button Text -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-3-circle text-warning"></i> Custom Button Text
+                </h2>
+                <p class="text-muted mb-3">Customize the button text for each face using <code>front-button-text</code> and <code>back-button-text</code>.</p>
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex justify-content-center">
+                        <flip-card front-button-text="Show Answer" back-button-text="Show Question">
+                            <card-front title="Trivia">
+                                <p><strong>Q:</strong> What year was the first version of C# released?</p>
+                            </card-front>
+                            <card-back title="Trivia Answer">
+                                <p><strong>A:</strong> C# 1.0 was released in January 2002 alongside Visual Studio .NET.</p>
+                            </card-back>
+                        </flip-card>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Code</h5>
+                    <pre class="bg-light p-3 rounded"><code>&lt;flip-card <strong>front-button-text="Show Answer" back-button-text="Show Question"</strong>&gt;
+    &lt;card-front title="Trivia"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Trivia Answer"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+                </div>
+            </section>
+
+            <!-- Example 4: Auto Height -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-4-circle text-warning"></i> Auto Height
+                </h2>
+                <p class="text-muted mb-3">
+                    Enable <code>auto-height="true"</code> to have the card automatically adjust its height
+                    to fit the tallest face content.
+                </p>
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex justify-content-center">
+                        <flip-card auto-height="true">
+                            <card-front title="Short Content">
+                                <p>This side has short content.</p>
+                            </card-front>
+                            <card-back title="Longer Content">
+                                <p>This side has more content that takes up more vertical space.</p>
+                                <ul>
+                                    <li>Item One</li>
+                                    <li>Item Two</li>
+                                    <li>Item Three</li>
+                                    <li>Item Four</li>
+                                    <li>Item Five</li>
+                                </ul>
+                                <p>The card adjusts to fit the tallest face.</p>
+                            </card-back>
+                        </flip-card>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Code</h5>
+                    <pre class="bg-light p-3 rounded"><code>&lt;flip-card <strong>auto-height="true"</strong>&gt;
+    &lt;card-front title="Short Content"&gt;
+        &lt;p&gt;This side has short content.&lt;/p&gt;
+    &lt;/card-front&gt;
+    &lt;card-back title="Longer Content"&gt;
+        &lt;p&gt;This side has more content...&lt;/p&gt;
+    &lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+                </div>
+            </section>
+
+            <!-- Example 5: No Buttons (CSS class trigger) -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-5-circle text-warning"></i> Without Buttons
+                </h2>
+                <p class="text-muted mb-3">
+                    Set <code>show-buttons="false"</code> to hide the flip buttons. You can then trigger the flip
+                    programmatically using JavaScript.
+                </p>
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex flex-column align-items-center">
+                        <flip-card show-buttons="false" class="js-manual-flip">
+                            <card-front title="Front">
+                                <p>This card has no built-in flip buttons.</p>
+                                <p>Use the external button below to flip it.</p>
+                            </card-front>
+                            <card-back title="Back">
+                                <p>You flipped it programmatically!</p>
+                                <p>Click the button again to flip back.</p>
+                            </card-back>
+                        </flip-card>
+                        <button type="button" class="btn btn-warning mt-3" id="manual-flip-btn">
+                            Flip Card Programmatically
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Code</h5>
+                    <pre class="bg-light p-3 rounded"><code>&lt;flip-card <strong>show-buttons="false"</strong>&gt;
+    &lt;card-front title="Front"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Back"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;
+
+&lt;script&gt;
+var btn = document.getElementById('manual-flip-btn');
+var card = document.querySelector('.js-manual-flip .card');
+btn.addEventListener('click', function() {
+    card.classList.toggle('is-flipped');
+});
+&lt;/script&gt;</code></pre>
+                </div>
+            </section>
+
+            <!-- Example 6: Icon Buttons via CSS -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-6-circle text-warning"></i> Buttons with Icons
+                </h2>
+                <p class="text-muted mb-3">
+                    Since button text is plain text, use a CSS class with <code>::after</code> pseudo-elements
+                    to add icons. This keeps the markup clean while giving visual flair to the flip buttons.
+                </p>
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex justify-content-center gap-4 flex-wrap">
+                        <flip-card button-class="icon-flip-btn" front-button-text="See Back" back-button-text="See Front">
+                            <card-front title="Profile">
+                                <p><strong>Jane Doe</strong></p>
+                                <p>Senior Developer</p>
+                            </card-front>
+                            <card-back title="Contact">
+                                <p>jane.doe@example.com</p>
+                                <p>+1 (555) 123-4567</p>
+                            </card-back>
+                        </flip-card>
+
+                        <flip-card button-class="arrow-flip-btn" button-text="">
+                            <card-front title="Step 1">
+                                <p>Install the NuGet package:</p>
+                                <code>dotnet add package CK.TagHelpers</code>
+                            </card-front>
+                            <card-back title="Step 2">
+                                <p>Register in <code>_ViewImports.cshtml</code>:</p>
+                                <code>@@addTagHelper *, CK.Taghelpers</code>
+                            </card-back>
+                        </flip-card>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Code</h5>
+                    <pre class="bg-light p-3 rounded"><code>&lt;style&gt;
+/* Icon after text */
+.icon-flip-btn::after {
+    content: " \21BB";  /* &#x21BB; clockwise arrow */
+    font-size: 1.1em;
+}
+/* Icon-only button (empty button-text) */
+.arrow-flip-btn {
+    font-size: 1.2em;
+    padding: 2px 10px;
+}
+.arrow-flip-btn::before {
+    content: "\21C4"; /* &#x21C4; left-right arrows */
+}
+&lt;/style&gt;
+
+&lt;!-- Text + icon --&gt;
+&lt;flip-card button-class="icon-flip-btn"
+           front-button-text="See Back"
+           back-button-text="See Front"&gt;
+    &lt;card-front title="Profile"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Contact"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;
+
+&lt;!-- Icon-only (empty button-text) --&gt;
+&lt;flip-card button-class="arrow-flip-btn" button-text=""&gt;
+    &lt;card-front title="Step 1"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Step 2"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+                </div>
+            </section>
+
+            <!-- Example 7: Custom Styling with CSS Variables -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-7-circle text-warning"></i> Custom Styling with CSS Variables
+                </h2>
+                <p class="text-muted mb-3">
+                    Use CSS custom properties to customize the card appearance. The flip card supports variables like
+                    <code>--flip-card-width</code>, <code>--flip-card-height</code>, <code>--border-color</code>,
+                    <code>--bg</code>, and more.
+                </p>
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex justify-content-center">
+                        <flip-card class="custom-styled-card" button-class="btn btn-sm btn-outline-light">
+                            <card-front title="Styled Front">
+                                <p style="color: #fff;">This card uses custom CSS variables for a unique look.</p>
+                            </card-front>
+                            <card-back title="Styled Back">
+                                <p style="color: #fff;">Custom colors, borders, and sizing via CSS custom properties.</p>
+                            </card-back>
+                        </flip-card>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Code</h5>
+                    <pre class="bg-light p-3 rounded"><code>&lt;style&gt;
+.custom-styled-card {
+    --flip-card-width: 350px;
+    --flip-card-height: 250px;
+    --bg: #2c3e50;
+    --color: #ecf0f1;
+    --header-bg: #34495e;
+    --border-color: #1abc9c;
+    --border-radius: 16px;
+    --border-width: 2px;
+    --button-bg: transparent;
+    --button-color: #1abc9c;
+    --button-bg-hover: #1abc9c33;
+    --shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+&lt;/style&gt;
+
+&lt;flip-card class="custom-styled-card" button-class="btn btn-sm btn-outline-light"&gt;
+    &lt;card-front title="Styled Front"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Styled Back"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+                </div>
+            </section>
+
+            <!-- Example 8: Grid Layout -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-8-circle text-warning"></i> Grid Layout
+                </h2>
+                <p class="text-muted mb-3">
+                    Place multiple flip cards in a responsive grid using Bootstrap's grid or CSS Grid.
+                    Set <code>--flip-card-width: 100%</code> so cards fill their column.
+                </p>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6 col-lg-4">
+                                <flip-card class="grid-card" auto-height="true" front-button-text="Details" back-button-text="Back">
+                                    <card-front title="HTML">
+                                        <p>The standard markup language for documents designed to be displayed in a web browser.</p>
+                                    </card-front>
+                                    <card-back title="HTML Details">
+                                        <ul class="mb-0">
+                                            <li>First published in 1993</li>
+                                            <li>Current version: HTML5</li>
+                                            <li>Maintained by WHATWG</li>
+                                        </ul>
+                                    </card-back>
+                                </flip-card>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <flip-card class="grid-card" auto-height="true" front-button-text="Details" back-button-text="Back">
+                                    <card-front title="CSS">
+                                        <p>A style sheet language used for describing the presentation of a document written in HTML.</p>
+                                    </card-front>
+                                    <card-back title="CSS Details">
+                                        <ul class="mb-0">
+                                            <li>First published in 1996</li>
+                                            <li>Current version: CSS3+</li>
+                                            <li>Maintained by W3C</li>
+                                        </ul>
+                                    </card-back>
+                                </flip-card>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <flip-card class="grid-card" auto-height="true" front-button-text="Details" back-button-text="Back">
+                                    <card-front title="JavaScript">
+                                        <p>A programming language that enables interactive web pages and is an essential part of web applications.</p>
+                                    </card-front>
+                                    <card-back title="JS Details">
+                                        <ul class="mb-0">
+                                            <li>First published in 1995</li>
+                                            <li>Current spec: ECMAScript 2024</li>
+                                            <li>Maintained by TC39</li>
+                                        </ul>
+                                    </card-back>
+                                </flip-card>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <flip-card class="grid-card" auto-height="true" front-button-text="Details" back-button-text="Back">
+                                    <card-front title="C#">
+                                        <p>A modern, object-oriented programming language developed by Microsoft for the .NET platform.</p>
+                                    </card-front>
+                                    <card-back title="C# Details">
+                                        <ul class="mb-0">
+                                            <li>First published in 2000</li>
+                                            <li>Current version: C# 13</li>
+                                            <li>Maintained by Microsoft</li>
+                                        </ul>
+                                    </card-back>
+                                </flip-card>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <flip-card class="grid-card" auto-height="true" front-button-text="Details" back-button-text="Back">
+                                    <card-front title="ASP.NET Core">
+                                        <p>A cross-platform, high-performance framework for building modern web applications.</p>
+                                    </card-front>
+                                    <card-back title="ASP.NET Details">
+                                        <ul class="mb-0">
+                                            <li>First published in 2016</li>
+                                            <li>Current version: .NET 10</li>
+                                            <li>Maintained by Microsoft</li>
+                                        </ul>
+                                    </card-back>
+                                </flip-card>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <flip-card class="grid-card" auto-height="true" front-button-text="Details" back-button-text="Back">
+                                    <card-front title="Blazor">
+                                        <p>A framework for building interactive web UIs using C# instead of JavaScript.</p>
+                                    </card-front>
+                                    <card-back title="Blazor Details">
+                                        <ul class="mb-0">
+                                            <li>First published in 2018</li>
+                                            <li>Supports Server &amp; WASM</li>
+                                            <li>Maintained by Microsoft</li>
+                                        </ul>
+                                    </card-back>
+                                </flip-card>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Code</h5>
+                    <pre class="bg-light p-3 rounded"><code>&lt;style&gt;
+.grid-card {
+    --flip-card-width: 100%;
+    --flip-card-height: 200px;
+}
+&lt;/style&gt;
+
+&lt;div class="row g-4"&gt;
+    &lt;div class="col-md-6 col-lg-4"&gt;
+        &lt;flip-card class="grid-card" auto-height="true"
+                   front-button-text="Details" back-button-text="Back"&gt;
+            &lt;card-front title="HTML"&gt;...&lt;/card-front&gt;
+            &lt;card-back title="HTML Details"&gt;...&lt;/card-back&gt;
+        &lt;/flip-card&gt;
+    &lt;/div&gt;
+    &lt;div class="col-md-6 col-lg-4"&gt;
+        &lt;flip-card class="grid-card" auto-height="true"
+                   front-button-text="Details" back-button-text="Back"&gt;
+            &lt;card-front title="CSS"&gt;...&lt;/card-front&gt;
+            &lt;card-back title="CSS Details"&gt;...&lt;/card-back&gt;
+        &lt;/flip-card&gt;
+    &lt;/div&gt;
+    &lt;!-- ... more cards ... --&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+            </section>
+
+            <!-- API Reference -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-book text-warning"></i> API Reference
+                </h2>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><code>&lt;flip-card&gt;</code> TagHelper</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Container element that renders the 3D flip card.</p>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Attribute</th>
+                                    <th>Type</th>
+                                    <th>Default</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>flip-direction</code></td>
+                                    <td>FlipDirection</td>
+                                    <td><code>Horizontal</code></td>
+                                    <td>Direction of the flip animation. <code>Horizontal</code> or <code>Vertical</code>.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>auto-height</code></td>
+                                    <td>bool?</td>
+                                    <td><code>false</code></td>
+                                    <td>When <code>true</code>, card height adjusts to fit the tallest face.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>button-text</code></td>
+                                    <td>string</td>
+                                    <td><code>"Flip"</code></td>
+                                    <td>Default text for both flip buttons.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>front-button-text</code></td>
+                                    <td>string?</td>
+                                    <td><em>null</em></td>
+                                    <td>Override button text on the front face. Falls back to <code>button-text</code>.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>back-button-text</code></td>
+                                    <td>string?</td>
+                                    <td><em>null</em></td>
+                                    <td>Override button text on the back face. Falls back to <code>button-text</code>.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>button-class</code></td>
+                                    <td>string?</td>
+                                    <td><em>null</em></td>
+                                    <td>Additional CSS classes for flip buttons.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>show-buttons</code></td>
+                                    <td>bool</td>
+                                    <td><code>true</code></td>
+                                    <td>When <code>false</code>, hides the built-in flip buttons.</td>
+                                </tr>
+                                <tr>
+                                    <td><code>class</code></td>
+                                    <td>string?</td>
+                                    <td><em>null</em></td>
+                                    <td>Additional CSS classes for the card container.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><code>&lt;card-front&gt;</code> / <code>&lt;card-back&gt;</code> TagHelpers</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Child elements defining the content of each card face. Must be placed inside a <code>&lt;flip-card&gt;</code>.</p>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Attribute</th>
+                                    <th>Type</th>
+                                    <th>Default</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>title</code></td>
+                                    <td>string</td>
+                                    <td><code>"Front"</code> / <code>"Back"</code></td>
+                                    <td>Title displayed in the card face header.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CSS Custom Properties Reference -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-palette text-warning"></i> CSS Custom Properties
+                </h2>
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Variable</th>
+                                    <th>Default</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>--flip-card-width</code></td><td>300px</td><td>Card width</td></tr>
+                                <tr><td><code>--flip-card-height</code></td><td>300px</td><td>Card height</td></tr>
+                                <tr><td><code>--flip-card-transition-duration</code></td><td>0.6s</td><td>Flip animation duration</td></tr>
+                                <tr><td><code>--flip-card-header-height</code></td><td>40px</td><td>Header minimum height</td></tr>
+                                <tr><td><code>--bg</code></td><td>#fff</td><td>Card background color</td></tr>
+                                <tr><td><code>--color</code></td><td>inherit</td><td>Card text color</td></tr>
+                                <tr><td><code>--header-bg</code></td><td>transparent</td><td>Header background color</td></tr>
+                                <tr><td><code>--border-color</code></td><td>#ccc</td><td>Border color</td></tr>
+                                <tr><td><code>--border-width</code></td><td>1px</td><td>Border width</td></tr>
+                                <tr><td><code>--border-radius</code></td><td>10px</td><td>Border radius</td></tr>
+                                <tr><td><code>--shadow</code></td><td>0 4px 8px rgba(0,0,0,0.1)</td><td>Box shadow</td></tr>
+                                <tr><td><code>--button-bg</code></td><td>#fff</td><td>Button background</td></tr>
+                                <tr><td><code>--button-color</code></td><td>inherit</td><td>Button text color</td></tr>
+                                <tr><td><code>--button-bg-hover</code></td><td>#f0f0f0</td><td>Button hover background</td></tr>
+                                <tr><td><code>--focus-color</code></td><td>#0066cc</td><td>Focus outline color</td></tr>
+                                <tr><td><code>--padding</code></td><td>10px</td><td>Content and header padding</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Back to Home -->
+            <div class="text-center mt-5">
+                <a asp-action="Index" class="btn btn-outline-warning btn-lg">
+                    <i class="bi bi-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Example 6: Icon buttons */
+    .icon-flip-btn::after {
+        content: " \21BB"; /* clockwise arrow */
+        font-size: 1.1em;
+    }
+
+    .arrow-flip-btn {
+        font-size: 1.2em;
+        padding: 2px 10px;
+    }
+
+    .arrow-flip-btn::before {
+        content: "\21C4"; /* left-right arrows */
+    }
+
+    /* Example 8: Grid layout */
+    .grid-card {
+        --flip-card-width: 100%;
+        --flip-card-height: 200px;
+    }
+
+    /* Example 7: Custom styled card */
+    .custom-styled-card {
+        --flip-card-width: 350px;
+        --flip-card-height: 250px;
+
+        --bg: #2c3e50;
+        --color: #ecf0f1;
+        --header-bg: #34495e;
+        --border-color: #1abc9c;
+        --border-radius: 16px;
+        --border-width: 2px;
+        --button-bg: transparent;
+        --button-color: #1abc9c;
+        --button-bg-hover: #1abc9c33;
+        --shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+</style>
+
+@section Scripts {
+    <script src="~/_content/CK.Taghelpers/js/flip-card.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var btn = document.getElementById('manual-flip-btn');
+            var container = document.querySelector('.js-manual-flip');
+            if (btn && container) {
+                var card = container.querySelector('.card');
+                btn.addEventListener('click', function () {
+                    card.classList.toggle('is-flipped');
+                    var isFlipped = card.classList.contains('is-flipped');
+                    var front = card.querySelector('.card-front');
+                    var back = card.querySelector('.card-back');
+                    if (front) front.setAttribute('aria-hidden', isFlipped.toString());
+                    if (back) back.setAttribute('aria-hidden', (!isFlipped).toString());
+                });
+            }
+        });
+    </script>
+}
