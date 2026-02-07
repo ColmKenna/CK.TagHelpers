@@ -5,7 +5,7 @@ using Microsoft.Extensions.Primitives;
 using System.Text;
 using System.Text.Encodings.Web;
 
-namespace CK.Taghelpers.TagHelpers;
+namespace CK.Taghelpers.TagHelpers.EditArray;
 
 public class EditArrayTagHelper : TagHelper
 {

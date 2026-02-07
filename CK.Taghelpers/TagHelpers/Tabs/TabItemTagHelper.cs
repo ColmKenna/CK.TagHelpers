@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace CK.Taghelpers.TagHelpers;
+namespace CK.Taghelpers.TagHelpers.Tabs;
 
 /// <summary>
 /// Renders a CSS-only tab item with a heading and panel content. The <c>heading</c> attribute is required.

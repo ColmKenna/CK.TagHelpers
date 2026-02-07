@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace CK.Taghelpers.TagHelpers;
+namespace CK.Taghelpers.TagHelpers.Tabs;
 
 internal sealed class TabContext
 {

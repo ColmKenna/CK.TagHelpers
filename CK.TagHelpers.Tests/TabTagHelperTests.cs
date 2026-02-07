@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using CK.Taghelpers.TagHelpers;
+using CK.Taghelpers.TagHelpers.Tabs;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Xunit;
 

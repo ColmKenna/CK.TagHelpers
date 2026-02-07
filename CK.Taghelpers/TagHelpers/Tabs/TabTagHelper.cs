@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace CK.Taghelpers.TagHelpers;
+namespace CK.Taghelpers.TagHelpers.Tabs;
 
 /// <summary>
 /// Renders a CSS-only tab container. Must contain one or more <c>&lt;tab-item&gt;</c> child elements.
