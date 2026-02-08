@@ -206,21 +206,21 @@ btn.addEventListener('click', function() {
                 <div class="card shadow-sm">
                     <div class="card-body d-flex justify-content-center gap-4 flex-wrap">
                         <!-- Front-only card: No flip button, no back panel -->
-                        <flip-card>
-                            <card-front title="Announcement">
+                        <flip-card class="info-card-theme">
+                            <card-front title="📢 Announcement">
                                 <p><strong>New Feature!</strong></p>
                                 <p>This card has no back panel, so no flip button is shown.</p>
-                                <p class="text-muted small mb-0">Great for static content.</p>
+                                <p style="opacity: 0.8;" class="small mb-0">Great for static content.</p>
                             </card-front>
                         </flip-card>
 
                         <!-- Compare with a regular flip card -->
-                        <flip-card>
-                            <card-front title="Compare">
+                        <flip-card class="info-card-theme">
+                            <card-front title="🔄 Compare">
                                 <p>This card has both front and back.</p>
                                 <p>Notice the flip button appears here.</p>
                             </card-front>
-                            <card-back title="Back Side">
+                            <card-back title="✨ Back Side">
                                 <p>Here's the back content!</p>
                                 <p>The button is visible because there's something to flip to.</p>
                             </card-back>
@@ -229,8 +229,22 @@ btn.addEventListener('click', function() {
                 </div>
                 <div class="mt-3">
                     <h5>Code</h5>
-                    <pre class="bg-light p-3 rounded"><code>&lt;!-- Front-only card: No flip button --&gt;
-&lt;flip-card&gt;
+                    <pre class="bg-light p-3 rounded"><code>&lt;style&gt;
+.info-card-theme {
+    --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --color: #fff;
+    --header-bg: rgba(0,0,0,0.15);
+    --border-color: rgba(255,255,255,0.2);
+    --border-radius: 12px;
+    --button-bg: rgba(255,255,255,0.2);
+    --button-color: #fff;
+    --button-bg-hover: rgba(255,255,255,0.3);
+    --shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+&lt;/style&gt;
+
+&lt;!-- Front-only card: No flip button --&gt;
+&lt;flip-card <strong>class="info-card-theme"</strong>&gt;
     &lt;card-front title="Announcement"&gt;
         &lt;p&gt;This card has no back panel.&lt;/p&gt;
     &lt;/card-front&gt;
@@ -238,7 +252,7 @@ btn.addEventListener('click', function() {
 &lt;/flip-card&gt;
 
 &lt;!-- With back panel: Flip button appears --&gt;
-&lt;flip-card&gt;
+&lt;flip-card <strong>class="info-card-theme"</strong>&gt;
     &lt;card-front title="Front"&gt;...&lt;/card-front&gt;
     &lt;card-back title="Back"&gt;...&lt;/card-back&gt;
 &lt;/flip-card&gt;</code></pre>
@@ -677,6 +691,19 @@ btn.addEventListener('click', function() {
         --button-color: #1abc9c;
         --button-bg-hover: #1abc9c33;
         --shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    /* Example 5.5: Info card theme for front-only example */
+    .info-card-theme {
+        --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --color: #fff;
+        --header-bg: rgba(0,0,0,0.15);
+        --border-color: rgba(255,255,255,0.2);
+        --border-radius: 12px;
+        --button-bg: rgba(255,255,255,0.2);
+        --button-color: #fff;
+        --button-bg-hover: rgba(255,255,255,0.3);
+        --shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
     }
 </style>
 
