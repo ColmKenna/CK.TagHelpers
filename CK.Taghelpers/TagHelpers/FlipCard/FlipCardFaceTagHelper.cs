@@ -161,12 +161,29 @@ public partial class FlipCardTagHelper : TagHelper
         output.TagName = "div";
         output.Attributes.SetAttribute("class", containerClasses);
 
-        // Build button HTML conditionally
-        var frontButtonHtml = ShowButtons
+        // Check if back content exists - only show buttons and back panel if it does
+        var hasBackContent = cardContext.BackContent != null;
+
+        // Build button HTML conditionally (only if there's something to flip to)
+        var frontButtonHtml = ShowButtons && hasBackContent
             ? $@"<button type=""button"" class=""{buttonClasses}"" data-flip-card-button aria-pressed=""false"">{frontButtonText}</button>"
             : "";
-        var backButtonHtml = ShowButtons
+        var backButtonHtml = ShowButtons && hasBackContent
             ? $@"<button type=""button"" class=""{buttonClasses}"" data-flip-card-button aria-pressed=""false"">{backButtonText}</button>"
+            : "";
+
+        // Build back panel HTML only if there's back content
+        var backPanelHtml = hasBackContent
+            ? $@"
+    <div class=""card-back"" aria-hidden=""true"">
+        <div class=""card-back-header"">
+            <h2>{backTitle}</h2>
+            {backButtonHtml}
+        </div>
+        <div class=""card-back-content"">
+            {backContentHtml}
+        </div>
+    </div>"
             : "";
 
         var html = $@"
@@ -179,16 +196,7 @@ public partial class FlipCardTagHelper : TagHelper
         <div class=""card-front-content"">
             {frontContentHtml}
         </div>
-    </div>
-    <div class=""card-back"" aria-hidden=""true"">
-        <div class=""card-back-header"">
-            <h2>{backTitle}</h2>
-            {backButtonHtml}
-        </div>
-        <div class=""card-back-content"">
-            {backContentHtml}
-        </div>
-    </div>
+    </div>{backPanelHtml}
 </div>";
 
         output.Content.SetHtmlContent(html);

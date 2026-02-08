@@ -548,4 +548,137 @@ public class FlipCardFaceTagHelperTests
     }
 
     #endregion
+
+    #region FlipCardTagHelper No Back Panel Tests
+
+    /// <summary>
+    /// Helper method to create FlipCardTagHelper for testing.
+    /// </summary>
+    private static FlipCardTagHelper CreateFlipCardTagHelper(
+        bool showButtons = true,
+        string buttonText = "Flip")
+    {
+        return new FlipCardTagHelper
+        {
+            ShowButtons = showButtons,
+            ButtonText = buttonText
+        };
+    }
+
+    /// <summary>
+    /// Helper method to create a TagHelperOutput for FlipCardTagHelper that simulates
+    /// child content setting the FlipCardContext values.
+    /// </summary>
+    private static TagHelperOutput CreateFlipCardOutput(
+        IDictionary<object, object> items,
+        IHtmlContent? frontContent,
+        IHtmlContent? backContent,
+        string frontTitle = "Front",
+        string backTitle = "Back")
+    {
+        return new TagHelperOutput(
+            tagName: "flip-card",
+            attributes: new TagHelperAttributeList(),
+            getChildContentAsync: (useCached, encoder) =>
+            {
+                // Simulate child taghelpers setting the context values
+                if (items.TryGetValue(typeof(FlipCardContext), out var item) &&
+                    item is FlipCardContext cardContext)
+                {
+                    cardContext.FrontContent = frontContent;
+                    cardContext.BackContent = backContent;
+                    cardContext.FrontTitle = frontTitle;
+                    cardContext.BackTitle = backTitle;
+                }
+                return Task.FromResult<TagHelperContent>(new DefaultTagHelperContent());
+            });
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithNoBackContent_DoesNotRenderFrontButton()
+    {
+        // Arrange - Only front content, no back content
+        var tagHelper = CreateFlipCardTagHelper(showButtons: true);
+        var items = new Dictionary<object, object>();
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(
+            items,
+            frontContent: new HtmlString("<p>Front content</p>"),
+            backContent: null); // No back content!
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - Should NOT contain a flip button since there's no back panel
+        var outputHtml = output.Content.GetContent();
+        Assert.DoesNotContain("data-flip-card-button", outputHtml);
+        Assert.DoesNotContain("rotate-button", outputHtml);
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithNoBackContent_DoesNotRenderBackPanel()
+    {
+        // Arrange - Only front content
+        var tagHelper = CreateFlipCardTagHelper(showButtons: true);
+        var items = new Dictionary<object, object>();
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(
+            items,
+            frontContent: new HtmlString("<p>Front content</p>"),
+            backContent: null); // No back content!
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - Should NOT contain the back panel div
+        var outputHtml = output.Content.GetContent();
+        Assert.DoesNotContain("card-back", outputHtml);
+        Assert.DoesNotContain("card-back-header", outputHtml);
+        Assert.DoesNotContain("card-back-content", outputHtml);
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithBackContent_RendersFrontButton()
+    {
+        // Arrange - Both front and back content
+        var tagHelper = CreateFlipCardTagHelper(showButtons: true);
+        var items = new Dictionary<object, object>();
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(
+            items,
+            frontContent: new HtmlString("<p>Front content</p>"),
+            backContent: new HtmlString("<p>Back content</p>")); // Has back content
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - Should contain flip buttons
+        var outputHtml = output.Content.GetContent();
+        Assert.Contains("data-flip-card-button", outputHtml);
+        Assert.Contains("rotate-button", outputHtml);
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithBackContentAndShowButtonsFalse_DoesNotRenderButtons()
+    {
+        // Arrange - Both panels but ShowButtons is false
+        var tagHelper = CreateFlipCardTagHelper(showButtons: false);
+        var items = new Dictionary<object, object>();
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(
+            items,
+            frontContent: new HtmlString("<p>Front content</p>"),
+            backContent: new HtmlString("<p>Back content</p>"));
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - Should NOT contain buttons (ShowButtons=false)
+        var outputHtml = output.Content.GetContent();
+        Assert.DoesNotContain("data-flip-card-button", outputHtml);
+        // But should still have back panel
+        Assert.Contains("card-back", outputHtml);
+    }
+
+    #endregion
 }

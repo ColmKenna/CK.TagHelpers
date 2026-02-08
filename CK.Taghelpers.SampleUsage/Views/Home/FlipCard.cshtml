@@ -193,6 +193,58 @@ btn.addEventListener('click', function() {
                 </div>
             </section>
 
+            <!-- Example 5.5: Front-Only Card (No Back Panel) -->
+            <section class="mb-5">
+                <h2 class="h3 mb-4">
+                    <i class="bi bi-card-text text-warning"></i> Front-Only Card (No Back Panel)
+                </h2>
+                <p class="text-muted mb-3">
+                    When you only define a <code>&lt;card-front&gt;</code> without a <code>&lt;card-back&gt;</code>,
+                    the flip button is automatically hidden since there's nothing to flip to. This is useful for
+                    static information cards that match the visual style of your flip cards.
+                </p>
+                <div class="card shadow-sm">
+                    <div class="card-body d-flex justify-content-center gap-4 flex-wrap">
+                        <!-- Front-only card: No flip button, no back panel -->
+                        <flip-card>
+                            <card-front title="Announcement">
+                                <p><strong>New Feature!</strong></p>
+                                <p>This card has no back panel, so no flip button is shown.</p>
+                                <p class="text-muted small mb-0">Great for static content.</p>
+                            </card-front>
+                        </flip-card>
+
+                        <!-- Compare with a regular flip card -->
+                        <flip-card>
+                            <card-front title="Compare">
+                                <p>This card has both front and back.</p>
+                                <p>Notice the flip button appears here.</p>
+                            </card-front>
+                            <card-back title="Back Side">
+                                <p>Here's the back content!</p>
+                                <p>The button is visible because there's something to flip to.</p>
+                            </card-back>
+                        </flip-card>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h5>Code</h5>
+                    <pre class="bg-light p-3 rounded"><code>&lt;!-- Front-only card: No flip button --&gt;
+&lt;flip-card&gt;
+    &lt;card-front title="Announcement"&gt;
+        &lt;p&gt;This card has no back panel.&lt;/p&gt;
+    &lt;/card-front&gt;
+    <strong>&lt;!-- No &lt;card-back&gt; = no flip button --&gt;</strong>
+&lt;/flip-card&gt;
+
+&lt;!-- With back panel: Flip button appears --&gt;
+&lt;flip-card&gt;
+    &lt;card-front title="Front"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Back"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+                </div>
+            </section>
+
             <!-- Example 6: Icon Buttons via CSS -->
             <section class="mb-5">
                 <h2 class="h3 mb-4">
