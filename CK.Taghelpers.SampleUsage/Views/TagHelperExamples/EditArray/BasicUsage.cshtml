@@ -1,0 +1,63 @@
+@model EditArrayBasicUsageViewModel
+
+@{
+    ViewData["Title"] = "EditArray - Basic Usage";
+}
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Start with the minimal required attributes, then enable display mode for a read-first experience.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TagHelperExamples" asp-action="Index">&larr; Back to EditArray examples</a>
+    </nav>
+
+    <section class="example-section" id="minimal-required">
+        <h2>Minimal required attributes</h2>
+        <p class="example-description">
+            Provide an id, items, and both edit and display partials. Display mode is disabled by default.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="basic-minimal"
+                            asp-items="Model.MinimalMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml">
+                </edit-array>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"basic-minimal\"\n            asp-items=\"Model.MinimalMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="example-section" id="display-mode">
+        <h2>Display mode enabled</h2>
+        <p class="example-description">
+            Display mode shows read-only content first and switches to edit mode when the Edit button is pressed.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="basic-display"
+                            asp-items="Model.DisplayModeMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true">
+                </edit-array>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"basic-display\"\n            asp-items=\"Model.DisplayModeMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+</div>

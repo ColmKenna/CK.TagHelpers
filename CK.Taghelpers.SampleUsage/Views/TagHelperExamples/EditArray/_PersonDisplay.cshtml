@@ -1,0 +1,22 @@
+@model EditArrayPersonViewModel
+
+<div class="mb-1">
+    <strong>Name:</strong>
+    <span data-display-for="@Html.IdFor(m => m.Name)">@((string.IsNullOrWhiteSpace(Model.Name)) ? "(none)" : Model.Name)</span>
+</div>
+<div class="mb-1">
+    <strong>Role:</strong>
+    <span data-display-for="@Html.IdFor(m => m.Role)">@((string.IsNullOrWhiteSpace(Model.Role)) ? "(none)" : Model.Role)</span>
+</div>
+<div class="mb-1">
+    <strong>Email:</strong>
+    <span data-display-for="@Html.IdFor(m => m.Email)">@((string.IsNullOrWhiteSpace(Model.Email)) ? "(none)" : Model.Email)</span>
+</div>
+<div class="mb-1">
+    <strong>Experience:</strong>
+    <span data-display-for="@Html.IdFor(m => m.YearsOfExperience)">@Model.YearsOfExperience</span>
+</div>
+<div class="mb-1">
+    <strong>Notes:</strong>
+    <span data-display-for="@Html.IdFor(m => m.Notes)">@((string.IsNullOrWhiteSpace(Model.Notes)) ? "(none)" : Model.Notes)</span>
+</div>

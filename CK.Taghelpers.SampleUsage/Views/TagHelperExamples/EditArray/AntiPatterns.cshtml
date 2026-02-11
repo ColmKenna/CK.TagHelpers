@@ -1,0 +1,79 @@
+@model EditArrayAntiPatternsViewModel
+
+@{
+    ViewData["Title"] = "EditArray - Anti-Patterns";
+}
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Common misconfigurations and the safe alternatives.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TagHelperExamples" asp-action="Index">&larr; Back to EditArray examples</a>
+    </nav>
+
+    <section class="example-section" id="missing-required">
+        <h2>Missing required attributes</h2>
+        <p class="example-description">
+            Omitting required attributes triggers the built-in error panel instead of rendering items.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <h4 class="h6 text-danger">Incorrect</h4>
+                <edit-array id="anti-missing"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml">
+                </edit-array>
+
+                <h4 class="h6 text-success mt-3">Correct</h4>
+                <edit-array id="anti-correct"
+                            asp-items="Model.Members"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- Incorrect --&gt;\n&lt;edit-array id=\"anti-missing\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"&gt;\n&lt;/edit-array&gt;\n\n&lt;!-- Correct --&gt;\n&lt;edit-array id=\"anti-correct\"\n            asp-items=\"Model.Members\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="example-section" id="display-template">
+        <h2>Display template without data-display-for</h2>
+        <p class="example-description">
+            The display view must include data-display-for attributes so updates propagate when Done is clicked.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <h4 class="h6 text-danger">Incorrect</h4>
+                <edit-array id="anti-static"
+                            asp-items="Model.Members"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplayStatic.cshtml"
+                            asp-display-mode="true">
+                </edit-array>
+
+                <h4 class="h6 text-success mt-3">Correct</h4>
+                <edit-array id="anti-dynamic"
+                            asp-items="Model.Members"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- Incorrect --&gt;\n&lt;edit-array id=\"anti-static\"\n            asp-items=\"Model.Members\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplayStatic.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;\n\n&lt;!-- Correct --&gt;\n&lt;edit-array id=\"anti-dynamic\"\n            asp-items=\"Model.Members\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+        <div class="example-notes">
+            <strong>Note:</strong> Avoid rendering untrusted content with Html.Raw in display templates.
+        </div>
+    </section>
+</div>

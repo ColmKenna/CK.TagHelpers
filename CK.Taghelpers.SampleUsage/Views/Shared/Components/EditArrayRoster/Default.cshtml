@@ -1,0 +1,11 @@
+@model CK.Taghelpers.SampleUsage.Models.TagHelperExamples.EditArray.EditArrayRosterViewModel
+
+<edit-array id="@Model.Id"
+            asp-items="Model.Members"
+            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+            asp-display-mode="true"
+            asp-template="true"
+            asp-add-button="true"
+            asp-add-text="Add roster member">
+</edit-array>

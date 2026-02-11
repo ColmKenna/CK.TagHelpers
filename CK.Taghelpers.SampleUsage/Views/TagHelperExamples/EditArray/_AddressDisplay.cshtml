@@ -1,0 +1,18 @@
+@model EditArrayAddressViewModel
+
+<div class="mb-1">
+    <strong>Street:</strong>
+    <span data-display-for="@Html.IdFor(m => m.Line1)">@((string.IsNullOrWhiteSpace(Model.Line1)) ? "(none)" : Model.Line1)</span>
+</div>
+<div class="mb-1">
+    <strong>City:</strong>
+    <span data-display-for="@Html.IdFor(m => m.City)">@((string.IsNullOrWhiteSpace(Model.City)) ? "(none)" : Model.City)</span>
+</div>
+<div class="mb-1">
+    <strong>Postal Code:</strong>
+    <span data-display-for="@Html.IdFor(m => m.PostalCode)">@((string.IsNullOrWhiteSpace(Model.PostalCode)) ? "(none)" : Model.PostalCode)</span>
+</div>
+<div class="mb-1">
+    <strong>Country:</strong>
+    <span data-display-for="@Html.IdFor(m => m.Country)">@((string.IsNullOrWhiteSpace(Model.Country)) ? "(none)" : Model.Country)</span>
+</div>

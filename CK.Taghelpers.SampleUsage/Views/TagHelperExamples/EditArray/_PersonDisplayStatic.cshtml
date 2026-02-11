@@ -1,0 +1,8 @@
+@model EditArrayPersonViewModel
+
+<div>
+    <strong>Name:</strong> @((string.IsNullOrWhiteSpace(Model.Name)) ? "(none)" : Model.Name)
+</div>
+<div>
+    <strong>Role:</strong> @((string.IsNullOrWhiteSpace(Model.Role)) ? "(none)" : Model.Role)
+</div>

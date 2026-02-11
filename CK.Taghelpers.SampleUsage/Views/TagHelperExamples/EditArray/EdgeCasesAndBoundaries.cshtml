@@ -1,0 +1,116 @@
+@model EditArrayEdgeCasesViewModel
+
+@{
+    ViewData["Title"] = "EditArray - Edge Cases and Boundaries";
+}
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Validate behavior with empty collections, long strings, special characters, and null values.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TagHelperExamples" asp-action="Index">&larr; Back to EditArray examples</a>
+    </nav>
+
+    <section class="example-section" id="empty-collection">
+        <h2>Empty collection placeholder</h2>
+        <p class="example-description">
+            Empty collections render the placeholder message if configured.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="edge-empty"
+                            asp-items="Model.EmptyMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-empty-placeholder="No entries available."
+                            asp-template="true"
+                            asp-add-button="true">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"edge-empty\"\n            asp-items=\"Model.EmptyMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-empty-placeholder=\"No entries available.\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="example-section" id="long-strings">
+        <h2>Long strings</h2>
+        <p class="example-description">
+            Long text wraps in the display template without breaking layout.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="edge-long"
+                            asp-items="Model.LongNameMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"edge-long\"\n            asp-items=\"Model.LongNameMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="example-section" id="special-characters">
+        <h2>Special characters and Unicode</h2>
+        <p class="example-description">
+            Razor encodes special characters safely in display mode.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="edge-special"
+                            asp-items="Model.SpecialCharacterMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"edge-special\"\n            asp-items=\"Model.SpecialCharacterMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+        <div class="example-notes">
+            <strong>Note:</strong> The display template uses normal Razor encoding, so raw HTML is not executed.
+        </div>
+    </section>
+
+    <section class="example-section" id="null-values">
+        <h2>Null property values</h2>
+        <p class="example-description">
+            Display template falls back to "(none)" for missing values to avoid empty UI gaps.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="edge-null"
+                            asp-items="Model.NullValueMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"edge-null\"\n            asp-items=\"Model.NullValueMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+        <div class="example-notes">
+            <strong>Note:</strong> If editArray.js is missing, the layout still renders, but add/edit actions will not work.
+        </div>
+    </section>
+</div>

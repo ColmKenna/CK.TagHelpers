@@ -1,0 +1,98 @@
+@model EditArrayValidationViewModel
+
+@{
+    ViewData["Title"] = "EditArray - Model Binding and Validation";
+}
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Bind EditArray to model properties with asp-for and validate using data annotations.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TagHelperExamples" asp-action="Index">&larr; Back to EditArray examples</a>
+    </nav>
+
+    @if (TempData["Message"] is string message)
+    {
+        <div class="alert alert-success">@message</div>
+    }
+
+    <form asp-controller="TagHelperExamples" asp-action="ModelBindingAndValidation" method="post" class="mb-4">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <section class="example-section" id="bind-and-validate">
+            <h2>Bind a collection with validation</h2>
+            <p class="example-description">
+                asp-for provides the correct field names for model binding and validation state.
+            </p>
+
+            <div class="example-container row g-3">
+                <div class="example-rendered col-lg-6">
+                    <h3 class="h6">Result</h3>
+                    <edit-array id="validation-members"
+                                asp-for="RequiredMembers"
+                                asp-items="Model.RequiredMembers"
+                                asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                                asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                                asp-template="true"
+                                asp-add-button="true">
+                    </edit-array>
+                </div>
+                <div class="example-source col-lg-6">
+                    <h3 class="h6">Source</h3>
+                    <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"validation-members\"\n            asp-for=\"RequiredMembers\"\n            asp-items=\"Model.RequiredMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                    <pre><code class="language-csharp">@Html.Raw("public class EditArrayValidationViewModel\n{\n    public List&lt;EditArrayPersonViewModel&gt; RequiredMembers { get; set; } = new();\n}\n")</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="example-section" id="nested-binding">
+            <h2>Nested model binding</h2>
+            <p class="example-description">
+                Bind a nested list like Profile.Addresses for complex forms.
+            </p>
+
+            <div class="example-container row g-3">
+                <div class="example-rendered col-lg-6">
+                    <h3 class="h6">Result</h3>
+                    <div class="mb-3">
+                        <label asp-for="Profile.ManagerName" class="form-label"></label>
+                        <input asp-for="Profile.ManagerName" class="form-control" />
+                        <span asp-validation-for="Profile.ManagerName" class="text-danger"></span>
+                    </div>
+                    <edit-array id="validation-addresses"
+                                asp-for="Profile.Addresses"
+                                asp-items="Model.Profile.Addresses"
+                                asp-view-name="~/Views/TagHelperExamples/EditArray/_AddressEditor.cshtml"
+                                asp-display-view-name="~/Views/TagHelperExamples/EditArray/_AddressDisplay.cshtml"
+                                asp-template="true"
+                                asp-add-button="true"
+                                asp-add-text="Add address">
+                    </edit-array>
+                </div>
+                <div class="example-source col-lg-6">
+                    <h3 class="h6">Source</h3>
+                    <pre><code class="language-cshtml">@Html.Raw("&lt;input asp-for=\"Profile.ManagerName\" class=\"form-control\" /&gt;\n&lt;edit-array id=\"validation-addresses\"\n            asp-for=\"Profile.Addresses\"\n            asp-items=\"Model.Profile.Addresses\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_AddressEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_AddressDisplay.cshtml\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-add-text=\"Add address\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                    <pre><code class="language-csharp">@Html.Raw("public class EditArrayProfileViewModel\n{\n    public string? ManagerName { get; set; }\n    public List&lt;EditArrayAddressViewModel&gt; Addresses { get; set; } = new();\n}\n")</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <div class="example-notes">
+            <strong>Note:</strong> Validation messages are visible because display mode is disabled here.
+            If you enable display mode, the edit fields are hidden and jQuery validation will not show messages until you switch to edit mode.
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Submit form</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+}

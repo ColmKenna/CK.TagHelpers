@@ -1,0 +1,191 @@
+@model EditArrayAttributesViewModel
+
+@{
+    ViewData["Title"] = "EditArray - Attributes and Configuration";
+}
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Each example focuses on a specific attribute set so you can see how configuration affects behavior.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TagHelperExamples" asp-action="Index">&larr; Back to EditArray examples</a>
+    </nav>
+
+    <section class="example-section" id="template-and-add">
+        <h2>Template and add button</h2>
+        <p class="example-description">
+            Enable the template and add button to let users create new items dynamically.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="attr-template"
+                            asp-items="Model.TemplateMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true"
+                            asp-template="true"
+                            asp-add-button="true"
+                            asp-add-text="Add teammate">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-template\"\n            asp-items=\"Model.TemplateMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-add-text=\"Add teammate\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="example-section" id="custom-styling">
+        <h2>Custom styling classes</h2>
+        <p class="example-description">
+            Override container, item, and button classes with Bootstrap utility classes.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="attr-styles"
+                            asp-items="Model.StyledMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true"
+                            asp-container-class="border border-warning rounded p-3 bg-light"
+                            asp-item-class="border rounded p-2 mb-2"
+                            asp-button-class="btn btn-outline-primary">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-styles\"\n            asp-items=\"Model.StyledMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-container-class=\"border border-warning rounded p-3 bg-light\"\n            asp-item-class=\"border rounded p-2 mb-2\"\n            asp-button-class=\"btn btn-outline-primary\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="example-section" id="reordering">
+        <h2>Reordering controls</h2>
+        <p class="example-description">
+            Enable reordering and customize the move button text and classes.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="attr-reorder"
+                            asp-items="Model.ReorderMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true"
+                            asp-enable-reordering="true"
+                            asp-reorder-button-class="btn btn-outline-dark btn-sm"
+                            asp-move-up-text="Up"
+                            asp-move-down-text="Down">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-reorder\"\n            asp-items=\"Model.ReorderMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-enable-reordering=\"true\"\n            asp-reorder-button-class=\"btn btn-outline-dark btn-sm\"\n            asp-move-up-text=\"Up\"\n            asp-move-down-text=\"Down\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="example-section" id="custom-button-text">
+        <h2>Custom button text</h2>
+        <p class="example-description">
+            Replace the default labels for edit, delete, undelete, and done actions.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="attr-button-text"
+                            asp-items="Model.ButtonTextMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true"
+                            asp-edit-text="Open"
+                            asp-delete-text="Remove"
+                            asp-undelete-text="Restore"
+                            asp-done-text="Close">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-button-text\"\n            asp-items=\"Model.ButtonTextMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-edit-text=\"Open\"\n            asp-delete-text=\"Remove\"\n            asp-undelete-text=\"Restore\"\n            asp-done-text=\"Close\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="example-section" id="callbacks">
+        <h2>Callback hooks</h2>
+        <p class="example-description">
+            Use asp-on-update and asp-on-delete to call safe, named JavaScript functions.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="attr-callbacks"
+                            asp-items="Model.CallbackMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true"
+                            asp-on-update="handleMemberUpdated"
+                            asp-on-delete="handleMemberDeleted">
+                </edit-array>
+                <div class="alert alert-info mt-2" id="callback-status">Waiting for an update or delete action.</div>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-callbacks\"\n            asp-items=\"Model.CallbackMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-on-update=\"handleMemberUpdated\"\n            asp-on-delete=\"handleMemberDeleted\"&gt;\n&lt;/edit-array&gt;\n&lt;div class=\"alert alert-info mt-2\" id=\"callback-status\"&gt;Waiting for an update or delete action.&lt;/div&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <section class="example-section" id="empty-placeholder">
+        <h2>Empty placeholder</h2>
+        <p class="example-description">
+            Use asp-empty-placeholder to render guidance text when there are no items.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="attr-empty"
+                            asp-items="Model.EmptyMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-empty-placeholder="No members yet. Use Add to get started."
+                            asp-template="true"
+                            asp-add-button="true">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-empty\"\n            asp-items=\"Model.EmptyMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-empty-placeholder=\"No members yet. Use Add to get started.\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        function handleMemberUpdated(itemId) {
+            const status = document.getElementById('callback-status');
+            if (status) {
+                status.textContent = 'Updated item: ' + itemId;
+            }
+        }
+
+        function handleMemberDeleted(itemId) {
+            const status = document.getElementById('callback-status');
+            if (status) {
+                status.textContent = 'Toggled delete for: ' + itemId;
+            }
+        }
+    </script>
+}

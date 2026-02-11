@@ -1,0 +1,118 @@
+@model EditArrayFormIntegrationViewModel
+
+@{
+    ViewData["Title"] = "EditArray - Form Integration";
+}
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Integrate EditArray with standard forms, partials, and ViewComponents.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TagHelperExamples" asp-action="Index">&larr; Back to EditArray examples</a>
+    </nav>
+
+    @if (TempData["Message"] is string message)
+    {
+        <div class="alert alert-success">@message</div>
+    }
+
+    <form asp-controller="TagHelperExamples"
+          asp-action="FormIntegration"
+          asp-route-source="form-integration"
+          method="post">
+        @Html.AntiForgeryToken()
+
+        <section class="example-section" id="multiple-instances">
+            <h2>Multiple arrays in one form</h2>
+            <p class="example-description">
+                Two EditArray instances share the same form alongside regular inputs.
+            </p>
+
+            <div class="example-container row g-3">
+                <div class="example-rendered col-lg-6">
+                    <h3 class="h6">Result</h3>
+                    <div class="mb-3">
+                        <label class="form-label" for="team-title">Team title</label>
+                        <input class="form-control" id="team-title" name="TeamTitle" value="Launch Squad" />
+                    </div>
+                    <edit-array id="form-engineers"
+                                asp-for="Engineers"
+                                asp-items="Model.Engineers"
+                                asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                                asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                                asp-display-mode="true"
+                                asp-template="true"
+                                asp-add-button="true">
+                    </edit-array>
+                    <edit-array id="form-designers"
+                                asp-for="Designers"
+                                asp-items="Model.Designers"
+                                asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                                asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                                asp-display-mode="true"
+                                asp-template="true"
+                                asp-add-button="true"
+                                asp-add-text="Add designer">
+                    </edit-array>
+                    <edit-array id="form-offices"
+                                asp-for="Offices"
+                                asp-items="Model.Offices"
+                                asp-view-name="~/Views/TagHelperExamples/EditArray/_AddressEditor.cshtml"
+                                asp-display-view-name="~/Views/TagHelperExamples/EditArray/_AddressDisplay.cshtml"
+                                asp-display-mode="true"
+                                asp-template="true"
+                                asp-add-button="true"
+                                asp-add-text="Add office">
+                    </edit-array>
+                </div>
+                <div class="example-source col-lg-6">
+                    <h3 class="h6">Source</h3>
+                    <pre><code class="language-cshtml">@Html.Raw("&lt;form asp-controller=\"TagHelperExamples\"\n      asp-action=\"FormIntegration\"\n      asp-route-source=\"form-integration\"\n      method=\"post\"&gt;\n    &lt;edit-array id=\"form-engineers\"\n                asp-for=\"Engineers\"\n                asp-items=\"Model.Engineers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-template=\"true\"\n                asp-add-button=\"true\"&gt;\n    &lt;/edit-array&gt;\n    &lt;edit-array id=\"form-designers\"\n                asp-for=\"Designers\"\n                asp-items=\"Model.Designers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-template=\"true\"\n                asp-add-button=\"true\"\n                asp-add-text=\"Add designer\"&gt;\n    &lt;/edit-array&gt;\n    &lt;edit-array id=\"form-offices\"\n                asp-for=\"Offices\"\n                asp-items=\"Model.Offices\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_AddressEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_AddressDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-template=\"true\"\n                asp-add-button=\"true\"\n                asp-add-text=\"Add office\"&gt;\n    &lt;/edit-array&gt;\n&lt;/form&gt;")</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="example-section" id="partial-view">
+            <h2>Partial view usage</h2>
+            <p class="example-description">
+                Render an EditArray inside a partial view with a dedicated model.
+            </p>
+
+            <div class="example-container row g-3">
+                <div class="example-rendered col-lg-6">
+                    <h3 class="h6">Result</h3>
+                    <partial name="_TeamMembersPartial" model="Model.PartialMembers" />
+                </div>
+                <div class="example-source col-lg-6">
+                    <h3 class="h6">Source</h3>
+                    <pre><code class="language-cshtml">@Html.Raw("&lt;partial name=\"_TeamMembersPartial\" model=\"Model.PartialMembers\" /&gt;")</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="example-section" id="view-component">
+            <h2>ViewComponent integration</h2>
+            <p class="example-description">
+                Invoke a ViewComponent that renders EditArray in its own view.
+            </p>
+
+            <div class="example-container row g-3">
+                <div class="example-rendered col-lg-6">
+                    <h3 class="h6">Result</h3>
+                    @await Component.InvokeAsync("EditArrayRoster", Model.ComponentMembers)
+                </div>
+                <div class="example-source col-lg-6">
+                    <h3 class="h6">Source</h3>
+                    <pre><code class="language-cshtml">@Html.Raw("@await Component.InvokeAsync(\"EditArrayRoster\", Model.ComponentMembers)")</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Submit form</button>
+        </div>
+    </form>
+</div>

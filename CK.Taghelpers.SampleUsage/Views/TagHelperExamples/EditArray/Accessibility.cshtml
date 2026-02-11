@@ -1,0 +1,47 @@
+@model EditArrayAccessibilityViewModel
+
+@{
+    ViewData["Title"] = "EditArray - Accessibility";
+}
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Review ARIA labels, keyboard navigation order, and focus behavior.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TagHelperExamples" asp-action="Index">&larr; Back to EditArray examples</a>
+    </nav>
+
+    <section class="example-section" id="aria-and-keyboard">
+        <h2>ARIA labels and keyboard flow</h2>
+        <p class="example-description">
+            EditArray buttons include aria-label attributes and follow the DOM tab order.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <edit-array id="accessibility"
+                            asp-items="Model.AccessibleMembers"
+                            asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                            asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                            asp-display-mode="true"
+                            asp-template="true"
+                            asp-add-button="true"
+                            asp-enable-reordering="true">
+                </edit-array>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"accessibility\"\n            asp-items=\"Model.AccessibleMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-enable-reordering=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Note:</strong> Expected tab order is edit/delete buttons first, then reorder buttons.
+            Screen readers announce the button aria-labels (for example, "Edit item edit-array-accessibility-item-0").
+        </div>
+    </section>
+</div>

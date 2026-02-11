@@ -1,0 +1,24 @@
+@model EditArrayAddressViewModel
+
+<div class="row g-3">
+    <div class="col-12">
+        <label asp-for="Line1" class="form-label"></label>
+        <input asp-for="Line1" class="form-control" />
+        <span asp-validation-for="Line1" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="City" class="form-label"></label>
+        <input asp-for="City" class="form-control" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="PostalCode" class="form-label"></label>
+        <input asp-for="PostalCode" class="form-control" />
+        <span asp-validation-for="PostalCode" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Country" class="form-label"></label>
+        <input asp-for="Country" class="form-control" />
+        <span asp-validation-for="Country" class="text-danger"></span>
+    </div>
+</div>
