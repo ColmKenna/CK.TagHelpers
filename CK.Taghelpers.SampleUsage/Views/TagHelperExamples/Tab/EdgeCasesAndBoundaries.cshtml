@@ -1,0 +1,146 @@
+@model TabEdgeCasesViewModel
+
+@{
+    ViewData["Title"] = "Tab - Edge Cases and Boundaries";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/tabs.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Boundary conditions: single tab, many tabs, duplicate headings, and special characters.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TabExamples" asp-action="Index">&larr; Back to Tab examples</a>
+    </nav>
+
+    <!-- EXAMPLE 1: Single tab -->
+    <section class="example-section" id="single-tab">
+        <h2>Single tab</h2>
+        <p class="example-description">
+            A tab container with only one item. The tab heading is still rendered and the panel is visible.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="Only Tab">
+                        <p>This is the only tab in this container. It is auto-selected.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"Only Tab\"&gt;\n        &lt;p&gt;This is the only tab.&lt;/p&gt;\n    &lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 2: Many tabs -->
+    <section class="example-section" id="many-tabs">
+        <h2>Many tabs</h2>
+        <p class="example-description">
+            With many tabs, headings wrap to multiple lines on narrow viewports (the container uses
+            <code>flex-wrap: wrap</code>). On wider screens (600px+), headings display inline.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="Tab 1"><p>Content for tab 1.</p></tab-item>
+                    <tab-item heading="Tab 2"><p>Content for tab 2.</p></tab-item>
+                    <tab-item heading="Tab 3"><p>Content for tab 3.</p></tab-item>
+                    <tab-item heading="Tab 4"><p>Content for tab 4.</p></tab-item>
+                    <tab-item heading="Tab 5"><p>Content for tab 5.</p></tab-item>
+                    <tab-item heading="Tab 6"><p>Content for tab 6.</p></tab-item>
+                    <tab-item heading="Tab 7"><p>Content for tab 7.</p></tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"Tab 1\"&gt;&lt;p&gt;Content for tab 1.&lt;/p&gt;&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Tab 2\"&gt;&lt;p&gt;Content for tab 2.&lt;/p&gt;&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Tab 3\"&gt;&lt;p&gt;Content for tab 3.&lt;/p&gt;&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Tab 4\"&gt;&lt;p&gt;Content for tab 4.&lt;/p&gt;&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Tab 5\"&gt;&lt;p&gt;Content for tab 5.&lt;/p&gt;&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Tab 6\"&gt;&lt;p&gt;Content for tab 6.&lt;/p&gt;&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Tab 7\"&gt;&lt;p&gt;Content for tab 7.&lt;/p&gt;&lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 3: Duplicate headings -->
+    <section class="example-section" id="duplicate-headings">
+        <h2>Duplicate headings</h2>
+        <p class="example-description">
+            When multiple tab items share the same heading, the TagHelper auto-generates unique IDs by
+            appending a numeric suffix (e.g., <code>settings</code>, <code>settings-1</code>,
+            <code>settings-2</code>). This prevents ID collisions.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="Settings">
+                        <p>First "Settings" tab. Generated ID: <code>settings</code>.</p>
+                    </tab-item>
+                    <tab-item heading="Settings">
+                        <p>Second "Settings" tab. Generated ID: <code>settings-1</code>.</p>
+                    </tab-item>
+                    <tab-item heading="Settings">
+                        <p>Third "Settings" tab. Generated ID: <code>settings-2</code>.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"Settings\"&gt;\n        &lt;p&gt;First \"Settings\" tab. ID: settings&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Settings\"&gt;\n        &lt;p&gt;Second \"Settings\" tab. ID: settings-1&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Settings\"&gt;\n        &lt;p&gt;Third \"Settings\" tab. ID: settings-2&lt;/p&gt;\n    &lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Note:</strong> The <code>EnsureUniqueId</code> method in the TagHelper uses a
+            <code>HashSet&lt;string&gt;</code> to track used IDs within a single <code>&lt;tab&gt;</code>
+            container and appends incrementing suffixes to avoid collisions.
+        </div>
+    </section>
+
+    <!-- EXAMPLE 4: Multiple independent tab containers -->
+    <section class="example-section" id="multiple-containers">
+        <h2>Multiple independent tab containers</h2>
+        <p class="example-description">
+            Each <code>&lt;tab&gt;</code> generates its own radio button group name using
+            <code>context.UniqueId</code>, so multiple tab containers on the same page do not
+            interfere with each other.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <p class="fw-bold small">Container 1:</p>
+                <tab>
+                    <tab-item heading="Alpha"><p>Alpha content in container 1.</p></tab-item>
+                    <tab-item heading="Beta"><p>Beta content in container 1.</p></tab-item>
+                </tab>
+
+                <p class="fw-bold small mt-3">Container 2:</p>
+                <tab>
+                    <tab-item heading="Alpha"><p>Alpha content in container 2.</p></tab-item>
+                    <tab-item heading="Beta"><p>Beta content in container 2.</p></tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- Container 1 --&gt;\n&lt;tab&gt;\n    &lt;tab-item heading=\"Alpha\"&gt;&lt;p&gt;Alpha in container 1.&lt;/p&gt;&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Beta\"&gt;&lt;p&gt;Beta in container 1.&lt;/p&gt;&lt;/tab-item&gt;\n&lt;/tab&gt;\n\n&lt;!-- Container 2 --&gt;\n&lt;tab&gt;\n    &lt;tab-item heading=\"Alpha\"&gt;&lt;p&gt;Alpha in container 2.&lt;/p&gt;&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Beta\"&gt;&lt;p&gt;Beta in container 2.&lt;/p&gt;&lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Note:</strong> Selecting a tab in one container does not affect the other. Each radio
+            group uses a unique <code>name</code> attribute derived from <code>context.UniqueId</code>.
+        </div>
+    </section>
+</div>

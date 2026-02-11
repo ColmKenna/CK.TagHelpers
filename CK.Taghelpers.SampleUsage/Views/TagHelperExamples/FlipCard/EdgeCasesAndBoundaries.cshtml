@@ -1,0 +1,162 @@
+@model FlipCardEdgeCasesViewModel
+
+@{
+    ViewData["Title"] = "FlipCard - Edge Cases and Boundaries";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/flip-card.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Exercises boundary conditions: empty titles, special characters, extremely long content, and missing faces.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="FlipCardExamples" asp-action="Index">&larr; Back to FlipCard examples</a>
+    </nav>
+
+    <!-- EXAMPLE 1: Empty title -->
+    <section class="example-section" id="empty-title">
+        <h2>Empty title attribute</h2>
+        <p class="example-description">
+            When the <code>title</code> attribute is omitted or empty on <code>&lt;card-front&gt;</code>
+            or <code>&lt;card-back&gt;</code>, the TagHelper falls back to the default titles
+            "Front" and "Back" respectively.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card>
+                    <card-front>
+                        <p>No title attribute was set on this face.</p>
+                        <p>The header should display "Front".</p>
+                    </card-front>
+                    <card-back>
+                        <p>No title attribute on the back either.</p>
+                        <p>The header should display "Back".</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card&gt;\n    &lt;card-front&gt;\n        &lt;p&gt;No title attribute was set on this face.&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back&gt;\n        &lt;p&gt;No title attribute on the back either.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 2: Special characters in titles -->
+    <section class="example-section" id="special-characters">
+        <h2>Special characters in titles and content</h2>
+        <p class="example-description">
+            Titles containing HTML special characters (<code>&lt;</code>, <code>&gt;</code>,
+            <code>&amp;</code>, <code>"</code>) are HTML-encoded by the TagHelper. Content inside
+            the face tags is rendered as-is (Razor handles encoding).
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card>
+                    <card-front title='Caf&eacute; &amp; "Bistro"'>
+                        <p>Title: <code>Caf&eacute; &amp; "Bistro"</code></p>
+                        <p>Characters like &lt;script&gt; in titles are safely encoded.</p>
+                    </card-front>
+                    <card-back title="&lt;Back&gt;">
+                        <p>The back title contains angle brackets.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card&gt;\n    &lt;card-front title='Caf&amp;eacute; &amp;amp; \"Bistro\"'&gt;\n        &lt;p&gt;Characters are safely encoded.&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"&amp;lt;Back&amp;gt;\"&gt;\n        &lt;p&gt;The back title contains angle brackets.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Note:</strong> The TagHelper uses <code>HtmlEncoder.Default.Encode()</code> on title text
+            and button text, preventing XSS injection through these attributes.
+        </div>
+    </section>
+
+    <!-- EXAMPLE 3: Extremely long content -->
+    <section class="example-section" id="long-content">
+        <h2>Extremely long content</h2>
+        <p class="example-description">
+            When content exceeds the card height, the content area scrolls vertically. The header remains
+            fixed at the top. With <code>auto-height="true"</code>, the card expands instead.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card>
+                    <card-front title="Long Content (Scrollable)">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+                        <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+                    </card-front>
+                    <card-back title="Short Back">
+                        <p>The back is short. The content area on the front scrolls to accommodate overflow.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card&gt;\n    &lt;card-front title=\"Long Content (Scrollable)\"&gt;\n        &lt;p&gt;Lorem ipsum dolor sit amet...&lt;/p&gt;\n        &lt;p&gt;Duis aute irure dolor...&lt;/p&gt;\n        &lt;p&gt;Sed ut perspiciatis...&lt;/p&gt;\n        &lt;p&gt;Nemo enim ipsam...&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Short Back\"&gt;\n        &lt;p&gt;The back is short.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Note:</strong> The CSS sets <code>overflow-y: auto</code> on <code>.card-front-content</code>
+            and <code>.card-back-content</code>, so content scrolls within the fixed card dimensions.
+        </div>
+    </section>
+
+    <!-- EXAMPLE 4: Empty button text -->
+    <section class="example-section" id="empty-button-text">
+        <h2>Empty button text</h2>
+        <p class="example-description">
+            Setting <code>button-text=""</code> renders buttons with no visible label. Combine with
+            <code>button-class</code> and CSS pseudo-elements to create icon-only buttons.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card button-text="" button-class="icon-only-btn">
+                    <card-front title="Icon Buttons">
+                        <p>The flip buttons use a CSS pseudo-element for the icon.</p>
+                    </card-front>
+                    <card-back title="Icon Buttons Back">
+                        <p>No text label, just the arrow icon.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;style&gt;\n.icon-only-btn { font-size: 1.2em; padding: 2px 10px; }\n.icon-only-btn::before { content: \"\\21C4\"; }\n&lt;/style&gt;\n\n&lt;flip-card button-text=\"\" button-class=\"icon-only-btn\"&gt;\n    &lt;card-front title=\"Icon Buttons\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Icon Buttons Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .icon-only-btn {
+        font-size: 1.2em;
+        padding: 2px 10px;
+    }
+    .icon-only-btn::before {
+        content: "\21C4"; /* left-right arrows */
+    }
+</style>
+
+@section Scripts {
+    <script src="~/_content/CK.Taghelpers/js/flip-card.js" asp-append-version="true"></script>
+}

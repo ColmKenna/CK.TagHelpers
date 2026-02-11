@@ -1,0 +1,303 @@
+@model FlipCardAttributesViewModel
+
+@{
+    ViewData["Title"] = "FlipCard - Attributes and Configuration";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/flip-card.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Every <code>[HtmlAttributeName]</code> property on the FlipCard TagHelper demonstrated individually and
+        in combination, plus CSS custom property theming.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="FlipCardExamples" asp-action="Index">&larr; Back to FlipCard examples</a>
+    </nav>
+
+    <!-- EXAMPLE 1: flip-direction -->
+    <section class="example-section" id="flip-direction">
+        <h2>flip-direction (Horizontal vs Vertical)</h2>
+        <p class="example-description">
+            The <code>flip-direction</code> attribute accepts <code>Horizontal</code> (default) or
+            <code>Vertical</code>. Compare both side by side.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <div class="d-flex gap-4 flex-wrap">
+                    <flip-card flip-direction="Horizontal">
+                        <card-front title="Horizontal">
+                            <p>Flips left-to-right (rotateY).</p>
+                        </card-front>
+                        <card-back title="Horizontal Back">
+                            <p>Default flip direction.</p>
+                        </card-back>
+                    </flip-card>
+
+                    <flip-card flip-direction="Vertical">
+                        <card-front title="Vertical">
+                            <p>Flips top-to-bottom (rotateX).</p>
+                        </card-front>
+                        <card-back title="Vertical Back">
+                            <p>Set via <code>flip-direction="Vertical"</code>.</p>
+                        </card-back>
+                    </flip-card>
+                </div>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card flip-direction=\"Horizontal\"&gt;\n    &lt;card-front title=\"Horizontal\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Horizontal Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;\n\n&lt;flip-card flip-direction=\"Vertical\"&gt;\n    &lt;card-front title=\"Vertical\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Vertical Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 2: button-text -->
+    <section class="example-section" id="button-text">
+        <h2>button-text</h2>
+        <p class="example-description">
+            The <code>button-text</code> attribute sets the label for both flip buttons. Defaults to "Flip".
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card button-text="Turn Over">
+                    <card-front title="Custom Button">
+                        <p>Both buttons say "Turn Over".</p>
+                    </card-front>
+                    <card-back title="Custom Button Back">
+                        <p>The same text is used for front and back buttons.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card button-text=\"Turn Over\"&gt;\n    &lt;card-front title=\"Custom Button\"&gt;\n        &lt;p&gt;Both buttons say \"Turn Over\".&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Custom Button Back\"&gt;\n        &lt;p&gt;The same text is used for front and back buttons.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 3: front-button-text / back-button-text -->
+    <section class="example-section" id="per-face-buttons">
+        <h2>front-button-text and back-button-text</h2>
+        <p class="example-description">
+            Override button text independently for each face. These take precedence over <code>button-text</code>.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card front-button-text="Show Answer" back-button-text="Show Question">
+                    <card-front title="Trivia">
+                        <p><strong>Q:</strong> In what year was the first version of C# released?</p>
+                    </card-front>
+                    <card-back title="Answer">
+                        <p><strong>A:</strong> C# 1.0 was released in January 2002 alongside Visual Studio .NET.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card front-button-text=\"Show Answer\"\n           back-button-text=\"Show Question\"&gt;\n    &lt;card-front title=\"Trivia\"&gt;\n        &lt;p&gt;&lt;strong&gt;Q:&lt;/strong&gt; In what year was the first version of C# released?&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Answer\"&gt;\n        &lt;p&gt;&lt;strong&gt;A:&lt;/strong&gt; C# 1.0 was released in January 2002.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 4: auto-height -->
+    <section class="example-section" id="auto-height">
+        <h2>auto-height</h2>
+        <p class="example-description">
+            When <code>auto-height="true"</code>, JavaScript measures both faces and sets the card height to the
+            tallest. Compare with <code>auto-height="false"</code> (default fixed height).
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <div class="d-flex gap-4 flex-wrap align-items-start">
+                    <div>
+                        <p class="fw-bold small mb-1">auto-height="true"</p>
+                        <flip-card auto-height="true">
+                            <card-front title="Short Front">
+                                <p>Short content.</p>
+                            </card-front>
+                            <card-back title="Tall Back">
+                                <p>This side has more content.</p>
+                                <ul>
+                                    <li>Item One</li>
+                                    <li>Item Two</li>
+                                    <li>Item Three</li>
+                                    <li>Item Four</li>
+                                    <li>Item Five</li>
+                                </ul>
+                                <p>The card grows to fit.</p>
+                            </card-back>
+                        </flip-card>
+                    </div>
+                    <div>
+                        <p class="fw-bold small mb-1">auto-height not set (fixed)</p>
+                        <flip-card>
+                            <card-front title="Short Front">
+                                <p>Short content.</p>
+                            </card-front>
+                            <card-back title="Tall Back">
+                                <p>This side has more content.</p>
+                                <ul>
+                                    <li>Item One</li>
+                                    <li>Item Two</li>
+                                    <li>Item Three</li>
+                                    <li>Item Four</li>
+                                    <li>Item Five</li>
+                                </ul>
+                                <p>The card stays fixed; content scrolls.</p>
+                            </card-back>
+                        </flip-card>
+                    </div>
+                </div>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- Auto-height enabled --&gt;\n&lt;flip-card auto-height=\"true\"&gt;\n    &lt;card-front title=\"Short Front\"&gt;\n        &lt;p&gt;Short content.&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Tall Back\"&gt;\n        &lt;p&gt;This side has more content.&lt;/p&gt;\n        &lt;ul&gt;&lt;li&gt;Item One&lt;/li&gt;...&lt;/ul&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;\n\n&lt;!-- Fixed height (default) --&gt;\n&lt;flip-card&gt;\n    &lt;card-front title=\"Short Front\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Tall Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 5: show-buttons -->
+    <section class="example-section" id="show-buttons">
+        <h2>show-buttons</h2>
+        <p class="example-description">
+            Set <code>show-buttons="false"</code> to hide the built-in flip buttons. You can then trigger
+            the flip programmatically by toggling the <code>is-flipped</code> class on the inner
+            <code>.card</code> element.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card show-buttons="false" class="js-programmatic-flip">
+                    <card-front title="No Buttons">
+                        <p>This card has no built-in flip buttons.</p>
+                        <p>Use the external button below.</p>
+                    </card-front>
+                    <card-back title="Flipped">
+                        <p>You flipped it programmatically!</p>
+                    </card-back>
+                </flip-card>
+                <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="programmatic-flip-btn">
+                    Flip Card Programmatically
+                </button>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card show-buttons=\"false\" class=\"js-programmatic-flip\"&gt;\n    &lt;card-front title=\"No Buttons\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Flipped\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;\n\n&lt;button type=\"button\" id=\"programmatic-flip-btn\"&gt;\n    Flip Card Programmatically\n&lt;/button&gt;\n\n&lt;script&gt;\nvar btn = document.getElementById('programmatic-flip-btn');\nvar container = document.querySelector('.js-programmatic-flip');\nvar card = container.querySelector('.card');\nbtn.addEventListener('click', function() {\n    card.classList.toggle('is-flipped');\n});\n&lt;/script&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 6: button-class -->
+    <section class="example-section" id="button-class">
+        <h2>button-class</h2>
+        <p class="example-description">
+            Add extra CSS classes to the flip buttons with <code>button-class</code>. The classes are appended
+            to the default <code>rotate-button</code> class.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card button-class="btn btn-sm btn-outline-success">
+                    <card-front title="Styled Buttons">
+                        <p>The flip buttons use Bootstrap styling.</p>
+                    </card-front>
+                    <card-back title="Styled Back">
+                        <p>Both buttons share the same custom class.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card button-class=\"btn btn-sm btn-outline-success\"&gt;\n    &lt;card-front title=\"Styled Buttons\"&gt;\n        &lt;p&gt;The flip buttons use Bootstrap styling.&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Styled Back\"&gt;\n        &lt;p&gt;Both buttons share the same custom class.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 7: class (CSS custom properties) -->
+    <section class="example-section" id="css-custom-properties">
+        <h2>class with CSS custom properties</h2>
+        <p class="example-description">
+            Use the <code>class</code> attribute to apply a CSS class that sets custom properties for
+            theming: <code>--flip-card-width</code>, <code>--flip-card-height</code>, <code>--bg</code>,
+            <code>--color</code>, <code>--header-bg</code>, <code>--border-color</code>,
+            <code>--border-radius</code>, <code>--shadow</code>, <code>--button-bg</code>,
+            <code>--button-color</code>, <code>--button-bg-hover</code>, and <code>--focus-color</code>.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card class="dark-theme-card">
+                    <card-front title="Dark Theme">
+                        <p>Custom colours, borders, and sizing via CSS custom properties.</p>
+                    </card-front>
+                    <card-back title="Dark Theme Back">
+                        <p>Every visual aspect is controllable through CSS variables.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;style&gt;\n.dark-theme-card {\n    --flip-card-width: 340px;\n    --flip-card-height: 240px;\n    --bg: #1e293b;\n    --color: #e2e8f0;\n    --header-bg: #334155;\n    --border-color: #475569;\n    --border-radius: 12px;\n    --border-width: 2px;\n    --shadow: 0 8px 24px rgba(0,0,0,0.4);\n    --button-bg: transparent;\n    --button-color: #38bdf8;\n    --button-bg-hover: rgba(56,189,248,0.15);\n    --focus-color: #38bdf8;\n}\n&lt;/style&gt;\n\n&lt;flip-card class=\"dark-theme-card\"&gt;\n    &lt;card-front title=\"Dark Theme\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Dark Theme Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .dark-theme-card {
+        --flip-card-width: 340px;
+        --flip-card-height: 240px;
+        --bg: #1e293b;
+        --color: #e2e8f0;
+        --header-bg: #334155;
+        --border-color: #475569;
+        --border-radius: 12px;
+        --border-width: 2px;
+        --shadow: 0 8px 24px rgba(0,0,0,0.4);
+        --button-bg: transparent;
+        --button-color: #38bdf8;
+        --button-bg-hover: rgba(56,189,248,0.15);
+        --focus-color: #38bdf8;
+    }
+</style>
+
+@section Scripts {
+    <script src="~/_content/CK.Taghelpers/js/flip-card.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var btn = document.getElementById('programmatic-flip-btn');
+            var container = document.querySelector('.js-programmatic-flip');
+            if (btn && container) {
+                var card = container.querySelector('.card');
+                btn.addEventListener('click', function () {
+                    card.classList.toggle('is-flipped');
+                    var isFlipped = card.classList.contains('is-flipped');
+                    var front = card.querySelector('.card-front');
+                    var back = card.querySelector('.card-back');
+                    if (front) front.setAttribute('aria-hidden', isFlipped.toString());
+                    if (back) back.setAttribute('aria-hidden', (!isFlipped).toString());
+                });
+            }
+        });
+    </script>
+}

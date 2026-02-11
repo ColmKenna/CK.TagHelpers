@@ -1,0 +1,104 @@
+@model FlipCardAccessibilityViewModel
+
+@{
+    ViewData["Title"] = "FlipCard - Accessibility";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/flip-card.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        The FlipCard TagHelper includes ARIA attributes, keyboard-accessible buttons, and a reduced-motion
+        media query. Inspect the rendered HTML to verify accessibility features.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="FlipCardExamples" asp-action="Index">&larr; Back to FlipCard examples</a>
+    </nav>
+
+    <!-- EXAMPLE 1: ARIA attributes -->
+    <section class="example-section" id="aria-attributes">
+        <h2>ARIA attributes on card faces and buttons</h2>
+        <p class="example-description">
+            The TagHelper renders <code>aria-hidden</code> on both card faces (front starts as
+            <code>"false"</code>, back as <code>"true"</code>). When flipped, the JavaScript toggles these
+            values. Buttons include <code>aria-pressed</code> and <code>data-flip-card-button</code>.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card>
+                    <card-front title="Accessible Front">
+                        <p>Inspect this card's HTML to see:</p>
+                        <ul>
+                            <li><code>aria-hidden="false"</code> on <code>.card-front</code></li>
+                            <li><code>aria-hidden="true"</code> on <code>.card-back</code></li>
+                            <li><code>aria-pressed="false"</code> on flip buttons</li>
+                        </ul>
+                    </card-front>
+                    <card-back title="Accessible Back">
+                        <p>After flipping:</p>
+                        <ul>
+                            <li><code>aria-hidden</code> values swap</li>
+                            <li><code>aria-pressed</code> updates to <code>"true"</code></li>
+                        </ul>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card&gt;\n    &lt;card-front title=\"Accessible Front\"&gt;\n        &lt;p&gt;Inspect this card's HTML to see:&lt;/p&gt;\n        &lt;ul&gt;\n            &lt;li&gt;aria-hidden=\"false\" on .card-front&lt;/li&gt;\n            &lt;li&gt;aria-hidden=\"true\" on .card-back&lt;/li&gt;\n            &lt;li&gt;aria-pressed=\"false\" on flip buttons&lt;/li&gt;\n        &lt;/ul&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Accessible Back\"&gt;\n        &lt;p&gt;After flipping, aria-hidden values swap.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+                <h3 class="h6 mt-3">Rendered HTML (simplified)</h3>
+                <pre><code class="language-html">@Html.Raw("&lt;div class=\"card-container flip-card\"&gt;\n  &lt;div class=\"card flip-horizontal\"&gt;\n    &lt;div class=\"card-front\" aria-hidden=\"false\"&gt;\n      &lt;div class=\"card-front-header\"&gt;\n        &lt;h2&gt;Accessible Front&lt;/h2&gt;\n        &lt;button type=\"button\" class=\"rotate-button\"\n                data-flip-card-button\n                aria-pressed=\"false\"&gt;Flip&lt;/button&gt;\n      &lt;/div&gt;\n      &lt;div class=\"card-front-content\"&gt;...&lt;/div&gt;\n    &lt;/div&gt;\n    &lt;div class=\"card-back\" aria-hidden=\"true\"&gt;...&lt;/div&gt;\n  &lt;/div&gt;\n&lt;/div&gt;")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Keyboard navigation:</strong> The flip button is a standard <code>&lt;button&gt;</code>
+            element, so it is focusable via Tab and activatable via Enter or Space. The CSS includes a
+            visible <code>:focus</code> outline using <code>--focus-color</code>.
+        </div>
+    </section>
+
+    <!-- EXAMPLE 2: Reduced motion -->
+    <section class="example-section" id="reduced-motion">
+        <h2>Reduced motion preference</h2>
+        <p class="example-description">
+            The flip-card CSS includes a <code>prefers-reduced-motion: reduce</code> media query that
+            disables the transition animation. Users who have enabled "Reduce motion" in their OS
+            settings will see an instant flip instead of a 0.6s animation.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card>
+                    <card-front title="Motion Safe">
+                        <p>This card respects the user's motion preference.</p>
+                        <p>Enable "Reduce motion" in your OS accessibility settings to see the difference.</p>
+                    </card-front>
+                    <card-back title="Motion Safe Back">
+                        <p>With reduced motion enabled, the flip is instant (no animation).</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source (CSS)</h3>
+                <pre><code class="language-css">@Html.Raw("/* From flip-card.css */\n@@media (prefers-reduced-motion: reduce) {\n    .flip-card .card {\n        transition: none;\n    }\n}")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Note:</strong> No additional markup is required. The media query is built into the
+            component's stylesheet and applies automatically.
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/_content/CK.Taghelpers/js/flip-card.js" asp-append-version="true"></script>
+}

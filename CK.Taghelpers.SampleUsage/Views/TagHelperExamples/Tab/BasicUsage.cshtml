@@ -1,0 +1,82 @@
+@model TabBasicUsageViewModel
+
+@{
+    ViewData["Title"] = "Tab - Basic Usage";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/tabs.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Start with the minimal markup for a tabbed interface. The first tab is auto-selected when none
+        is explicitly marked.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TabExamples" asp-action="Index">&larr; Back to Tab examples</a>
+    </nav>
+
+    <!-- EXAMPLE 1 -->
+    <section class="example-section" id="minimal-tabs">
+        <h2>Minimal tab container</h2>
+        <p class="example-description">
+            Wrap <code>&lt;tab-item&gt;</code> elements inside a <code>&lt;tab&gt;</code>. Each
+            <code>&lt;tab-item&gt;</code> requires a <code>heading</code> attribute. The first tab is
+            automatically selected.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="Overview">
+                        <h4>Welcome to the Overview</h4>
+                        <p>This is the first tab panel. It is auto-selected because no tab has
+                        <code>selected="true"</code>.</p>
+                    </tab-item>
+                    <tab-item heading="Features">
+                        <h4>Features</h4>
+                        <p>CSS-only implementation using hidden radio inputs. No JavaScript required.</p>
+                    </tab-item>
+                    <tab-item heading="Setup">
+                        <h4>Getting Started</h4>
+                        <p>Register the TagHelper and include the CSS file. That's it!</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"Overview\"&gt;\n        &lt;h4&gt;Welcome to the Overview&lt;/h4&gt;\n        &lt;p&gt;This is the first tab panel.&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Features\"&gt;\n        &lt;h4&gt;Features&lt;/h4&gt;\n        &lt;p&gt;CSS-only implementation.&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Setup\"&gt;\n        &lt;h4&gt;Getting Started&lt;/h4&gt;\n        &lt;p&gt;Register the TagHelper and include the CSS.&lt;/p&gt;\n    &lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 2 -->
+    <section class="example-section" id="two-tabs">
+        <h2>Two-tab minimal example</h2>
+        <p class="example-description">
+            The simplest useful tab layout: two tabs with plain text content.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="Description">
+                        <p>A lightweight, reusable tab component built with CSS radio buttons.</p>
+                    </tab-item>
+                    <tab-item heading="Requirements">
+                        <p>ASP.NET Core 8+ and the CK.Taghelpers NuGet package.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"Description\"&gt;\n        &lt;p&gt;A lightweight, reusable tab component.&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Requirements\"&gt;\n        &lt;p&gt;ASP.NET Core 8+ and the CK.Taghelpers NuGet package.&lt;/p&gt;\n    &lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,329 @@
+@model FlipCardThemesViewModel
+
+@{
+    ViewData["Title"] = "FlipCard - Themes";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/flip-card.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        FlipCard theming is controlled entirely through CSS custom properties. Apply a class to the
+        <code>&lt;flip-card&gt;</code> element that sets the desired variables. No C# changes required.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="FlipCardExamples" asp-action="Index">&larr; Back to FlipCard examples</a>
+    </nav>
+
+    <!-- THEME 1: Dark -->
+    <section class="example-section" id="theme-dark">
+        <h2>Dark Theme</h2>
+        <p class="example-description">
+            A dark background with light text and teal accents. Uses <code>--bg</code>, <code>--color</code>,
+            <code>--header-bg</code>, <code>--border-color</code>, and <code>--button-color</code>.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card class="theme-dark">
+                    <card-front title="Dark Theme">
+                        <p>Deep slate background with teal highlights.</p>
+                        <p>Great for developer-focused content or dark-mode interfaces.</p>
+                    </card-front>
+                    <card-back title="Dark Theme Back">
+                        <p>The button and border share the teal accent colour.</p>
+                        <p>Set <code>--shadow</code> with higher opacity for depth on dark backgrounds.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-css">@Html.Raw(".theme-dark {\n    --flip-card-width: 320px;\n    --flip-card-height: 260px;\n    --bg: #1e293b;\n    --color: #e2e8f0;\n    --header-bg: #334155;\n    --border-color: #475569;\n    --border-radius: 12px;\n    --border-width: 2px;\n    --shadow: 0 8px 24px rgba(0,0,0,0.4);\n    --button-bg: transparent;\n    --button-color: #14b8a6;\n    --button-bg-hover: rgba(20,184,166,0.15);\n    --focus-color: #14b8a6;\n}")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card class=\"theme-dark\"&gt;\n    &lt;card-front title=\"Dark Theme\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Dark Theme Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEME 2: Gradient -->
+    <section class="example-section" id="theme-gradient">
+        <h2>Gradient Theme</h2>
+        <p class="example-description">
+            A vivid purple-to-indigo gradient with semi-transparent borders and buttons.
+            Uses <code>background</code> via <code>--bg</code> which the CSS applies to
+            <code>background-color</code> (the gradient is set via a class override).
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card class="theme-gradient">
+                    <card-front title="Gradient Theme">
+                        <p>Eye-catching gradient backgrounds for marketing or hero content.</p>
+                        <p>Buttons use semi-transparent white overlays.</p>
+                    </card-front>
+                    <card-back title="Gradient Back">
+                        <p>The same gradient applies to both faces.</p>
+                        <p>Pair with <code>auto-height="true"</code> for variable content.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-css">@Html.Raw(".theme-gradient {\n    --flip-card-width: 320px;\n    --flip-card-height: 260px;\n    --color: #fff;\n    --header-bg: rgba(0,0,0,0.15);\n    --border-color: rgba(255,255,255,0.2);\n    --border-radius: 14px;\n    --shadow: 0 10px 30px rgba(102,126,234,0.4);\n    --button-bg: rgba(255,255,255,0.2);\n    --button-color: #fff;\n    --button-bg-hover: rgba(255,255,255,0.3);\n    --focus-color: #fff;\n}\n.theme-gradient .card-front,\n.theme-gradient .card-back {\n    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n}")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card class=\"theme-gradient\"&gt;\n    &lt;card-front title=\"Gradient Theme\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Gradient Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEME 3: Minimal -->
+    <section class="example-section" id="theme-minimal">
+        <h2>Minimal Theme</h2>
+        <p class="example-description">
+            A borderless, flat design with subtle shadow and no header background. Ideal for
+            content-focused layouts where the card should feel lightweight.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card class="theme-minimal">
+                    <card-front title="Minimal Theme">
+                        <p>No border, no header background. Just content and a soft shadow.</p>
+                        <p>Buttons use a simple underline-on-hover style.</p>
+                    </card-front>
+                    <card-back title="Minimal Back">
+                        <p>The back face matches the same clean aesthetic.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-css">@Html.Raw(".theme-minimal {\n    --flip-card-width: 320px;\n    --flip-card-height: 240px;\n    --bg: #fff;\n    --color: #374151;\n    --header-bg: transparent;\n    --border-color: transparent;\n    --border-width: 0;\n    --border-radius: 8px;\n    --shadow: 0 1px 3px rgba(0,0,0,0.08),\n              0 4px 12px rgba(0,0,0,0.04);\n    --button-bg: transparent;\n    --button-color: #6366f1;\n    --button-bg-hover: rgba(99,102,241,0.08);\n    --focus-color: #6366f1;\n    --padding: 16px;\n}")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card class=\"theme-minimal\"&gt;\n    &lt;card-front title=\"Minimal Theme\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Minimal Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEME 4: Warning / Alert -->
+    <section class="example-section" id="theme-warning">
+        <h2>Warning / Alert Theme</h2>
+        <p class="example-description">
+            Amber and warm tones for cards that demand attention. Suitable for alerts,
+            important notices, or cautionary content.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card class="theme-warning">
+                    <card-front title="Warning">
+                        <p><strong>Scheduled Maintenance</strong></p>
+                        <p>Servers will be offline Saturday 02:00-04:00 UTC for database upgrades.</p>
+                    </card-front>
+                    <card-back title="Details">
+                        <p>Affected services:</p>
+                        <ul>
+                            <li>API Gateway</li>
+                            <li>Dashboard</li>
+                            <li>Webhook Delivery</li>
+                        </ul>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-css">@Html.Raw(".theme-warning {\n    --flip-card-width: 320px;\n    --flip-card-height: 280px;\n    --bg: #fffbeb;\n    --color: #92400e;\n    --header-bg: #fef3c7;\n    --border-color: #f59e0b;\n    --border-width: 2px;\n    --border-radius: 10px;\n    --shadow: 0 4px 12px rgba(245,158,11,0.2);\n    --button-bg: #fef3c7;\n    --button-color: #92400e;\n    --button-bg-hover: #fde68a;\n    --focus-color: #d97706;\n}")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEME 5: Success / Positive -->
+    <section class="example-section" id="theme-success">
+        <h2>Success / Positive Theme</h2>
+        <p class="example-description">
+            Green tones for confirmation messages, completed steps, or positive outcomes.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card class="theme-success">
+                    <card-front title="Completed">
+                        <p><strong>Deployment Successful</strong></p>
+                        <p>Version 2.4.1 is now live on all production servers.</p>
+                    </card-front>
+                    <card-back title="Summary">
+                        <p>Deploy completed in 47 seconds.</p>
+                        <p>All 128 health checks passing.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-css">@Html.Raw(".theme-success {\n    --flip-card-width: 320px;\n    --flip-card-height: 240px;\n    --bg: #f0fdf4;\n    --color: #166534;\n    --header-bg: #dcfce7;\n    --border-color: #22c55e;\n    --border-width: 2px;\n    --border-radius: 10px;\n    --shadow: 0 4px 12px rgba(34,197,94,0.2);\n    --button-bg: #dcfce7;\n    --button-color: #166534;\n    --button-bg-hover: #bbf7d0;\n    --focus-color: #16a34a;\n}")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEME 6: Side-by-side gallery -->
+    <section class="example-section" id="theme-gallery">
+        <h2>Theme Gallery</h2>
+        <p class="example-description">
+            All five themes displayed side by side in a responsive grid. This demonstrates
+            how CSS custom properties make it trivial to maintain a consistent component
+            shape with vastly different visual identities.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-12">
+                <h3 class="h6">Result</h3>
+                <div class="row g-4">
+                    <div class="col-md-6 col-xl-4">
+                        <flip-card class="theme-dark gallery-card" auto-height="true">
+                            <card-front title="Dark"><p>Developer-focused dark palette.</p></card-front>
+                            <card-back title="Dark"><p>Teal accent buttons.</p></card-back>
+                        </flip-card>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <flip-card class="theme-gradient gallery-card" auto-height="true">
+                            <card-front title="Gradient"><p>Purple-to-indigo gradient.</p></card-front>
+                            <card-back title="Gradient"><p>Semi-transparent overlays.</p></card-back>
+                        </flip-card>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <flip-card class="theme-minimal gallery-card" auto-height="true">
+                            <card-front title="Minimal"><p>Clean, borderless, flat design.</p></card-front>
+                            <card-back title="Minimal"><p>Content-first approach.</p></card-back>
+                        </flip-card>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <flip-card class="theme-warning gallery-card" auto-height="true">
+                            <card-front title="Warning"><p>Amber attention-grabbing tones.</p></card-front>
+                            <card-back title="Warning"><p>For notices and alerts.</p></card-back>
+                        </flip-card>
+                    </div>
+                    <div class="col-md-6 col-xl-4">
+                        <flip-card class="theme-success gallery-card" auto-height="true">
+                            <card-front title="Success"><p>Green positive-outcome palette.</p></card-front>
+                            <card-back title="Success"><p>For confirmations and completed states.</p></card-back>
+                        </flip-card>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Tip:</strong> Combine <code>--flip-card-width: 100%</code> with Bootstrap grid
+            columns so cards fill their containers responsively. The <code>gallery-card</code> class
+            above does exactly this.
+        </div>
+    </section>
+</div>
+
+<style>
+    /* Dark Theme */
+    .theme-dark {
+        --flip-card-width: 320px;
+        --flip-card-height: 260px;
+        --bg: #1e293b;
+        --color: #e2e8f0;
+        --header-bg: #334155;
+        --border-color: #475569;
+        --border-radius: 12px;
+        --border-width: 2px;
+        --shadow: 0 8px 24px rgba(0,0,0,0.4);
+        --button-bg: transparent;
+        --button-color: #14b8a6;
+        --button-bg-hover: rgba(20,184,166,0.15);
+        --focus-color: #14b8a6;
+    }
+
+    /* Gradient Theme */
+    .theme-gradient {
+        --flip-card-width: 320px;
+        --flip-card-height: 260px;
+        --color: #fff;
+        --header-bg: rgba(0,0,0,0.15);
+        --border-color: rgba(255,255,255,0.2);
+        --border-radius: 14px;
+        --shadow: 0 10px 30px rgba(102,126,234,0.4);
+        --button-bg: rgba(255,255,255,0.2);
+        --button-color: #fff;
+        --button-bg-hover: rgba(255,255,255,0.3);
+        --focus-color: #fff;
+    }
+    .theme-gradient .card-front,
+    .theme-gradient .card-back {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Minimal Theme */
+    .theme-minimal {
+        --flip-card-width: 320px;
+        --flip-card-height: 240px;
+        --bg: #fff;
+        --color: #374151;
+        --header-bg: transparent;
+        --border-color: transparent;
+        --border-width: 0;
+        --border-radius: 8px;
+        --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+        --button-bg: transparent;
+        --button-color: #6366f1;
+        --button-bg-hover: rgba(99,102,241,0.08);
+        --focus-color: #6366f1;
+        --padding: 16px;
+    }
+
+    /* Warning Theme */
+    .theme-warning {
+        --flip-card-width: 320px;
+        --flip-card-height: 280px;
+        --bg: #fffbeb;
+        --color: #92400e;
+        --header-bg: #fef3c7;
+        --border-color: #f59e0b;
+        --border-width: 2px;
+        --border-radius: 10px;
+        --shadow: 0 4px 12px rgba(245,158,11,0.2);
+        --button-bg: #fef3c7;
+        --button-color: #92400e;
+        --button-bg-hover: #fde68a;
+        --focus-color: #d97706;
+    }
+
+    /* Success Theme */
+    .theme-success {
+        --flip-card-width: 320px;
+        --flip-card-height: 240px;
+        --bg: #f0fdf4;
+        --color: #166534;
+        --header-bg: #dcfce7;
+        --border-color: #22c55e;
+        --border-width: 2px;
+        --border-radius: 10px;
+        --shadow: 0 4px 12px rgba(34,197,94,0.2);
+        --button-bg: #dcfce7;
+        --button-color: #166534;
+        --button-bg-hover: #bbf7d0;
+        --focus-color: #16a34a;
+    }
+
+    /* Gallery override */
+    .gallery-card {
+        --flip-card-width: 100%;
+        --flip-card-height: 160px;
+    }
+</style>
+
+@section Scripts {
+    <script src="~/_content/CK.Taghelpers/js/flip-card.js" asp-append-version="true"></script>
+}

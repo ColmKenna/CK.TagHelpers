@@ -1,0 +1,42 @@
+@model TabIndexViewModel
+
+@{
+    ViewData["Title"] = "Tab TagHelper Examples";
+}
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        TabTagHelper renders CSS-only tabbed interfaces using hidden radio inputs for state management.
+        No JavaScript is required. Each group below focuses on a specific usage area.
+    </p>
+
+    <section class="mb-4">
+        <h2 class="h4">Prerequisites</h2>
+        <ul class="list-unstyled">
+            <li><strong>TagHelper registration:</strong> Ensure CK.Taghelpers is registered in _ViewImports.</li>
+            <li><strong>CSS:</strong> Include <code>tabs.css</code> from the library static assets.</li>
+            <li><strong>JS:</strong> None required &mdash; tabs are CSS-only.</li>
+        </ul>
+        <pre><code class="language-cshtml">@Html.Raw("&lt;!-- _ViewImports.cshtml --&gt;\n@addTagHelper *, CK.Taghelpers\n\n&lt;!-- Layout or page --&gt;\n&lt;link rel=\"stylesheet\" href=\"~/_content/CK.Taghelpers/css/tabs.css\" /&gt;")</code></pre>
+    </section>
+
+    <div class="row g-3">
+        @foreach (var group in Model.Groups)
+        {
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5">@group.Title</h3>
+                        <p class="mb-2">@group.Description</p>
+                        <p class="text-muted mb-3">@group.ExampleCount example(s)</p>
+                        <a class="btn btn-outline-primary"
+                           asp-controller="TabExamples"
+                           asp-action="@group.ActionName"
+                           asp-fragment="@group.AnchorId">View examples</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

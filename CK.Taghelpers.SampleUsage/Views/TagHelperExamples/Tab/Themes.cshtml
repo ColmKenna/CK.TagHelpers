@@ -1,0 +1,305 @@
+@model TabThemesViewModel
+
+@{
+    ViewData["Title"] = "Tab - Themes";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/tabs.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        The Tab TagHelper renders a <code>&lt;div class="tabs"&gt;</code> container with standard CSS
+        class names. Override those classes in a wrapping selector to create distinct visual themes
+        without touching the TagHelper or its shipped stylesheet.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TabExamples" asp-action="Index">&larr; Back to Tab examples</a>
+    </nav>
+
+    <!-- THEME 1: Dark -->
+    <section class="example-section" id="theme-dark-tabs">
+        <h2>Dark Theme</h2>
+        <p class="example-description">
+            Dark background with light text and a teal active-tab indicator. Override
+            <code>.tabs</code>, <code>.tab-heading</code>, <code>.panel</code>, and
+            <code>.tabs-panel-input:checked + .tab-heading</code>.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab class="tabs tabs-dark">
+                    <tab-item heading="Dashboard">
+                        <p>Dark-themed dashboard panel. Text uses a soft off-white for reduced eye strain.</p>
+                    </tab-item>
+                    <tab-item heading="Analytics">
+                        <p>Analytics data would go here. The active tab has a teal bottom border.</p>
+                    </tab-item>
+                    <tab-item heading="Settings">
+                        <p>Configuration options in a dark-mode context.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-css">@Html.Raw(".tabs.tabs-dark {\n    background: #1e293b;\n    border-color: #334155;\n    color: #e2e8f0;\n}\n.tabs.tabs-dark .tab-heading {\n    color: #94a3b8;\n}\n.tabs.tabs-dark .tab-heading:hover {\n    background: #334155;\n    color: #e2e8f0;\n}\n.tabs.tabs-dark .tabs-panel-input:checked + .tab-heading {\n    background: #1e293b;\n    color: #14b8a6;\n    border-bottom: 2px solid #14b8a6;\n}\n.tabs.tabs-dark .panel {\n    background: #1e293b;\n    color: #e2e8f0;\n}\n.tabs.tabs-dark .panel .panel-content {\n    border-top-color: #334155;\n}")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab class=\"tabs tabs-dark\"&gt;\n    &lt;tab-item heading=\"Dashboard\"&gt;...&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Analytics\"&gt;...&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Settings\"&gt;...&lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEME 2: Primary / Brand -->
+    <section class="example-section" id="theme-primary-tabs">
+        <h2>Primary / Brand Theme</h2>
+        <p class="example-description">
+            A blue brand-coloured theme with a filled active tab heading and white panel.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab class="tabs tabs-primary">
+                    <tab-item heading="Overview">
+                        <p>The active heading has a solid blue fill with white text.</p>
+                    </tab-item>
+                    <tab-item heading="Pricing">
+                        <p>Inactive headings use a lighter blue tint on hover.</p>
+                    </tab-item>
+                    <tab-item heading="FAQ">
+                        <p>Frequently asked questions section.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-css">@Html.Raw(".tabs.tabs-primary {\n    border-color: #3b82f6;\n}\n.tabs.tabs-primary .tab-heading {\n    color: #1e40af;\n}\n.tabs.tabs-primary .tab-heading:hover {\n    background: #dbeafe;\n}\n.tabs.tabs-primary .tabs-panel-input:checked + .tab-heading {\n    background: #3b82f6;\n    color: #fff;\n    border-bottom: none;\n    border-radius: 4px 4px 0 0;\n}\n.tabs.tabs-primary .panel .panel-content {\n    border-top-color: #3b82f6;\n}")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEME 3: Bordered / Card-style -->
+    <section class="example-section" id="theme-bordered-tabs">
+        <h2>Bordered / Card-style Theme</h2>
+        <p class="example-description">
+            Each tab heading is outlined like a card tab. The active tab connects seamlessly
+            with the panel border, creating the illusion of a card with a tab selector.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab class="tabs tabs-bordered">
+                    <tab-item heading="General">
+                        <p>The active heading merges with the panel border.</p>
+                    </tab-item>
+                    <tab-item heading="Security">
+                        <p>Inactive headings have a bottom border that creates a continuous line.</p>
+                    </tab-item>
+                    <tab-item heading="Notifications">
+                        <p>Notification preferences would go here.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-css">@Html.Raw(".tabs.tabs-bordered {\n    border: none;\n    padding: 0;\n}\n.tabs.tabs-bordered .tab-heading {\n    border: 1px solid transparent;\n    border-bottom: 1px solid #dee2e6;\n    margin-bottom: -1px;\n    padding: 12px 20px;\n    color: #6b7280;\n}\n.tabs.tabs-bordered .tab-heading:hover {\n    background: transparent;\n    border-color: #e5e7eb #e5e7eb #dee2e6;\n    color: #374151;\n}\n.tabs.tabs-bordered .tabs-panel-input:checked + .tab-heading {\n    background: #fff;\n    color: #111827;\n    border-color: #dee2e6 #dee2e6 #fff;\n    font-weight: 600;\n}\n.tabs.tabs-bordered .panel {\n    border: 1px solid #dee2e6;\n    border-top: none;\n    border-radius: 0 0 6px 6px;\n}\n.tabs.tabs-bordered .panel .panel-content {\n    border-top: none;\n}")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEME 4: Pill -->
+    <section class="example-section" id="theme-pill-tabs">
+        <h2>Pill Theme</h2>
+        <p class="example-description">
+            Rounded "pill" headings with a coloured fill on the active tab. No borders on the
+            container or panel.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab class="tabs tabs-pill">
+                    <tab-item heading="All">
+                        <p>Showing all items. The active pill has a filled background.</p>
+                    </tab-item>
+                    <tab-item heading="Active">
+                        <p>Filtered to active items only.</p>
+                    </tab-item>
+                    <tab-item heading="Archived">
+                        <p>Showing archived items.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-css">@Html.Raw(".tabs.tabs-pill {\n    border: none;\n    padding: 0;\n    gap: 6px;\n}\n.tabs.tabs-pill .tab-heading {\n    border-radius: 999px;\n    padding: 8px 20px;\n    font-size: 14px;\n    color: #6b7280;\n    transition: all 0.15s;\n}\n.tabs.tabs-pill .tab-heading:hover {\n    background: #f3f4f6;\n    border-radius: 999px;\n    color: #374151;\n}\n.tabs.tabs-pill .tabs-panel-input:checked + .tab-heading {\n    background: #4f46e5;\n    color: #fff;\n    border-bottom: none;\n    border-radius: 999px;\n}\n.tabs.tabs-pill .panel {\n    border: none;\n    background: transparent;\n}\n.tabs.tabs-pill .panel .panel-content {\n    border-top: 1px solid #e5e7eb;\n    margin-top: 8px;\n    padding-top: 16px;\n}")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- THEME 5: Gallery -->
+    <section class="example-section" id="theme-gallery-tabs">
+        <h2>Theme Gallery</h2>
+        <p class="example-description">
+            All four themes stacked for quick visual comparison. Each uses only CSS class overrides —
+            no changes to the TagHelper markup beyond the <code>class</code> attribute on
+            <code>&lt;tab&gt;</code>.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-12">
+                <h3 class="h6">Result</h3>
+
+                <p class="fw-bold small mb-1">Default</p>
+                <tab>
+                    <tab-item heading="Tab A"><p>Default theme content.</p></tab-item>
+                    <tab-item heading="Tab B"><p>No class needed.</p></tab-item>
+                </tab>
+
+                <p class="fw-bold small mb-1 mt-3">Dark</p>
+                <tab class="tabs tabs-dark">
+                    <tab-item heading="Tab A"><p>Dark theme content.</p></tab-item>
+                    <tab-item heading="Tab B"><p>Teal active indicator.</p></tab-item>
+                </tab>
+
+                <p class="fw-bold small mb-1 mt-3">Primary</p>
+                <tab class="tabs tabs-primary">
+                    <tab-item heading="Tab A"><p>Primary theme content.</p></tab-item>
+                    <tab-item heading="Tab B"><p>Filled blue active heading.</p></tab-item>
+                </tab>
+
+                <p class="fw-bold small mb-1 mt-3">Bordered</p>
+                <tab class="tabs tabs-bordered">
+                    <tab-item heading="Tab A"><p>Bordered theme content.</p></tab-item>
+                    <tab-item heading="Tab B"><p>Card-style tab connection.</p></tab-item>
+                </tab>
+
+                <p class="fw-bold small mb-1 mt-3">Pill</p>
+                <tab class="tabs tabs-pill">
+                    <tab-item heading="Tab A"><p>Pill theme content.</p></tab-item>
+                    <tab-item heading="Tab B"><p>Rounded pill selectors.</p></tab-item>
+                </tab>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    /* Dark Theme */
+    .tabs.tabs-dark {
+        background: #1e293b;
+        border-color: #334155;
+        color: #e2e8f0;
+    }
+    .tabs.tabs-dark .tab-heading {
+        color: #94a3b8;
+    }
+    .tabs.tabs-dark .tab-heading:hover {
+        background: #334155;
+        color: #e2e8f0;
+    }
+    .tabs.tabs-dark .tabs-panel-input:checked + .tab-heading {
+        background: #1e293b;
+        color: #14b8a6;
+        border-bottom: 2px solid #14b8a6;
+    }
+    .tabs.tabs-dark .panel {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+    .tabs.tabs-dark .panel .panel-content {
+        border-top-color: #334155;
+    }
+
+    /* Primary Theme */
+    .tabs.tabs-primary {
+        border-color: #3b82f6;
+    }
+    .tabs.tabs-primary .tab-heading {
+        color: #1e40af;
+    }
+    .tabs.tabs-primary .tab-heading:hover {
+        background: #dbeafe;
+    }
+    .tabs.tabs-primary .tabs-panel-input:checked + .tab-heading {
+        background: #3b82f6;
+        color: #fff;
+        border-bottom: none;
+        border-radius: 4px 4px 0 0;
+    }
+    .tabs.tabs-primary .panel .panel-content {
+        border-top-color: #3b82f6;
+    }
+
+    /* Bordered Theme */
+    .tabs.tabs-bordered {
+        border: none;
+        padding: 0;
+    }
+    .tabs.tabs-bordered .tab-heading {
+        border: 1px solid transparent;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: -1px;
+        padding: 12px 20px;
+        color: #6b7280;
+    }
+    .tabs.tabs-bordered .tab-heading:hover {
+        background: transparent;
+        border-color: #e5e7eb #e5e7eb #dee2e6;
+        color: #374151;
+    }
+    .tabs.tabs-bordered .tabs-panel-input:checked + .tab-heading {
+        background: #fff;
+        color: #111827;
+        border-color: #dee2e6 #dee2e6 #fff;
+        font-weight: 600;
+    }
+    .tabs.tabs-bordered .panel {
+        border: 1px solid #dee2e6;
+        border-top: none;
+        border-radius: 0 0 6px 6px;
+    }
+    .tabs.tabs-bordered .panel .panel-content {
+        border-top: none;
+    }
+
+    /* Pill Theme */
+    .tabs.tabs-pill {
+        border: none;
+        padding: 0;
+        gap: 6px;
+    }
+    .tabs.tabs-pill .tab-heading {
+        border-radius: 999px;
+        padding: 8px 20px;
+        font-size: 14px;
+        color: #6b7280;
+        transition: all 0.15s;
+    }
+    .tabs.tabs-pill .tab-heading:hover {
+        background: #f3f4f6;
+        border-radius: 999px;
+        color: #374151;
+    }
+    .tabs.tabs-pill .tabs-panel-input:checked + .tab-heading {
+        background: #4f46e5;
+        color: #fff;
+        border-bottom: none;
+        border-radius: 999px;
+    }
+    .tabs.tabs-pill .panel {
+        border: none;
+        background: transparent;
+    }
+    .tabs.tabs-pill .panel .panel-content {
+        border-top: 1px solid #e5e7eb;
+        margin-top: 8px;
+        padding-top: 16px;
+    }
+</style>

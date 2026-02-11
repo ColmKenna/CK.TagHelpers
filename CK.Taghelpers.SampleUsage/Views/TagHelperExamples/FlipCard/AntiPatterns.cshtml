@@ -1,0 +1,144 @@
+@model FlipCardAntiPatternsViewModel
+
+@{
+    ViewData["Title"] = "FlipCard - Anti-Patterns";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/flip-card.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Common mistakes when using the FlipCard TagHelper and their correct alternatives.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="FlipCardExamples" asp-action="Index">&larr; Back to FlipCard examples</a>
+    </nav>
+
+    <!-- ANTI-PATTERN 1 -->
+    <section class="example-section" id="missing-card-front">
+        <h2>Missing card-front element</h2>
+        <p class="example-description">
+            The <code>&lt;flip-card&gt;</code> always renders a front panel. If you omit
+            <code>&lt;card-front&gt;</code>, the front will have default title "Front" and empty content.
+            Always define at least a <code>&lt;card-front&gt;</code>.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Incorrect</h3>
+                <div class="border border-danger rounded p-3 mb-3">
+                    <flip-card>
+                        <card-back title="Only Back">
+                            <p>There is no card-front defined.</p>
+                        </card-back>
+                    </flip-card>
+                </div>
+
+                <h3 class="h6">Correct</h3>
+                <div class="border border-success rounded p-3">
+                    <flip-card>
+                        <card-front title="Front Content">
+                            <p>Always include a card-front element.</p>
+                        </card-front>
+                        <card-back title="Back Content">
+                            <p>The back panel is optional.</p>
+                        </card-back>
+                    </flip-card>
+                </div>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Incorrect</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- &#10060; Missing card-front --&gt;\n&lt;flip-card&gt;\n    &lt;card-back title=\"Only Back\"&gt;\n        &lt;p&gt;There is no card-front defined.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+
+                <h3 class="h6 mt-3">Correct</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- &#9989; Always define card-front --&gt;\n&lt;flip-card&gt;\n    &lt;card-front title=\"Front Content\"&gt;\n        &lt;p&gt;Always include a card-front element.&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Back Content\"&gt;\n        &lt;p&gt;The back panel is optional.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ANTI-PATTERN 2 -->
+    <section class="example-section" id="face-outside-flipcard">
+        <h2>card-front/card-back outside flip-card</h2>
+        <p class="example-description">
+            The <code>&lt;card-front&gt;</code> and <code>&lt;card-back&gt;</code> TagHelpers require
+            <code>ParentTag = "flip-card"</code>. Placing them outside a <code>&lt;flip-card&gt;</code>
+            means they won't be processed as TagHelpers and will render as unknown HTML elements.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Incorrect</h3>
+                <div class="border border-danger rounded p-3 mb-3">
+                    <p class="text-muted"><em>The face tags outside a flip-card are not processed by the TagHelper.
+                    They render as bare HTML elements with no special behaviour.</em></p>
+                </div>
+
+                <h3 class="h6">Correct</h3>
+                <div class="border border-success rounded p-3">
+                    <flip-card>
+                        <card-front title="Properly Nested">
+                            <p>Face elements are inside a flip-card.</p>
+                        </card-front>
+                        <card-back title="Properly Nested Back">
+                            <p>Both faces are rendered correctly.</p>
+                        </card-back>
+                    </flip-card>
+                </div>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Incorrect</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- &#10060; Face tags outside flip-card --&gt;\n&lt;div&gt;\n    &lt;card-front title=\"Orphaned\"&gt;\n        &lt;p&gt;Not inside a flip-card!&lt;/p&gt;\n    &lt;/card-front&gt;\n&lt;/div&gt;")</code></pre>
+
+                <h3 class="h6 mt-3">Correct</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- &#9989; Face tags inside flip-card --&gt;\n&lt;flip-card&gt;\n    &lt;card-front title=\"Properly Nested\"&gt;\n        &lt;p&gt;Face elements are inside a flip-card.&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Properly Nested Back\"&gt;\n        &lt;p&gt;Both faces are rendered correctly.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ANTI-PATTERN 3 -->
+    <section class="example-section" id="missing-js">
+        <h2>Missing flip-card.js</h2>
+        <p class="example-description">
+            Without the JavaScript file, the flip buttons do nothing when clicked and auto-height
+            measurement does not run. The card renders visually but is not interactive.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Symptom</h3>
+                <div class="border border-danger rounded p-3 mb-3">
+                    <p class="text-muted"><em>Buttons appear but clicking them has no effect. Cards with
+                    <code>auto-height="true"</code> remain at the default 300px height.</em></p>
+                </div>
+
+                <h3 class="h6">Fix</h3>
+                <div class="border border-success rounded p-3">
+                    <p>Include the script in your layout or page:</p>
+                    <code>&lt;script src="~/_content/CK.Taghelpers/js/flip-card.js"&gt;&lt;/script&gt;</code>
+                </div>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Incorrect</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- &#10060; No script reference --&gt;\n&lt;link rel=\"stylesheet\"\n      href=\"~/_content/CK.Taghelpers/css/flip-card.css\" /&gt;\n\n&lt;flip-card auto-height=\"true\"&gt;\n    &lt;card-front title=\"Front\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+
+                <h3 class="h6 mt-3">Correct</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- &#9989; Include both CSS and JS --&gt;\n&lt;link rel=\"stylesheet\"\n      href=\"~/_content/CK.Taghelpers/css/flip-card.css\" /&gt;\n&lt;script src=\"~/_content/CK.Taghelpers/js/flip-card.js\"&gt;&lt;/script&gt;\n\n&lt;flip-card auto-height=\"true\"&gt;\n    &lt;card-front title=\"Front\"&gt;...&lt;/card-front&gt;\n    &lt;card-back title=\"Back\"&gt;...&lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Note:</strong> For dynamically added cards (e.g. via AJAX), call
+            <code>window.FlipCard.initialize()</code> after inserting the new HTML to attach event
+            listeners and equalise heights.
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/_content/CK.Taghelpers/js/flip-card.js" asp-append-version="true"></script>
+}

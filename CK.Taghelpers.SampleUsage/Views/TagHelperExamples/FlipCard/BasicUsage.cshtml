@@ -1,0 +1,113 @@
+@model FlipCardBasicUsageViewModel
+
+@{
+    ViewData["Title"] = "FlipCard - Basic Usage";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/flip-card.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Start with the minimal markup for a flip card, then see the default horizontal and vertical orientations.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="FlipCardExamples" asp-action="Index">&larr; Back to FlipCard examples</a>
+    </nav>
+
+    <!-- EXAMPLE 1 -->
+    <section class="example-section" id="minimal-horizontal">
+        <h2>Minimal horizontal flip card</h2>
+        <p class="example-description">
+            Provide a <code>&lt;flip-card&gt;</code> with <code>&lt;card-front&gt;</code> and
+            <code>&lt;card-back&gt;</code> children. No attributes are required; the card defaults
+            to horizontal flip with "Flip" button text.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card>
+                    <card-front title="Welcome">
+                        <p>This is the front of a basic flip card.</p>
+                        <p>Click <strong>Flip</strong> to reveal the back.</p>
+                    </card-front>
+                    <card-back title="Details">
+                        <p>This is the back of the card.</p>
+                        <p>The 3D CSS transform creates a smooth horizontal flip.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card&gt;\n    &lt;card-front title=\"Welcome\"&gt;\n        &lt;p&gt;This is the front of a basic flip card.&lt;/p&gt;\n        &lt;p&gt;Click &lt;strong&gt;Flip&lt;/strong&gt; to reveal the back.&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Details\"&gt;\n        &lt;p&gt;This is the back of the card.&lt;/p&gt;\n        &lt;p&gt;The 3D CSS transform creates a smooth horizontal flip.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 2 -->
+    <section class="example-section" id="vertical-flip">
+        <h2>Vertical flip card</h2>
+        <p class="example-description">
+            Set <code>flip-direction="Vertical"</code> to flip the card top-to-bottom instead of left-to-right.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card flip-direction="Vertical">
+                    <card-front title="Question">
+                        <p><strong>What is ASP.NET Core?</strong></p>
+                        <p>Flip the card to find out!</p>
+                    </card-front>
+                    <card-back title="Answer">
+                        <p>ASP.NET Core is a cross-platform, high-performance framework for building modern web applications.</p>
+                    </card-back>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card flip-direction=\"Vertical\"&gt;\n    &lt;card-front title=\"Question\"&gt;\n        &lt;p&gt;&lt;strong&gt;What is ASP.NET Core?&lt;/strong&gt;&lt;/p&gt;\n        &lt;p&gt;Flip the card to find out!&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;card-back title=\"Answer\"&gt;\n        &lt;p&gt;ASP.NET Core is a cross-platform, high-performance\n           framework for building modern web applications.&lt;/p&gt;\n    &lt;/card-back&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 3 -->
+    <section class="example-section" id="front-only">
+        <h2>Front-only card (no back panel)</h2>
+        <p class="example-description">
+            When only <code>&lt;card-front&gt;</code> is defined, the flip button is automatically hidden
+            and no back panel is rendered. Useful for static information cards that match flip card styling.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <flip-card>
+                    <card-front title="Announcement">
+                        <p><strong>System Maintenance</strong></p>
+                        <p>Scheduled downtime on Saturday 09:00-11:00 UTC.</p>
+                        <p class="text-muted small mb-0">No flip button appears because there is no back panel.</p>
+                    </card-front>
+                </flip-card>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;flip-card&gt;\n    &lt;card-front title=\"Announcement\"&gt;\n        &lt;p&gt;&lt;strong&gt;System Maintenance&lt;/strong&gt;&lt;/p&gt;\n        &lt;p&gt;Scheduled downtime on Saturday 09:00-11:00 UTC.&lt;/p&gt;\n    &lt;/card-front&gt;\n    &lt;!-- No &lt;card-back&gt; = no flip button, no back panel --&gt;\n&lt;/flip-card&gt;")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Note:</strong> The <code>show-buttons</code> attribute has no effect when there is no back
+            content — buttons are suppressed automatically regardless of the attribute value.
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/_content/CK.Taghelpers/js/flip-card.js" asp-append-version="true"></script>
+}

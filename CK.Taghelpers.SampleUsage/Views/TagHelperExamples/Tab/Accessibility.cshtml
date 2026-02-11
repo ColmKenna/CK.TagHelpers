@@ -1,0 +1,101 @@
+@model TabAccessibilityViewModel
+
+@{
+    ViewData["Title"] = "Tab - Accessibility";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/tabs.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        The Tab TagHelper renders accessible markup with ARIA roles, keyboard-navigable radio inputs,
+        and semantic label associations.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TabExamples" asp-action="Index">&larr; Back to Tab examples</a>
+    </nav>
+
+    <!-- EXAMPLE 1: ARIA roles and attributes -->
+    <section class="example-section" id="aria-roles">
+        <h2>ARIA roles and label associations</h2>
+        <p class="example-description">
+            Each tab renders a hidden radio <code>&lt;input&gt;</code> with <code>role="tab"</code> and
+            <code>aria-controls</code> pointing to the panel. The panel has <code>role="tabpanel"</code>
+            and <code>aria-labelledby</code> pointing back to the input. Labels use <code>for</code> to
+            associate with inputs.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="Dashboard">
+                        <p>Inspect this tab's rendered HTML to verify the ARIA attributes.</p>
+                    </tab-item>
+                    <tab-item heading="Reports">
+                        <p>Each panel is linked to its tab via aria-labelledby.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"Dashboard\"&gt;...&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Reports\"&gt;...&lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+
+                <h3 class="h6 mt-3">Rendered HTML (simplified)</h3>
+                <pre><code class="language-html">@Html.Raw("&lt;div class=\"tabs\"&gt;\n  &lt;!-- Tab 1 --&gt;\n  &lt;input class=\"tabs-panel-input\" type=\"radio\"\n         name=\"tabs-{uniqueId}\" id=\"dashboard\"\n         role=\"tab\" aria-controls=\"dashboard-panel\"\n         checked=\"checked\" /&gt;\n  &lt;label class=\"tab-heading\" for=\"dashboard\"&gt;\n    Dashboard\n  &lt;/label&gt;\n  &lt;div class=\"panel\" id=\"dashboard-panel\"\n       role=\"tabpanel\" aria-labelledby=\"dashboard\"&gt;\n    &lt;div class=\"panel-content\"&gt;...&lt;/div&gt;\n  &lt;/div&gt;\n\n  &lt;!-- Tab 2 --&gt;\n  &lt;input class=\"tabs-panel-input\" type=\"radio\"\n         name=\"tabs-{uniqueId}\" id=\"reports\"\n         role=\"tab\" aria-controls=\"reports-panel\" /&gt;\n  &lt;label class=\"tab-heading\" for=\"reports\"&gt;\n    Reports\n  &lt;/label&gt;\n  &lt;div class=\"panel\" id=\"reports-panel\"\n       role=\"tabpanel\" aria-labelledby=\"reports\"&gt;\n    &lt;div class=\"panel-content\"&gt;...&lt;/div&gt;\n  &lt;/div&gt;\n&lt;/div&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 2: Keyboard navigation -->
+    <section class="example-section" id="keyboard-nav">
+        <h2>Keyboard navigation</h2>
+        <p class="example-description">
+            Because the tab state is controlled by radio inputs, keyboard navigation follows the native
+            radio button pattern. Tab headings are <code>&lt;label&gt;</code> elements associated via
+            <code>for</code>, so clicking or pressing Space/Enter on a label activates the corresponding
+            radio input.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="Keyboard Test A">
+                        <p>Use <strong>Tab</strong> to focus the heading labels, then press
+                        <strong>Space</strong> or <strong>Enter</strong> to switch tabs.</p>
+                    </tab-item>
+                    <tab-item heading="Keyboard Test B">
+                        <p>You can also use arrow keys when a radio input is focused to move
+                        between tabs (native browser behaviour for radio groups).</p>
+                    </tab-item>
+                    <tab-item heading="Keyboard Test C">
+                        <p>The CSS includes a <code>:focus</code> rule on <code>.tabs-panel-input:focus + .tab-heading</code>
+                        to provide a visible focus indicator via <code>z-index</code>.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"Keyboard Test A\"&gt;\n        &lt;p&gt;Use Tab to focus, Space/Enter to switch.&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Keyboard Test B\"&gt;\n        &lt;p&gt;Arrow keys also work (native radio behaviour).&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Keyboard Test C\"&gt;\n        &lt;p&gt;Focus indicator via :focus CSS rule.&lt;/p&gt;\n    &lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+
+                <h3 class="h6 mt-3">Focus CSS</h3>
+                <pre><code class="language-css">@Html.Raw("/* From tabs.css */\n.tabs .tabs-panel-input:focus + .tab-heading {\n    z-index: 1;\n}")</code></pre>
+            </div>
+        </div>
+
+        <div class="example-notes">
+            <strong>Expected keyboard flow:</strong>
+            <ol>
+                <li>Press <kbd>Tab</kbd> to focus the first tab heading.</li>
+                <li>Press <kbd>Space</kbd> or <kbd>Enter</kbd> to select a tab.</li>
+                <li>Use arrow keys (<kbd>&larr;</kbd> / <kbd>&rarr;</kbd>) to move between radio inputs when focused.</li>
+                <li>Press <kbd>Tab</kbd> to move focus into the active panel content.</li>
+            </ol>
+        </div>
+    </section>
+</div>

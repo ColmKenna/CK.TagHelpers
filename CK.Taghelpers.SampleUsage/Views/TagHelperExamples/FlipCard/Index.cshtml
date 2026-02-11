@@ -1,0 +1,43 @@
+@model FlipCardIndexViewModel
+
+@{
+    ViewData["Title"] = "FlipCard TagHelper Examples";
+}
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        FlipCardTagHelper renders interactive 3D flip cards with customisable flip direction,
+        button text, auto-height, and CSS custom property theming. Each group below focuses on
+        a specific usage area.
+    </p>
+
+    <section class="mb-4">
+        <h2 class="h4">Prerequisites</h2>
+        <ul class="list-unstyled">
+            <li><strong>TagHelper registration:</strong> Ensure CK.Taghelpers is registered in _ViewImports.</li>
+            <li><strong>CSS:</strong> Include <code>flip-card.css</code> from the library static assets.</li>
+            <li><strong>JS:</strong> Include <code>flip-card.js</code> for button click handling and auto-height equalisation.</li>
+        </ul>
+        <pre><code class="language-cshtml">@Html.Raw("&lt;!-- _ViewImports.cshtml --&gt;\n@addTagHelper *, CK.Taghelpers\n\n&lt;!-- Layout or page --&gt;\n&lt;link rel=\"stylesheet\" href=\"~/_content/CK.Taghelpers/css/flip-card.css\" /&gt;\n&lt;script src=\"~/_content/CK.Taghelpers/js/flip-card.js\"&gt;&lt;/script&gt;")</code></pre>
+    </section>
+
+    <div class="row g-3">
+        @foreach (var group in Model.Groups)
+        {
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5">@group.Title</h3>
+                        <p class="mb-2">@group.Description</p>
+                        <p class="text-muted mb-3">@group.ExampleCount example(s)</p>
+                        <a class="btn btn-outline-primary"
+                           asp-controller="FlipCardExamples"
+                           asp-action="@group.ActionName"
+                           asp-fragment="@group.AnchorId">View examples</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

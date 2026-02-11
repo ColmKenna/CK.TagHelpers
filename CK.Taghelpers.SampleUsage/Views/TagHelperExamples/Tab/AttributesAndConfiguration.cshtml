@@ -1,0 +1,212 @@
+@model TabAttributesViewModel
+
+@{
+    ViewData["Title"] = "Tab - Attributes and Configuration";
+}
+
+<link rel="stylesheet" href="~/_content/CK.Taghelpers/css/tabs.css" asp-append-version="true" />
+
+<div class="example-page">
+    <h1>@ViewData["Title"]</h1>
+    <p class="page-description">
+        Every attribute on the Tab and TabItem TagHelpers demonstrated individually: heading, id, selected,
+        custom CSS classes, and rich HTML content.
+    </p>
+
+    <nav class="example-nav">
+        <a asp-controller="TabExamples" asp-action="Index">&larr; Back to Tab examples</a>
+    </nav>
+
+    <!-- EXAMPLE 1: selected -->
+    <section class="example-section" id="pre-selected">
+        <h2>selected attribute</h2>
+        <p class="example-description">
+            Set <code>selected="true"</code> on a <code>&lt;tab-item&gt;</code> to make it the default
+            active tab. If omitted from all items, the first tab is auto-selected.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="First">
+                        <p>This is the first tab, but it is <strong>not</strong> selected by default.</p>
+                    </tab-item>
+                    <tab-item heading="Second" selected="true">
+                        <p><strong>This tab is pre-selected!</strong></p>
+                        <p>Use <code>selected="true"</code> to control the initial active tab.</p>
+                    </tab-item>
+                    <tab-item heading="Third">
+                        <p>This is the third tab.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"First\"&gt;\n        &lt;p&gt;Not selected by default.&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Second\" selected=\"true\"&gt;\n        &lt;p&gt;This tab is pre-selected!&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Third\"&gt;\n        &lt;p&gt;Third tab.&lt;/p&gt;\n    &lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 2: Custom id -->
+    <section class="example-section" id="custom-ids">
+        <h2>id attribute</h2>
+        <p class="example-description">
+            By default, tab IDs are auto-generated from the heading text (lowercased, spaces become hyphens,
+            special characters removed). Set <code>id</code> explicitly when you need stable anchors
+            or programmatic references.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item id="custom-home" heading="Home">
+                        <p>This tab has <code>id="custom-home"</code>.</p>
+                        <p>The radio input gets this ID; the panel gets <code>custom-home-panel</code>.</p>
+                    </tab-item>
+                    <tab-item id="custom-profile" heading="Profile">
+                        <p>This tab has <code>id="custom-profile"</code>.</p>
+                    </tab-item>
+                    <tab-item heading="Auto-Generated">
+                        <p>This tab's ID is generated from "Auto-Generated" &rarr; <code>auto-generated</code>.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item id=\"custom-home\" heading=\"Home\"&gt;\n        &lt;p&gt;Custom ID: custom-home&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item id=\"custom-profile\" heading=\"Profile\"&gt;\n        &lt;p&gt;Custom ID: custom-profile&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Auto-Generated\"&gt;\n        &lt;p&gt;ID auto-generated from heading.&lt;/p&gt;\n    &lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 3: heading with various text -->
+    <section class="example-section" id="heading-variations">
+        <h2>heading attribute variations</h2>
+        <p class="example-description">
+            The <code>heading</code> attribute is required and rendered as the label text. IDs are derived
+            from headings unless explicitly provided.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="Simple">
+                        <p>A plain one-word heading.</p>
+                    </tab-item>
+                    <tab-item heading="Multi Word Heading">
+                        <p>Spaces in the heading become hyphens in the generated ID.</p>
+                    </tab-item>
+                    <tab-item heading="Special: Characters & Symbols!">
+                        <p>Special characters are stripped from the generated ID. The heading text is rendered as-is.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"Simple\"&gt;...&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Multi Word Heading\"&gt;...&lt;/tab-item&gt;\n    &lt;tab-item heading=\"Special: Characters &amp; Symbols!\"&gt;...&lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 4: CSS class on tab container -->
+    <section class="example-section" id="custom-css-class">
+        <h2>Custom CSS class on the tab container</h2>
+        <p class="example-description">
+            Add a <code>class</code> attribute to the <code>&lt;tab&gt;</code> element to append custom
+            classes. The TagHelper merges them with the required <code>tabs</code> class.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab class="border-primary">
+                    <tab-item heading="Styled Container">
+                        <p>The tab container has an extra <code>border-primary</code> Bootstrap class.</p>
+                    </tab-item>
+                    <tab-item heading="Second Tab">
+                        <p>The custom class is merged with the default <code>tabs</code> class.</p>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab class=\"border-primary\"&gt;\n    &lt;tab-item heading=\"Styled Container\"&gt;\n        &lt;p&gt;Extra Bootstrap class on the container.&lt;/p&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Second Tab\"&gt;\n        &lt;p&gt;Merged with the default &amp;ldquo;tabs&amp;rdquo; class.&lt;/p&gt;\n    &lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXAMPLE 5: Rich content -->
+    <section class="example-section" id="rich-content">
+        <h2>Rich HTML content in panels</h2>
+        <p class="example-description">
+            Tab panels can contain any HTML: forms, tables, images, lists, and embedded components.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <tab>
+                    <tab-item heading="Contact Form">
+                        <h4>Contact Us</h4>
+                        <form>
+                            <div class="mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" placeholder="Your name">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Message</label>
+                                <textarea class="form-control" rows="2" placeholder="Your message"></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm">Send</button>
+                        </form>
+                    </tab-item>
+                    <tab-item heading="Data Table">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr><th>ID</th><th>Name</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>1</td><td>Alice Johnson</td><td><span class="badge bg-success">Active</span></td></tr>
+                                <tr><td>2</td><td>Bob Smith</td><td><span class="badge bg-warning">Pending</span></td></tr>
+                                <tr><td>3</td><td>Carol Williams</td><td><span class="badge bg-success">Active</span></td></tr>
+                            </tbody>
+                        </table>
+                    </tab-item>
+                    <tab-item heading="Statistics">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="p-2 bg-primary text-white rounded">
+                                    <h5 class="mb-0">1,234</h5>
+                                    <small>Users</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 bg-success text-white rounded">
+                                    <h5 class="mb-0">567</h5>
+                                    <small>Sessions</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 bg-info text-white rounded">
+                                    <h5 class="mb-0">89%</h5>
+                                    <small>Satisfaction</small>
+                                </div>
+                            </div>
+                        </div>
+                    </tab-item>
+                </tab>
+            </div>
+
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;tab&gt;\n    &lt;tab-item heading=\"Contact Form\"&gt;\n        &lt;form&gt;\n            &lt;div class=\"mb-3\"&gt;\n                &lt;label class=\"form-label\"&gt;Name&lt;/label&gt;\n                &lt;input type=\"text\" class=\"form-control\" /&gt;\n            &lt;/div&gt;\n            &lt;button type=\"button\" class=\"btn btn-primary\"&gt;Send&lt;/button&gt;\n        &lt;/form&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Data Table\"&gt;\n        &lt;table class=\"table table-striped\"&gt;...&lt;/table&gt;\n    &lt;/tab-item&gt;\n    &lt;tab-item heading=\"Statistics\"&gt;\n        &lt;div class=\"row text-center\"&gt;...&lt;/div&gt;\n    &lt;/tab-item&gt;\n&lt;/tab&gt;")</code></pre>
+            </div>
+        </div>
+    </section>
+</div>
