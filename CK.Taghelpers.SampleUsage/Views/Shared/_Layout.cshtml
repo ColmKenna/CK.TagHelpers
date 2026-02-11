@@ -23,14 +23,26 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Tabs">Tabs</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Tabs</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Home" asp-action="Tabs">Demo</a></li>
+                                <li><a class="dropdown-item" asp-controller="TabExamples" asp-action="Index">Examples</a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="FlipCard">FlipCard</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">FlipCard</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Home" asp-action="FlipCard">Demo</a></li>
+                                <li><a class="dropdown-item" asp-controller="FlipCardExamples" asp-action="Index">Examples</a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Samples">EditArray</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">EditArray</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Home" asp-action="Samples">Demo</a></li>
+                                <li><a class="dropdown-item" asp-controller="TagHelperExamples" asp-action="Index">Examples</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="DynamicEditor">DynamicEditor</a>
@@ -57,6 +69,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/_content/CK.Taghelpers/js/editArray.js" asp-append-version="true"></script>
+    <script src="~/_content/CK.Taghelpers/js/editArrayValidator.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

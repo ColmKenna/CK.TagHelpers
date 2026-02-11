@@ -6,257 +6,130 @@ using Xunit;
 namespace CK.TagHelpers.Tests.ClientScripts;
 
 /// <summary>
-/// TDD Tests for EditArray client script - jQuery Validation Wiring.
+/// TDD Tests for EditArray client script - core functionality and event dispatching.
 ///
-/// Feature: Ensure jQuery validation is wired up correctly for both existing
-/// and new entries via a reusable wireUpValidation function.
+/// Feature: Ensure editArray.js emits custom events at key lifecycle points
+/// so that external modules (e.g. EditArrayValidator) can subscribe to them.
 ///
 /// Requirements:
-/// - Extract validation re-parsing into a reusable wireUpValidation function
-/// - Call wireUpValidation consistently in addNewItem and toggleEditMode
-/// - Initialize validation for existing containers on page load
-/// - Attach blur validation handlers for immediate field feedback
+/// - Dispatch editarray:item-added after adding a new item
+/// - Dispatch editarray:edit-saving (cancelable) before edit→display transition
+/// - Dispatch editarray:edit-entered after display→edit transition
+/// - Dispatch editarray:init for each existing container on page load
+/// - Core functions (addNewItem, toggleEditMode, handleEditArrayAction) still present
 ///
 /// Assumptions: Script content assertions are used because there is no JS runtime test harness.
 /// </summary>
 public class EditArrayClientScriptTests
 {
     // ========================================================================
-    // 1. wireUpValidation function existence and signature
+    // 1. Event dispatching - addNewItem
     // ========================================================================
 
     [Fact]
-    public void Should_HaveWireUpValidationFunction()
+    public void AddNewItem_Should_DispatchItemAddedEvent()
     {
         var script = LoadScript();
-
-        // wireUpValidation should be defined as a function taking a container parameter
-        Assert.Matches(
-            new Regex(@"function\s+wireUpValidation\s*\(\s*\w+\s*\)", RegexOptions.Singleline),
-            script);
-    }
-
-    // ========================================================================
-    // 2. wireUpValidation internals - validation re-parsing
-    // ========================================================================
-
-    [Fact]
-    public void WireUpValidation_Should_RemoveValidatorData()
-    {
-        var script = LoadScript();
-
-        // Extract the wireUpValidation function body
-        var functionBody = ExtractFunctionBody(script, "wireUpValidation");
-
-        // Should remove existing validator data to allow re-parsing
-        Assert.Contains("removeData('validator')", functionBody);
-        Assert.Contains("removeData('unobtrusiveValidator')", functionBody);
-    }
-
-    [Fact]
-    public void WireUpValidation_Should_ParseWithUnobtrusiveValidation()
-    {
-        var script = LoadScript();
-
-        var functionBody = ExtractFunctionBody(script, "wireUpValidation");
-
-        // Should call $.validator.unobtrusive.parse
-        Assert.Matches(
-            new Regex(@"validator\.unobtrusive\.parse\s*\(", RegexOptions.Singleline),
-            functionBody);
-    }
-
-    [Fact]
-    public void WireUpValidation_Should_AttachBlurValidationHandlers()
-    {
-        var script = LoadScript();
-
-        var functionBody = ExtractFunctionBody(script, "wireUpValidation");
-
-        // Should attach blur validation handlers to inputs
-        Assert.Contains("blur.validate", functionBody);
-        Assert.Matches(
-            new Regex(@"on\s*\(\s*['""]blur\.validate['""]", RegexOptions.Singleline),
-            functionBody);
-    }
-
-    [Fact]
-    public void WireUpValidation_Should_TargetInputSelectTextareaElements()
-    {
-        var script = LoadScript();
-
-        var functionBody = ExtractFunctionBody(script, "wireUpValidation");
-
-        // Should target input, select, and textarea elements for blur handlers
-        Assert.Contains("input", functionBody);
-        Assert.Contains("select", functionBody);
-        Assert.Contains("textarea", functionBody);
-    }
-
-    [Fact]
-    public void WireUpValidation_Should_GuardAgainstMissingjQuery()
-    {
-        var script = LoadScript();
-
-        var functionBody = ExtractFunctionBody(script, "wireUpValidation");
-
-        // Should check for jQuery and validator availability before proceeding
-        Assert.Contains("window.jQuery", functionBody);
-    }
-
-    [Fact]
-    public void WireUpValidation_Should_FindClosestForm()
-    {
-        var script = LoadScript();
-
-        var functionBody = ExtractFunctionBody(script, "wireUpValidation");
-
-        // Should find the closest form element from the container
-        Assert.Contains("closest('form')", functionBody);
-    }
-
-    // ========================================================================
-    // 3. addNewItem calls wireUpValidation
-    // ========================================================================
-
-    [Fact]
-    public void AddNewItem_Should_CallWireUpValidation()
-    {
-        var script = LoadScript();
-
         var functionBody = ExtractFunctionBody(script, "addNewItem");
 
-        // addNewItem should call wireUpValidation
-        Assert.Contains("wireUpValidation", functionBody);
+        Assert.Contains("editarray:item-added", functionBody);
+        Assert.Contains("dispatchEvent", functionBody);
     }
 
     [Fact]
-    public void AddNewItem_Should_NotContainDuplicatedValidationLogic()
+    public void AddNewItem_Should_NotContainValidationLogic()
     {
         var script = LoadScript();
-
         var functionBody = ExtractFunctionBody(script, "addNewItem");
 
-        // addNewItem should NOT contain inline removeData/parse logic anymore
-        // (it should delegate to wireUpValidation)
+        // Should not contain direct validation calls - delegated to validator via events
+        Assert.DoesNotContain("wireUpValidation", functionBody);
         Assert.DoesNotContain("removeData('validator')", functionBody);
         Assert.DoesNotContain("removeData('unobtrusiveValidator')", functionBody);
     }
 
     // ========================================================================
-    // 4. toggleEditMode calls wireUpValidation
+    // 2. Event dispatching - toggleEditMode
     // ========================================================================
 
     [Fact]
-    public void ToggleEditMode_Should_CallWireUpValidation()
+    public void ToggleEditMode_Should_DispatchEditSavingEvent()
     {
         var script = LoadScript();
-
         var functionBody = ExtractFunctionBody(script, "toggleEditMode");
 
-        // toggleEditMode should call wireUpValidation when entering edit mode
-        Assert.Contains("wireUpValidation", functionBody);
+        Assert.Contains("editarray:edit-saving", functionBody);
+        Assert.Contains("cancelable: true", functionBody);
     }
 
     [Fact]
-    public void ToggleEditMode_Should_NotContainDuplicatedValidationLogic()
+    public void ToggleEditMode_Should_CheckDefaultPreventedBeforeProceeding()
     {
         var script = LoadScript();
-
         var functionBody = ExtractFunctionBody(script, "toggleEditMode");
 
-        // toggleEditMode should NOT contain inline removeData/parse logic anymore
+        Assert.Contains("defaultPrevented", functionBody);
+    }
+
+    [Fact]
+    public void ToggleEditMode_Should_ReturnEarlyWhenEventCancelled()
+    {
+        var script = LoadScript();
+        var functionBody = ExtractFunctionBody(script, "toggleEditMode");
+
+        // Should check defaultPrevented and return
+        Assert.Matches(
+            new Regex(@"defaultPrevented.*return", RegexOptions.Singleline),
+            functionBody);
+    }
+
+    [Fact]
+    public void ToggleEditMode_Should_DispatchEditEnteredEvent()
+    {
+        var script = LoadScript();
+        var functionBody = ExtractFunctionBody(script, "toggleEditMode");
+
+        Assert.Contains("editarray:edit-entered", functionBody);
+    }
+
+    [Fact]
+    public void ToggleEditMode_Should_NotContainDirectValidationLogic()
+    {
+        var script = LoadScript();
+        var functionBody = ExtractFunctionBody(script, "toggleEditMode");
+
+        // Should not contain jQuery validation calls - delegated to validator via events
+        Assert.DoesNotContain("wireUpValidation", functionBody);
         Assert.DoesNotContain("removeData('validator')", functionBody);
-        Assert.DoesNotContain("removeData('unobtrusiveValidator')", functionBody);
+        Assert.DoesNotContain(".valid()", functionBody);
+        Assert.DoesNotContain("window.jQuery", functionBody);
     }
 
     // ========================================================================
-    // 5. Page load initialization
+    // 3. Event dispatching - initEditArray
     // ========================================================================
 
     [Fact]
-    public void Should_InitializeValidationForExistingContainersOnPageLoad()
+    public void InitEditArray_Should_DispatchInitEventForExistingContainers()
     {
         var script = LoadScript();
+        var functionBody = ExtractFunctionBody(script, "initEditArray");
 
-        // The script should query for existing edit-array-container elements
-        // and wire up validation for them during initialization
-        Assert.Contains("edit-array-container", script);
+        Assert.Contains("editarray:init", functionBody);
+        Assert.Contains("edit-array-container", functionBody);
+    }
 
-        // Should have an init function that calls wireUpValidation for existing containers
-        // and is invoked on DOMContentLoaded or when readyState is already complete
-        Assert.Matches(
-            new Regex(
-                @"querySelectorAll\s*\(\s*['""]\.edit-array-container['""]\s*\).*wireUpValidation",
-                RegexOptions.Singleline),
-            script);
+    [Fact]
+    public void InitEditArray_Should_NotContainDirectValidationLogic()
+    {
+        var script = LoadScript();
+        var functionBody = ExtractFunctionBody(script, "initEditArray");
 
-        // The init function should be registered with DOMContentLoaded
-        Assert.Matches(
-            new Regex(
-                @"(DOMContentLoaded|readyState).*init",
-                RegexOptions.Singleline),
-            script);
+        Assert.DoesNotContain("wireUpValidation", functionBody);
     }
 
     // ========================================================================
-    // 6. toggleEditMode validates before switching to display mode
-    // ========================================================================
-
-    [Fact]
-    public void ToggleEditMode_Should_ValidateEditContainerBeforeSwitchingToDisplay()
-    {
-        var script = LoadScript();
-
-        var functionBody = ExtractFunctionBody(script, "toggleEditMode");
-
-        // When switching from edit → display (displayContainer.style.display === 'none'),
-        // should validate the edit container's form inputs before proceeding
-        // Should use jQuery .valid() to trigger validation
-        Assert.Matches(
-            new Regex(@"\.valid\s*\(\s*\)", RegexOptions.Singleline),
-            functionBody);
-    }
-
-    [Fact]
-    public void ToggleEditMode_Should_ReturnEarlyWhenValidationFails()
-    {
-        var script = LoadScript();
-
-        var functionBody = ExtractFunctionBody(script, "toggleEditMode");
-
-        // Should check the result of validation and return early if invalid
-        // The pattern should be: if validation fails → return (don't toggle)
-        Assert.Matches(
-            new Regex(@"valid\s*\(\s*\).*return", RegexOptions.Singleline),
-            functionBody);
-    }
-
-    [Fact]
-    public void ToggleEditMode_Should_CheckjQueryAvailabilityBeforeValidation()
-    {
-        var script = LoadScript();
-
-        var functionBody = ExtractFunctionBody(script, "toggleEditMode");
-
-        // Should guard against missing jQuery when validating
-        // (vanilla JS scenario should still allow toggling without validation)
-        Assert.Contains("window.jQuery", functionBody);
-    }
-
-    [Fact]
-    public void ToggleEditMode_Should_FindFormForValidation()
-    {
-        var script = LoadScript();
-
-        var functionBody = ExtractFunctionBody(script, "toggleEditMode");
-
-        // Should find the closest form to validate against
-        Assert.Contains("closest('form')", functionBody);
-    }
-
-    // ========================================================================
-    // 7. Existing functions still present
+    // 4. Core functions still present
     // ========================================================================
 
     [Fact]
@@ -294,9 +167,34 @@ public class EditArrayClientScriptTests
     {
         var script = LoadScript();
 
-        // Event delegation should still be set up
         Assert.Contains("handleEditArrayAction", script);
         Assert.Contains("addEventListener('click'", script);
+    }
+
+    // ========================================================================
+    // 5. No validation code remains in editArray.js
+    // ========================================================================
+
+    [Fact]
+    public void Should_NotContainWireUpValidationFunction()
+    {
+        var script = LoadScript();
+
+        // wireUpValidation should have been moved to the validator module
+        Assert.DoesNotMatch(
+            new Regex(@"function\s+wireUpValidation\s*\(", RegexOptions.Singleline),
+            script);
+    }
+
+    [Fact]
+    public void Should_NotContainDirectjQueryValidationCalls()
+    {
+        var script = LoadScript();
+
+        // No direct jQuery validation references should remain
+        Assert.DoesNotContain("removeData('validator')", script);
+        Assert.DoesNotContain("removeData('unobtrusiveValidator')", script);
+        Assert.DoesNotContain("$.validator.unobtrusive.parse", script);
     }
 
     // ========================================================================

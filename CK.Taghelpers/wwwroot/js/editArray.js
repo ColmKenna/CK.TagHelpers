@@ -2,38 +2,15 @@
  * EditArray JavaScript Module
  *
  * Provides client-side functionality for dynamic array editing in ASP.NET Core applications.
- * Works as vanilla JavaScript with optional jQuery integration for form validation.
+ * Works as vanilla JavaScript. Emits custom events for validation integration
+ * (see editArrayValidator.js for jQuery Validation support).
  *
  * @requires None (vanilla JS)
- * @optional jQuery - When available with jQuery Validation Unobtrusive, enables
- *                    automatic form re-validation after adding new items.
+ * @emits editarray:init - When the module initializes for each container
+ * @emits editarray:item-added - After a new item is appended to the DOM
+ * @emits editarray:edit-saving - Before switching from edit to display mode (cancelable)
+ * @emits editarray:edit-entered - After switching from display to edit mode
  */
-
-/**
- * Re-parse jQuery unobtrusive validation and attach blur handlers for a container.
- * Call this after adding new DOM elements or toggling visibility of form inputs
- * to ensure validation is wired up correctly.
- * @param {HTMLElement} container - A DOM element inside a form (e.g. the items container or edit container)
- */
-function wireUpValidation(container) {
-    if (!container) return;
-
-    const $jq = window.jQuery;
-    if (!$jq || !$jq.validator || !$jq.validator.unobtrusive) return;
-
-    const form = container.closest('form');
-    if (!form) return;
-
-    const $form = $jq(form);
-    $form.removeData('validator');
-    $form.removeData('unobtrusiveValidator');
-    $jq.validator.unobtrusive.parse($form);
-
-    // Attach blur validation handlers to all inputs within the container
-    $jq(container).find('input, select, textarea').off('blur.validate').on('blur.validate', function () {
-        $jq(this).valid();
-    });
-}
 
 /**
  * Add a new item to an edit-array container
@@ -157,8 +134,10 @@ function addNewItem(containerId, templateId, data) {
         editContainer.appendChild(cancelButton);
     }
     
-    // Re-parse validation for the new elements if jQuery validation is available
-    wireUpValidation(container);
+    // Notify listeners that a new item was added (e.g. for validation wiring)
+    document.dispatchEvent(new CustomEvent('editarray:item-added', {
+        detail: { containerId, itemId: itemDiv?.id, container }
+    }));
 }
 
 /**
@@ -175,24 +154,14 @@ function toggleEditMode(itemId) {
 
     if (displayContainer && editContainer) {
         if (displayContainer.style.display === 'none') {
-            // Validate edit container inputs before switching to display mode
-            const $jq = window.jQuery;
-            if ($jq && $jq.validator) {
-                const form = editContainer.closest('form');
-                if (form) {
-                    const $form = $jq(form);
-                    // Trigger validation on all inputs within the edit container
-                    const $inputs = $jq(editContainer).find('input, select, textarea');
-                    let isValid = true;
-                    $inputs.each(function () {
-                        if (!$jq(this).valid()) {
-                            isValid = false;
-                        }
-                    });
-                    if (!isValid) {
-                        return;
-                    }
-                }
+            // Allow listeners (e.g. validator) to cancel the save
+            const savingEvent = new CustomEvent('editarray:edit-saving', {
+                cancelable: true,
+                detail: { itemId, editContainer }
+            });
+            document.dispatchEvent(savingEvent);
+            if (savingEvent.defaultPrevented) {
+                return;
             }
 
             // Update display with current values
@@ -212,8 +181,10 @@ function toggleEditMode(itemId) {
             displayContainer.style.display = 'none';
             editContainer.style.display = 'block';
 
-            // Re-validate form when entering edit mode to ensure validation state is current
-            wireUpValidation(editContainer);
+            // Notify listeners that edit mode was entered (e.g. for validation wiring)
+            document.dispatchEvent(new CustomEvent('editarray:edit-entered', {
+                detail: { itemId, editContainer }
+            }));
         }
     }
     // re-enable the add button
@@ -514,9 +485,11 @@ function handleEditArrayAction(event) {
 function initEditArray() {
     document.addEventListener('click', handleEditArrayAction);
 
-    // Wire up validation for any existing edit-array containers
+    // Notify listeners for each existing container (e.g. for validation wiring)
     document.querySelectorAll('.edit-array-container').forEach(function(container) {
-        wireUpValidation(container);
+        document.dispatchEvent(new CustomEvent('editarray:init', {
+            detail: { container }
+        }));
     });
 }
 
