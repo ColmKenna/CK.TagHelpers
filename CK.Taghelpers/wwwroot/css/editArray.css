@@ -1,0 +1,77 @@
+/* ===================================================================
+   EditArray Component Styles
+   =================================================================== */
+
+/* --- Custom Properties (Theming Surface) --- */
+:root {
+    --ea-deleted-opacity: 0.5;
+    --ea-deleted-bg: #f8d7da;
+    --ea-placeholder-color: #6c757d;
+}
+
+/* --- Visibility Toggle (replaces inline style="display:none") --- */
+.ea-hidden {
+    display: none !important;
+}
+
+/* --- Container --- */
+.edit-array-container {
+    position: relative;
+}
+
+/* --- Items Wrapper --- */
+.edit-array-items {
+    /* No special styling needed; exists for structure */
+}
+
+/* --- Individual Item --- */
+.edit-array-item {
+    position: relative;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+}
+
+/* --- Deleted State --- */
+.edit-array-item.deleted {
+    opacity: var(--ea-deleted-opacity);
+    background-color: var(--ea-deleted-bg);
+    text-decoration: line-through;
+}
+
+.edit-array-item.deleted .display-container,
+.edit-array-item.deleted .edit-container {
+    pointer-events: none;
+}
+
+/* --- Display / Edit Containers --- */
+.display-container,
+.edit-container {
+    /* Block-level by default; ea-hidden toggles visibility */
+}
+
+/* --- Empty Placeholder --- */
+.edit-array-placeholder {
+    color: var(--ea-placeholder-color);
+    padding: 1rem 0;
+    font-style: italic;
+}
+
+/* --- Reorder Controls --- */
+.reorder-controls {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+/* --- Error Panel --- */
+.edit-array-error {
+    /* Combines with Bootstrap's .alert .alert-danger */
+}
+
+/* --- Focus Indicators (Accessibility) --- */
+.edit-array-container button:focus-visible {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+}
