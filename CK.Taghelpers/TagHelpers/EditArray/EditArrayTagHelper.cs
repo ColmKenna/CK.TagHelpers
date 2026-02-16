@@ -305,24 +305,28 @@ public sealed partial class EditArrayTagHelper : TagHelper
     // ============================================================
 
     /// <summary>
-    /// Gets or sets the JavaScript function name to invoke when a user completes editing an item (clicks "Done").
-    /// The function receives the item's DOM element ID as a parameter.
+    /// Gets or sets the JavaScript function name to invoke after successfully switching from edit
+    /// to display mode (after "Done" is not canceled and the display view is updated).
     /// </summary>
     /// <value>
     /// The name of a JavaScript function to call, or <c>null</c> if no callback is needed.
     /// </value>
     /// <remarks>
     /// <para>
-    /// When set, "Done" buttons will invoke both the <c>toggleEditMode</c> function and this custom callback.
-    /// The callback is executed after the toggle completes. If <c>null</c> or empty, only <c>toggleEditMode</c> is called.
+    /// This callback fires after <see cref="OnDone"/> and cannot cancel the transition because the
+    /// mode switch is already complete.
     /// </para>
+    /// <para><strong>Execution order on Done click:</strong></para>
+    /// <list type="number">
+    ///   <item><description><see cref="OnDone"/> callback fires (can cancel by returning <c>false</c>)</description></item>
+    ///   <item><description><c>editarray:edit-saving</c> event fires (can cancel via <c>preventDefault()</c>)</description></item>
+    ///   <item><description>Display view is updated from form values</description></item>
+    ///   <item><description>Visibility toggles from edit to display</description></item>
+    ///   <item><description><see cref="OnUpdate"/> callback fires</description></item>
+    /// </list>
     /// <para>
     /// The callback value is HTML-encoded to prevent XSS vulnerabilities. Only specify the function name;
     /// do not include quotes, parentheses, or other JavaScript code beyond the function identifier.
-    /// </para>
-    /// <para>
-    /// This is particularly useful for triggering AJAX saves, form validation, or other custom logic when
-    /// an item's editing is completed.
     /// </para>
     /// </remarks>
     /// <example>
@@ -341,12 +345,12 @@ public sealed partial class EditArrayTagHelper : TagHelper
     public string? OnUpdate { get; set; }
 
     /// <summary>
-    /// Gets or sets the JavaScript function name to invoke when a user clicks the "Done" button.
-    /// This is invoked in addition to <see cref="OnUpdate"/> and receives the item's DOM element ID.
+    /// Gets or sets the JavaScript function name to invoke when the user clicks "Done",
+    /// before any transition occurs.
     /// </summary>
     /// <remarks>
-    /// Use this when you need a distinct hook for the Done action (e.g., closing popovers,
-    /// firing telemetry) without overloading <see cref="OnUpdate"/> semantics.
+    /// Return <c>false</c> from this callback to cancel the edit-to-display transition
+    /// (for example, to block the switch when validation fails).
     /// </remarks>
     [HtmlAttributeName(OnDoneAttributeName)]
     public string? OnDone { get; set; }
