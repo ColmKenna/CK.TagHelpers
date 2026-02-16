@@ -193,10 +193,9 @@ public sealed class EditArrayTagHelper : TagHelper
 
     /// <summary>
     /// Gets or sets the name of the partial view used to render each item in display mode.
-    /// This property is required.
     /// </summary>
     /// <value>
-    /// The path to the partial view for display mode. Must not be <c>null</c>.
+    /// The path to the partial view for display mode, or <c>null</c> for edit-only mode.
     /// </value>
     /// <remarks>
     /// <para>
@@ -204,11 +203,11 @@ public sealed class EditArrayTagHelper : TagHelper
     /// Users can toggle between display and edit modes using Edit/Done buttons.
     /// </para>
     /// <para>
-    /// This property must always be specified, even if <see cref="DisplayMode"/> is <c>false</c>.
+    /// When omitted, the component renders edit-only mode (no display container or Edit/Done buttons).
     /// </para>
     /// </remarks>
     [HtmlAttributeName(DisplayViewNameAttributeName)]
-    public required string DisplayViewName { get; set; }
+    public string? DisplayViewName { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to render a template section for adding new items.
@@ -712,31 +711,37 @@ public sealed class EditArrayTagHelper : TagHelper
 
     private async Task RenderItemDisplayMode(StringBuilder sb, object item, string itemId, ViewDataDictionary<object> viewData)
     {
-        var displayVisibility = GetVisibilityStyle(!DisplayMode);
-        var editVisibility = GetVisibilityStyle(DisplayMode);
+        var hasDisplayView = !string.IsNullOrWhiteSpace(DisplayViewName);
 
-        sb.Append("<div class=\"")
-            .Append(CssClasses.DisplayContainer)
-            .Append("\" id=\"")
-            .Append(itemId)
-            .Append("-display\"");
-        if (!string.IsNullOrEmpty(displayVisibility))
+        if (hasDisplayView)
         {
-            sb.Append(' ')
-              .Append(displayVisibility);
-        }
-        sb.Append('>');
+            var displayVisibility = GetVisibilityStyle(!DisplayMode);
 
-        var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, item, viewData);
-        using (var writer = new StringWriter())
-        {
-            displayViewContent.WriteTo(writer, HtmlEncoder.Default);
-            sb.Append(writer.ToString());
+            sb.Append("<div class=\"")
+                .Append(CssClasses.DisplayContainer)
+                .Append("\" id=\"")
+                .Append(itemId)
+                .Append("-display\"");
+            if (!string.IsNullOrEmpty(displayVisibility))
+            {
+                sb.Append(' ')
+                  .Append(displayVisibility);
+            }
+            sb.Append('>');
+
+            var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, item, viewData);
+            using (var writer = new StringWriter())
+            {
+                displayViewContent.WriteTo(writer, HtmlEncoder.Default);
+                sb.Append(writer.ToString());
+            }
+
+            sb.Append(GenerateButton("edit", itemId, false));
+            sb.Append(GenerateButton("delete", itemId, false));
+            sb.Append("</div>");
         }
 
-        sb.Append(GenerateButton("edit", itemId, false));
-        sb.Append(GenerateButton("delete", itemId, false));
-        sb.Append("</div>");
+        var editVisibility = GetVisibilityStyle(hasDisplayView && DisplayMode);
 
         sb.Append("<div class=\"")
             .Append(CssClasses.EditContainer)
@@ -757,7 +762,14 @@ public sealed class EditArrayTagHelper : TagHelper
             sb.Append(writer.ToString());
         }
 
-        sb.Append(GenerateButton("done", itemId, false));
+        if (hasDisplayView)
+        {
+            sb.Append(GenerateButton("done", itemId, false));
+        }
+        else
+        {
+            sb.Append(GenerateButton("delete", itemId, false));
+        }
         sb.Append("</div>");
     }
 
@@ -806,7 +818,9 @@ public sealed class EditArrayTagHelper : TagHelper
 
         var name = $"{templateFieldName}.IsDeleted";
 
-        if (!string.IsNullOrWhiteSpace(DisplayViewName))
+        var hasDisplayView = !string.IsNullOrWhiteSpace(DisplayViewName);
+
+        if (hasDisplayView)
         {
             var templateDisplayVisibility = GetVisibilityStyle(true);
 
@@ -832,11 +846,11 @@ public sealed class EditArrayTagHelper : TagHelper
             sb.Append(GenerateButton("edit", null, true));
             sb.Append(GenerateButton("delete", null, true));
             sb.Append("</div>");
-
-            sb.Append("<div class=\"")
-              .Append(CssClasses.EditContainer)
-              .Append("\">");
         }
+
+        sb.Append("<div class=\"")
+          .Append(CssClasses.EditContainer)
+          .Append("\">");
 
         if (templateModel != null)
         {
@@ -853,7 +867,14 @@ public sealed class EditArrayTagHelper : TagHelper
             }
         }
 
-        sb.Append(GenerateButton("done", null, true));
+        if (hasDisplayView)
+        {
+            sb.Append(GenerateButton("done", null, true));
+        }
+        else
+        {
+            sb.Append(GenerateButton("delete", null, true));
+        }
         sb.Append("</div>");
 
         AppendTemplateReorderButtons(sb, containerId);
@@ -1252,10 +1273,10 @@ public sealed class EditArrayTagHelper : TagHelper
             errors.Add($"'{ArrayIdAttributeName}' attribute is required and must not be null, empty, or whitespace. The id is used to generate unique JavaScript function calls and DOM element identifiers.");
         }
 
-        // Validate DisplayViewName (always required as it's marked with 'required' keyword)
-        if (string.IsNullOrWhiteSpace(DisplayViewName))
+        // Validate DisplayViewName when display mode is enabled
+        if (DisplayMode && string.IsNullOrWhiteSpace(DisplayViewName))
         {
-            errors.Add($"'{nameof(DisplayViewName)}' is required and must not be null or empty. Specify the name of the partial view to render for display mode.");
+            errors.Add($"'{nameof(DisplayViewName)}' is required when DisplayMode is enabled. Specify the name of the partial view to render for display mode.");
         }
 
         // Validate ViewContext and nested properties

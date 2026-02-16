@@ -304,6 +304,34 @@ public class EditArrayTagHelperTests
         Assert.Contains("Done", content); // Done button text
     }
 
+    [Fact]
+    public async Task Should_RenderEditOnlyMode_When_DisplayViewNameIsNullAndDisplayModeIsFalse()
+    {
+        // Arrange
+        var items = new[] { "Item1" };
+        var tagHelper = CreateTagHelper(items: items, viewName: "_Editor");
+        tagHelper.DisplayMode = false;
+        tagHelper.DisplayViewName = null;
+
+        SetupPartialAsync("_Editor", new HtmlString("<input>"));
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = output.Content.GetContent();
+        Assert.DoesNotContain("class=\"display-container\"", content);
+        Assert.Contains("class=\"edit-container\"", content);
+        Assert.Contains("data-action=\"delete\"", content);
+        Assert.DoesNotContain("data-action=\"edit\"", content);
+        Assert.DoesNotContain("data-action=\"done\"", content);
+
+        _htmlHelperMock.Verify(h => h.PartialAsync("_Display", It.IsAny<object>(), It.IsAny<ViewDataDictionary>()), Times.Never);
+    }
+
     // ========================================================================
     // 4. Template & Add Button Tests
     // ========================================================================
@@ -337,6 +365,39 @@ public class EditArrayTagHelperTests
         Assert.Contains("<template", content);
         Assert.Contains("</template>", content);
         Assert.Contains("__index__", content); // Check placeholder replacement logic
+    }
+
+    [Fact]
+    public async Task Should_RenderEditOnlyTemplate_When_DisplayViewNameIsNull()
+    {
+        // Arrange
+        var items = new List<TestItem> { new TestItem() };
+        var tagHelper = CreateTagHelper(items: Array.Empty<object>(), viewName: "_Editor");
+        tagHelper.Items = items;
+        tagHelper.DisplayViewName = null;
+        tagHelper.RenderTemplate = true;
+
+        SetupPartialAsync("_Editor", new HtmlString("TemplateContent"));
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = output.Content.GetContent();
+        var templateStart = content.IndexOf("<template", StringComparison.Ordinal);
+        var templateEnd = content.IndexOf("</template>", StringComparison.Ordinal);
+        var templateContent = content.Substring(templateStart, templateEnd - templateStart);
+
+        Assert.DoesNotContain("display-container", templateContent);
+        Assert.Contains("class=\"edit-container\"", templateContent);
+        Assert.Contains("data-action=\"delete\"", templateContent);
+        Assert.DoesNotContain("data-action=\"edit\"", templateContent);
+        Assert.DoesNotContain("data-action=\"done\"", templateContent);
+
+        _htmlHelperMock.Verify(h => h.PartialAsync("_Display", It.IsAny<object>(), It.IsAny<ViewDataDictionary>()), Times.Never);
     }
 
     [Fact]
