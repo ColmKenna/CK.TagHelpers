@@ -2,8 +2,7 @@
  * EditArray JavaScript Module
  *
  * Provides client-side functionality for dynamic array editing in ASP.NET Core applications.
- * Works as vanilla JavaScript. Emits custom events for validation integration
- * (see editArrayValidator.js for jQuery Validation support).
+ * Works as vanilla JavaScript. Emits custom events for validation integration.
  *
  * @requires None (vanilla JS)
  * @emits editarray:init - When the module initializes for each container
@@ -107,6 +106,9 @@ function addNewItem(containerId, templateId, data) {
 
     container.appendChild(clone);
 
+    // Re-parse jQuery unobtrusive validation for the new inputs if available
+    refreshUnobtrusiveValidation(container);
+
     // Hide the placeholder if it exists
     const placeholder = container.querySelector('.edit-array-placeholder');
     if (placeholder) {
@@ -154,6 +156,15 @@ function toggleEditMode(itemId) {
 
     if (displayContainer && editContainer) {
         if (displayContainer.style.display === 'none') {
+            // Optional dedicated hook for Done button; returning false cancels the transition
+            const onDone = item.dataset.onDone;
+            if (onDone && typeof window[onDone] === 'function') {
+                const shouldContinue = window[onDone](itemId);
+                if (shouldContinue === false) {
+                    return;
+                }
+            }
+
             // Allow listeners (e.g. validator) to cancel the save
             const savingEvent = new CustomEvent('editarray:edit-saving', {
                 cancelable: true,
@@ -481,12 +492,38 @@ function handleEditArrayAction(event) {
     }
 }
 
+/**
+ * Re-parse jQuery unobtrusive validation for dynamically added inputs.
+ * Removes stale validator data so $.validator.unobtrusive.parse() picks up new fields.
+ * No-ops silently when jQuery validation is not loaded.
+ * @param {HTMLElement} element - An element inside the form to re-parse
+ */
+function refreshUnobtrusiveValidation(element) {
+    if (typeof $ === 'undefined' || !$.validator || !$.validator.unobtrusive) return;
+    var $form = $(element).closest('form');
+    if (!$form.length) return;
+
+    $form.removeData('validator').removeData('unobtrusiveValidation');
+    $.validator.unobtrusive.parse($form);
+
+    // Enable eager validation so fields validate on blur, not just on submit
+    var validator = $form.data('validator');
+    if (validator) {
+        validator.settings.onfocusout = function (el) {
+            if (!this.checkable(el)) {
+                this.element(el);
+            }
+        };
+    }
+}
+
 // Initialize event delegation and validation when DOM is ready
 function initEditArray() {
     document.addEventListener('click', handleEditArrayAction);
 
-    // Notify listeners for each existing container (e.g. for validation wiring)
+    // Wire up unobtrusive validation and notify listeners for each container
     document.querySelectorAll('.edit-array-container').forEach(function(container) {
+        refreshUnobtrusiveValidation(container);
         document.dispatchEvent(new CustomEvent('editarray:init', {
             detail: { container }
         }));
@@ -497,5 +534,24 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initEditArray);
 } else {
     initEditArray();
+}
+
+// Export for test environments (CommonJS); ignored in browsers.
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        addNewItem,
+        toggleEditMode,
+        markForDeletion,
+        updateDisplayFromForm,
+        moveItem,
+        renumberItems,
+        updateAttributeWithIndex,
+        replaceIndexTokens,
+        getContainerIdFromItemId,
+        resolveItemId,
+        handleEditArrayAction,
+        refreshUnobtrusiveValidation,
+        initEditArray
+    };
 }
 

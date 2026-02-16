@@ -7,5 +7,6 @@ public class EditArrayAttributesViewModel
     public List<EditArrayPersonViewModel> ReorderMembers { get; set; } = new();
     public List<EditArrayPersonViewModel> ButtonTextMembers { get; set; } = new();
     public List<EditArrayPersonViewModel> CallbackMembers { get; set; } = new();
+    public List<EditArrayPersonViewModel> DoneHookMembers { get; set; } = new();
     public List<EditArrayPersonViewModel> EmptyMembers { get; set; } = new();
 }

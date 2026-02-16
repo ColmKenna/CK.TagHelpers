@@ -414,6 +414,7 @@ public class EditArrayTagHelperTests
         tagHelper.DisplayMode = true;
         tagHelper.DisplayViewName = "_Display";
         tagHelper.OnUpdate = "myUpdateCallback";
+        tagHelper.OnDone = "myDoneCallback";
         tagHelper.OnDelete = "myDeleteCallback";
         
         SetupPartialAsync("_Editor", new HtmlString(""));
@@ -430,6 +431,7 @@ public class EditArrayTagHelperTests
         
         // Verify data attributes are present (XSS-safe approach)
         Assert.Contains("data-on-update=\"myUpdateCallback\"", content);
+        Assert.Contains("data-on-done=\"myDoneCallback\"", content);
         Assert.Contains("data-on-delete=\"myDeleteCallback\"", content);
 
         // Verify core button data-action attributes are present (event delegation, not inline onclick)

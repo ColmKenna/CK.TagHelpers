@@ -146,6 +146,37 @@
         </div>
     </section>
 
+    <section class="example-section" id="done-hook">
+        <h2>Done hook with external validation guard</h2>
+        <p class="example-description">
+            Plug an external function into asp-on-done to block closing when client-side validation spans contain errors. This keeps the validation logic outside the TagHelper.
+        </p>
+
+        <div class="example-container row g-3">
+            <div class="example-rendered col-lg-6">
+                <h3 class="h6">Result</h3>
+                <form id="done-hook-form" novalidate>
+                    <edit-array id="attr-done-hook"
+                                asp-items="Model.DoneHookMembers"
+                                asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
+                                asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
+                                asp-display-mode="true"
+                                asp-on-done="guardDoneAction">
+                    </edit-array>
+                </form>
+                <div class="alert alert-warning mt-2" id="done-hook-status">Attempt an edit, then click Done.</div>
+            </div>
+            <div class="example-source col-lg-6">
+                <h3 class="h6">Source</h3>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;form id=\"done-hook-form\" novalidate&gt;\n    &lt;edit-array id=\"attr-done-hook\"\n                asp-items=\"Model.DoneHookMembers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-on-done=\"guardDoneAction\"&gt;\n    &lt;/edit-array&gt;\n&lt;/form&gt;\n&lt;div class=\"alert alert-warning mt-2\" id=\"done-hook-status\"&gt;Attempt an edit, then click Done.&lt;/div&gt;")</code></pre>
+                <pre class="mt-2"><code class="language-javascript">@Html.Raw("function guardDoneAction(itemId) {\n    const editScope = document.getElementById(`${itemId}-edit`);\n    const form = editScope ? editScope.closest('form') : null;\n    if (form && typeof $ === 'function' && $.validator && $.validator.unobtrusive) {\n        $.validator.unobtrusive.parse(editScope);\n        const validator = $(form).data('validator') || $(form).validate();\n        const inputs = $(editScope).find(':input');\n        const isValid = inputs.toArray().every(input => validator.element(input));\n        updateDoneHookStatus(isValid);\n        return isValid;\n    }\n\n    // Fallback: inspect validation spans if unobtrusive scripts are missing\n    const spans = editScope ? editScope.querySelectorAll('span[data-valmsg-for]') : [];\n    const hasErrors = Array.from(spans).some(s => (s.textContent && s.textContent.trim()) || s.classList.contains('field-validation-error'));\n    updateDoneHookStatus(!hasErrors);\n    return !hasErrors;\n}\n\nfunction updateDoneHookStatus(isValid) {\n    const status = document.getElementById('done-hook-status');\n    if (!status) return;\n    status.textContent = isValid\n        ? 'Allowed: Done action proceeded.'\n        : 'Blocked: resolve validation errors before closing.';\n    status.className = isValid ? 'alert alert-success mt-2' : 'alert alert-danger mt-2';\n}")</code></pre>
+            </div>
+        </div>
+        <div class="example-notes">
+            <strong>Note:</strong> The guard lives entirely in your page script. Returning <code>false</code> keeps the edit container open and prevents the internal Done toggle.
+        </div>
+    </section>
+
     <section class="example-section" id="empty-placeholder">
         <h2>Empty placeholder</h2>
         <p class="example-description">
@@ -187,5 +218,33 @@
                 status.textContent = 'Toggled delete for: ' + itemId;
             }
         }
+
+        function guardDoneAction(itemId) {
+            const editScope = document.getElementById(`${itemId}-edit`);
+            const form = editScope ? editScope.closest('form') : null;
+            if (form && typeof $ === 'function' && $.validator && $.validator.unobtrusive) {
+                $.validator.unobtrusive.parse(editScope);
+                const validator = $(form).data('validator') || $(form).validate();
+                const inputs = $(editScope).find(':input');
+                const isValid = inputs.toArray().every(input => validator.element(input));
+                updateDoneHookStatus(isValid);
+                return isValid;
+            }
+
+            const spans = editScope ? editScope.querySelectorAll('span[data-valmsg-for]') : [];
+            const hasErrors = Array.from(spans).some(s => (s.textContent && s.textContent.trim()) || s.classList.contains('field-validation-error'));
+            updateDoneHookStatus(!hasErrors);
+            return !hasErrors;
+        }
+
+        function updateDoneHookStatus(isValid) {
+            const status = document.getElementById('done-hook-status');
+            if (!status) return;
+            status.textContent = isValid
+                ? 'Allowed: Done action proceeded.'
+                : 'Blocked: resolve validation errors before closing.';
+            status.className = isValid ? 'alert alert-success mt-2' : 'alert alert-danger mt-2';
+        }
     </script>
+    <partial name="_ValidationScriptsPartial" />
 }

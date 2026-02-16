@@ -64,6 +64,15 @@ public static class EditArraySampleData
         };
     }
 
+    public static List<EditArrayPersonViewModel> GetDoneHookMembers()
+    {
+        return new List<EditArrayPersonViewModel>
+        {
+            new() { Id = 62, Name = "Sawyer Lane", Role = "Developer", Email = "sawyer.lane@example.com", YearsOfExperience = 3, Notes = "Validates before close." },
+            new() { Id = 63, Name = "Dakota Rivers", Role = "QA Analyst", Email = "dakota.rivers@example.com", YearsOfExperience = 4, Notes = "Blocks done on errors." }
+        };
+    }
+
     public static List<EditArrayPersonViewModel> GetValidationMembers()
     {
         return new List<EditArrayPersonViewModel>

@@ -9,7 +9,7 @@ namespace CK.TagHelpers.Tests.ClientScripts;
 /// TDD Tests for EditArray client script - core functionality and event dispatching.
 ///
 /// Feature: Ensure editArray.js emits custom events at key lifecycle points
-/// so that external modules (e.g. EditArrayValidator) can subscribe to them.
+/// so that external validation modules can subscribe to them.
 ///
 /// Requirements:
 /// - Dispatch editarray:item-added after adding a new item
@@ -80,6 +80,18 @@ public class EditArrayClientScriptTests
         // Should check defaultPrevented and return
         Assert.Matches(
             new Regex(@"defaultPrevented.*return", RegexOptions.Singleline),
+            functionBody);
+    }
+
+    [Fact]
+    public void ToggleEditMode_Should_InvokeOnDoneAndAllowCancellation()
+    {
+        var script = LoadScript();
+        var functionBody = ExtractFunctionBody(script, "toggleEditMode");
+
+        Assert.Contains("onDone && typeof window[onDone] === 'function'", functionBody);
+        Assert.Matches(
+            new Regex(@"shouldContinue\s*===\s*false\s*\)\s*{\s*return", RegexOptions.Singleline),
             functionBody);
     }
 

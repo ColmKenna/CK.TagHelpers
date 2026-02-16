@@ -25,7 +25,7 @@ public class TagHelperExamplesController : Controller
                 {
                     Title = "Attributes and Configuration",
                     Description = "Every attribute with practical combinations.",
-                    ExampleCount = 6,
+                    ExampleCount = 7,
                     ActionName = nameof(AttributesAndConfiguration),
                     AnchorId = "template-and-add"
                 },
@@ -97,6 +97,7 @@ public class TagHelperExamplesController : Controller
             ReorderMembers = EditArraySampleData.GetReorderMembers(),
             ButtonTextMembers = EditArraySampleData.GetButtonTextMembers(),
             CallbackMembers = EditArraySampleData.GetCallbackMembers(),
+            DoneHookMembers = EditArraySampleData.GetDoneHookMembers(),
             EmptyMembers = new List<EditArrayPersonViewModel>()
         };
 

@@ -17,6 +17,7 @@ public class EditArrayTagHelper : TagHelper
     private const string AddButtonAttributeName = "asp-add-button";
     private const string DisplayModeAttributeName = "asp-display-mode";
     private const string OnUpdateAttributeName = "asp-on-update";
+    private const string OnDoneAttributeName = "asp-on-done";
     private const string OnDeleteAttributeName = "asp-on-delete";
     private const string ContainerCssClassAttributeName = "asp-container-class";
     private const string ItemCssClassAttributeName = "asp-item-class";
@@ -318,6 +319,17 @@ public class EditArrayTagHelper : TagHelper
     /// </example>
     [HtmlAttributeName(OnUpdateAttributeName)]
     public string? OnUpdate { get; set; }
+
+    /// <summary>
+    /// Gets or sets the JavaScript function name to invoke when a user clicks the "Done" button.
+    /// This is invoked in addition to <see cref="OnUpdate"/> and receives the item's DOM element ID.
+    /// </summary>
+    /// <remarks>
+    /// Use this when you need a distinct hook for the Done action (e.g., closing popovers,
+    /// firing telemetry) without overloading <see cref="OnUpdate"/> semantics.
+    /// </remarks>
+    [HtmlAttributeName(OnDoneAttributeName)]
+    public string? OnDone { get; set; }
 
     /// <summary>
     /// Gets or sets the JavaScript function name to invoke after an item is marked for deletion.
@@ -981,6 +993,13 @@ public class EditArrayTagHelper : TagHelper
         {
             sb.Append(" data-on-update=\"")
               .Append(HtmlEncoder.Default.Encode(OnUpdate))
+              .Append("\"");
+        }
+
+        if (!string.IsNullOrWhiteSpace(OnDone))
+        {
+            sb.Append(" data-on-done=\"")
+              .Append(HtmlEncoder.Default.Encode(OnDone))
               .Append("\"");
         }
 
