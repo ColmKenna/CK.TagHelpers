@@ -5,10 +5,28 @@ const {
     addNewItem,
     toggleEditMode,
     markForDeletion,
+    removeUnsavedItem,
+    updateDisplayFromForm,
     moveItem,
+    renumberItems,
+    updateAttributeWithIndex,
+    replaceIndexTokens,
+    replaceTemplateTokens,
+    getContainerIdFromItemId,
+    resolveItemId,
+    handleEditArrayAction,
     refreshUnobtrusiveValidation,
     initEditArray,
-    replaceIndexTokens
+    showElement,
+    hideElement,
+    HIDDEN_CLASS,
+    SUFFIX_ITEMS,
+    SUFFIX_DISPLAY,
+    SUFFIX_EDIT,
+    SUFFIX_ADD,
+    SELECTOR_ITEM,
+    SELECTOR_PLACEHOLDER,
+    SELECTOR_CONTAINER
 } = require('../../CK.Taghelpers/wwwroot/js/editArray.js');
 
 function setupFixture(options = {}) {
@@ -403,6 +421,549 @@ describe('editArray.js', () => {
         // Validates fast path avoids unnecessary processing when no markers are present.
         it('returns unchanged value when no markers or old id are present', () => {
             expect(replaceIndexTokens('plain-text', 3, null, null)).toBe('plain-text');
+        });
+
+        // Validates bracket-index pattern replacement used in name attributes.
+        it('replaces [n] bracket patterns with the new index', () => {
+            expect(replaceIndexTokens('Input[0]', 5, null, null)).toBe('Input[5]');
+        });
+
+        // Validates underscore-index pattern replacement used in id attributes.
+        it('replaces _n__ underscore patterns with the new index', () => {
+            expect(replaceIndexTokens('Input_0__Name', 3, null, null)).toBe('Input_3__Name');
+        });
+
+        // Validates __newItem__ marker pattern replacement.
+        it('replaces __newItem__n patterns with the new index', () => {
+            expect(replaceIndexTokens('__newItem__0', 7, null, null)).toBe('__newItem__7');
+        });
+
+        // Validates -item-n pattern replacement used in element IDs.
+        it('replaces -item-n patterns with the new index', () => {
+            expect(replaceIndexTokens('container-item-0', 2, null, null)).toBe('container-item-2');
+        });
+
+        // Validates oldId→newId substitution for renumbering container-scoped IDs.
+        it('replaces oldId with newId when both are provided', () => {
+            expect(replaceIndexTokens(
+                'test-container-item-0',
+                1,
+                'test-container-item-0',
+                'test-container-item-1'
+            )).toBe('test-container-item-1');
+        });
+
+        // Validates compound values with multiple token patterns are all replaced.
+        it('handles values with multiple patterns in a single string', () => {
+            const value = 'Input[0].Items[0].Name';
+            expect(replaceIndexTokens(value, 2, null, null)).toBe('Input[2].Items[2].Name');
+        });
+    });
+
+    // Validates show/hide helpers manage the ea-hidden CSS class correctly.
+    describe('showElement and hideElement', () => {
+        it('showElement removes ea-hidden class from an element', () => {
+            const el = document.createElement('div');
+            el.classList.add(HIDDEN_CLASS);
+
+            showElement(el);
+
+            expect(el.classList.contains(HIDDEN_CLASS)).toBe(false);
+        });
+
+        it('hideElement adds ea-hidden class to an element', () => {
+            const el = document.createElement('div');
+
+            hideElement(el);
+
+            expect(el.classList.contains(HIDDEN_CLASS)).toBe(true);
+        });
+    });
+
+    // Validates exported constants match the values used in the DOM contract.
+    describe('DOM contract constants', () => {
+        it('exports expected suffix and selector constants', () => {
+            expect(HIDDEN_CLASS).toBe('ea-hidden');
+            expect(SUFFIX_ITEMS).toBe('-items');
+            expect(SUFFIX_DISPLAY).toBe('-display');
+            expect(SUFFIX_EDIT).toBe('-edit');
+            expect(SUFFIX_ADD).toBe('-add');
+            expect(SELECTOR_ITEM).toBe('.edit-array-item');
+            expect(SELECTOR_PLACEHOLDER).toBe('.edit-array-placeholder');
+            expect(SELECTOR_CONTAINER).toBe('.edit-array-container');
+        });
+    });
+
+    // Validates container ID extraction from item IDs used by toggleEditMode.
+    describe('getContainerIdFromItemId', () => {
+        it('extracts container id from a well-formed item id', () => {
+            expect(getContainerIdFromItemId('my-container-item-0')).toBe('my-container');
+        });
+
+        it('returns null for a malformed item id without -item-n suffix', () => {
+            expect(getContainerIdFromItemId('no-suffix-here')).toBeNull();
+        });
+
+        it('returns null when given null or empty string', () => {
+            expect(getContainerIdFromItemId(null)).toBeNull();
+            expect(getContainerIdFromItemId('')).toBeNull();
+        });
+
+        it('handles nested container names with hyphens', () => {
+            expect(getContainerIdFromItemId('outer-inner-container-item-5')).toBe('outer-inner-container');
+        });
+    });
+
+    // Validates resolveItemId resolves "closest" ancestor or returns literal data-item-id.
+    describe('resolveItemId', () => {
+        it('returns the closest edit-array-item ancestor id when data-item-id is "closest"', () => {
+            // Arrange
+            const item = addItemAndGet('0');
+            const button = item.querySelector('.edit-item-btn');
+            button.dataset.itemId = 'closest';
+
+            // Act
+            const resolved = resolveItemId(button);
+
+            // Assert
+            expect(resolved).toBe('test-container-item-0');
+        });
+
+        it('returns the literal data-item-id value when it is not "closest"', () => {
+            // Arrange
+            const button = document.createElement('button');
+            button.dataset.itemId = 'explicit-item-3';
+
+            // Act / Assert
+            expect(resolveItemId(button)).toBe('explicit-item-3');
+        });
+
+        it('returns null when data-item-id is absent', () => {
+            const button = document.createElement('button');
+            expect(resolveItemId(button)).toBeNull();
+        });
+
+        it('returns null when closest ancestor has no id', () => {
+            // Arrange - button with "closest" but no .edit-array-item ancestor
+            const button = document.createElement('button');
+            button.dataset.itemId = 'closest';
+            document.body.appendChild(button);
+
+            // Act / Assert
+            expect(resolveItemId(button)).toBeNull();
+            button.remove();
+        });
+    });
+
+    // Validates updateDisplayFromForm copies input values to matching display spans.
+    describe('updateDisplayFromForm rendering', () => {
+        it('copies input value to the matching display-for span', () => {
+            // Arrange
+            const item = addItemAndGet('0');
+            const input = item.querySelector('input[type="text"]');
+            input.value = 'Bob';
+
+            // Act
+            updateDisplayFromForm('test-container-item-0');
+
+            // Assert
+            const displaySpan = item.querySelector('[data-display-for="Input_0"]');
+            expect(displaySpan.textContent).toBe('Bob');
+        });
+
+        it('no-ops safely when item does not exist', () => {
+            expect(() => updateDisplayFromForm('nonexistent-item')).not.toThrow();
+        });
+
+        it('skips inputs that have no matching display element', () => {
+            // Arrange
+            const item = addItemAndGet('0');
+            const editContainer = item.querySelector('.edit-container');
+            const extraInput = document.createElement('input');
+            extraInput.id = 'orphan-input';
+            extraInput.value = 'should be ignored';
+            editContainer.appendChild(extraInput);
+
+            // Act / Assert - should not throw when display target is missing
+            expect(() => updateDisplayFromForm('test-container-item-0')).not.toThrow();
+        });
+    });
+
+    // Validates replaceTemplateTokens replaces __index__ tokens in cloned template fragments.
+    describe('replaceTemplateTokens rendering', () => {
+        it('replaces __index__ in name, id, data-id, data-display-for, for, and data-valmsg-for', () => {
+            // Arrange
+            const template = document.getElementById('test-template');
+            const clone = template.content.cloneNode(true);
+
+            // Act
+            replaceTemplateTokens(clone, 4);
+
+            // Assert
+            const input = clone.querySelector('input[type="text"]');
+            expect(input.name).toBe('Input[4]');
+            expect(input.id).toBe('Input_4');
+            expect(input.getAttribute('data-id')).toBe('input-4');
+            expect(input.getAttribute('data-display-for')).toBe('Input_4');
+
+            const label = clone.querySelector('label');
+            expect(label.htmlFor).toBe('Input_4');
+
+            const valMsg = clone.querySelector('[data-valmsg-for]');
+            expect(valMsg.getAttribute('data-valmsg-for')).toBe('Input[4]');
+
+            const hiddenInput = clone.querySelector('input[data-is-deleted-marker]');
+            expect(hiddenInput.name).toBe('Input[4].IsDeleted');
+        });
+    });
+
+    // Validates removeUnsavedItem directly removes the item and restores container state.
+    describe('removeUnsavedItem', () => {
+        it('removes the item from the DOM and re-enables the add button', () => {
+            // Arrange
+            addItemAndGet('0');
+            const addButton = document.getElementById('test-container-add');
+            expect(addButton.disabled).toBe(true);
+
+            // Act
+            removeUnsavedItem('test-container-item-0', 'test-container');
+
+            // Assert
+            expect(document.getElementById('test-container-item-0')).toBeNull();
+            expect(addButton.disabled).toBe(false);
+            expect(document.activeElement).toBe(addButton);
+        });
+
+        it('shows placeholder when last item is removed', () => {
+            // Arrange
+            addItemAndGet('0');
+            const placeholder = document.querySelector('.edit-array-placeholder');
+            expect(placeholder.classList.contains(HIDDEN_CLASS)).toBe(true);
+
+            // Act
+            removeUnsavedItem('test-container-item-0', 'test-container');
+
+            // Assert
+            expect(placeholder.classList.contains(HIDDEN_CLASS)).toBe(false);
+        });
+
+        it('does not show placeholder when other items remain', () => {
+            // Arrange
+            addItemAndGet('0');
+            toggleEditMode('test-container-item-0');
+            addItemAndGet('1');
+
+            // Act
+            removeUnsavedItem('test-container-item-1', 'test-container');
+
+            // Assert
+            const placeholder = document.querySelector('.edit-array-placeholder');
+            expect(placeholder.classList.contains(HIDDEN_CLASS)).toBe(true);
+        });
+
+        it('no-ops safely when item does not exist', () => {
+            expect(() => removeUnsavedItem('nonexistent', 'test-container')).not.toThrow();
+        });
+
+        it('no-ops safely when containerId is null', () => {
+            // Arrange
+            addItemAndGet('0');
+
+            // Act / Assert
+            expect(() => removeUnsavedItem('test-container-item-0', null)).not.toThrow();
+            expect(document.getElementById('test-container-item-0')).toBeNull();
+        });
+    });
+
+    // Validates updateAttributeWithIndex updates individual attributes with index tokens.
+    describe('updateAttributeWithIndex', () => {
+        it('updates an id attribute using replaceIndexTokens', () => {
+            // Arrange
+            const el = document.createElement('div');
+            el.id = 'container-item-0';
+
+            // Act
+            updateAttributeWithIndex(el, 'id', 3, 'container-item-0', 'container-item-3');
+
+            // Assert
+            expect(el.id).toBe('container-item-3');
+        });
+
+        it('updates a name attribute with bracket index pattern', () => {
+            // Arrange
+            const input = document.createElement('input');
+            input.name = 'Field[0].Value';
+
+            // Act
+            updateAttributeWithIndex(input, 'name', 2, null, null);
+
+            // Assert
+            expect(input.name).toBe('Field[2].Value');
+        });
+
+        it('updates htmlFor on label elements via the "for" attribute name', () => {
+            // Arrange - use _n__ pattern that matches the underscore-index regex
+            const label = document.createElement('label');
+            label.htmlFor = 'Input_0__Name';
+
+            // Act
+            updateAttributeWithIndex(label, 'for', 5, null, null);
+
+            // Assert
+            expect(label.htmlFor).toBe('Input_5__Name');
+        });
+
+        it('updates a data-* attribute', () => {
+            // Arrange
+            const el = document.createElement('span');
+            el.setAttribute('data-valmsg-for', 'Items[0].Name');
+
+            // Act
+            updateAttributeWithIndex(el, 'data-valmsg-for', 1, null, null);
+
+            // Assert
+            expect(el.getAttribute('data-valmsg-for')).toBe('Items[1].Name');
+        });
+
+        it('no-ops when element is null', () => {
+            expect(() => updateAttributeWithIndex(null, 'id', 0, null, null)).not.toThrow();
+        });
+
+        it('no-ops when attribute value is empty', () => {
+            // Arrange
+            const el = document.createElement('div');
+
+            // Act / Assert - element has no 'name' attribute
+            expect(() => updateAttributeWithIndex(el, 'name', 0, null, null)).not.toThrow();
+        });
+    });
+
+    // Validates renumberItems updates all item IDs and descendant attributes after DOM reorder.
+    describe('renumberItems rendering', () => {
+        it('skips renumbering and warns when manual swap causes duplicate IDs', () => {
+            // Arrange - swap creates a conflict: position 0 wants id "item-0" but it already exists
+            setupFixture({ reorderEnabled: true });
+            addItemAndGet('0');
+            toggleEditMode('test-container-item-0');
+            addItemAndGet('1');
+            toggleEditMode('test-container-item-1');
+
+            const container = document.getElementById('test-container-items');
+            const item0 = document.getElementById('test-container-item-0');
+            const item1 = document.getElementById('test-container-item-1');
+            container.insertBefore(item1, item0);
+            const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+            // Act
+            renumberItems('test-container');
+
+            // Assert - duplicate-ID guard fires, items keep their original IDs
+            expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Duplicate ID'));
+            const items = container.querySelectorAll('.edit-array-item');
+            expect(items[0].id).toBe('test-container-item-1');
+            expect(items[1].id).toBe('test-container-item-0');
+        });
+
+        it('renumbers a single item to index 0', () => {
+            // Arrange - single item, no duplicate conflict
+            addItemAndGet('0');
+            toggleEditMode('test-container-item-0');
+
+            // Act
+            renumberItems('test-container');
+
+            // Assert
+            const items = document.querySelectorAll('#test-container-items .edit-array-item');
+            expect(items).toHaveLength(1);
+            expect(items[0].id).toBe('test-container-item-0');
+            expect(items[0].querySelector('input[type="text"]').name).toBe('Input[0]');
+        });
+
+        it('logs error when container element is not found', () => {
+            // Arrange
+            const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+            // Act
+            renumberItems('nonexistent-container');
+
+            // Assert
+            expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('nonexistent-container'));
+        });
+
+        it('no-ops when container has zero items', () => {
+            // Act / Assert - should not throw with empty container
+            expect(() => renumberItems('test-container')).not.toThrow();
+        });
+    });
+
+    // Validates handleEditArrayAction dispatches actions based on data-action attribute.
+    describe('handleEditArrayAction event delegation', () => {
+        it('dispatches edit action for button with data-action="edit"', () => {
+            // Arrange
+            const item = addItemAndGet('0');
+            toggleEditMode('test-container-item-0');
+            const editButton = item.querySelector('.edit-item-btn');
+
+            // Act
+            handleEditArrayAction({ target: editButton });
+
+            // Assert - should have entered edit mode (display hidden, edit visible)
+            expect(item.querySelector('.display-container').classList.contains(HIDDEN_CLASS)).toBe(true);
+            expect(item.querySelector('.edit-container').classList.contains(HIDDEN_CLASS)).toBe(false);
+        });
+
+        it('dispatches done action for button with data-action="done"', () => {
+            // Arrange
+            const item = addItemAndGet('0');
+            const doneButton = item.querySelector('.done-item-btn');
+
+            // Act
+            handleEditArrayAction({ target: doneButton });
+
+            // Assert - should have saved (display visible, edit hidden)
+            expect(item.querySelector('.display-container').classList.contains(HIDDEN_CLASS)).toBe(false);
+            expect(item.querySelector('.edit-container').classList.contains(HIDDEN_CLASS)).toBe(true);
+        });
+
+        it('dispatches delete action for button with data-action="delete"', () => {
+            // Arrange
+            addItemAndGet('0');
+            const item = document.getElementById('test-container-item-0');
+            const deleteButton = item.querySelector('.delete-item-btn');
+
+            // Act - new item, so delete should remove it entirely
+            handleEditArrayAction({ target: deleteButton });
+
+            // Assert
+            expect(document.getElementById('test-container-item-0')).toBeNull();
+        });
+
+        it('dispatches move action for button with data-action="move"', () => {
+            // Arrange
+            setupFixture({ reorderEnabled: true });
+            addItemAndGet('0');
+            toggleEditMode('test-container-item-0');
+            addItemAndGet('1');
+            toggleEditMode('test-container-item-1');
+            const moveDownBtn = document.querySelector('#test-container-item-0 .move-down-btn');
+            const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+            // Act
+            handleEditArrayAction({ target: moveDownBtn });
+
+            // Assert
+            const items = document.querySelectorAll('#test-container-items .edit-array-item');
+            expect(items[0].id).not.toBe('test-container-item-0');
+            warnSpy.mockRestore();
+        });
+
+        it('ignores clicks on non-action elements', () => {
+            // Arrange
+            const span = document.createElement('span');
+            document.body.appendChild(span);
+
+            // Act / Assert - should not throw
+            expect(() => handleEditArrayAction({ target: span })).not.toThrow();
+            span.remove();
+        });
+    });
+
+    // Validates multi-item rendering produces correct sequential indexes.
+    describe('multi-item rendering', () => {
+        it('renders sequential items with incrementing indexes', () => {
+            // Arrange & Act
+            addItemAndGet('0');
+            toggleEditMode('test-container-item-0');
+            addItemAndGet('1');
+
+            // Assert
+            const item0 = document.getElementById('test-container-item-0');
+            const item1 = document.getElementById('test-container-item-1');
+
+            expect(item0.querySelector('input[type="text"]').name).toBe('Input[0]');
+            expect(item1.querySelector('input[type="text"]').name).toBe('Input[1]');
+            expect(item0.querySelector('input[type="text"]').id).toBe('Input_0');
+            expect(item1.querySelector('input[type="text"]').id).toBe('Input_1');
+            expect(item0.querySelector('.display-container').id).toBe('test-container-item-0-display');
+            expect(item1.querySelector('.display-container').id).toBe('test-container-item-1-display');
+        });
+
+        it('renders hidden IsDeleted marker as first child for each item', () => {
+            // Arrange & Act
+            addItemAndGet('0');
+            toggleEditMode('test-container-item-0');
+            addItemAndGet('1');
+
+            // Assert
+            const item0 = document.getElementById('test-container-item-0');
+            const item1 = document.getElementById('test-container-item-1');
+
+            expect(item0.firstElementChild.getAttribute('data-is-deleted-marker')).toBe('true');
+            expect(item0.firstElementChild.value).toBe('false');
+            expect(item1.firstElementChild.getAttribute('data-is-deleted-marker')).toBe('true');
+            expect(item1.firstElementChild.value).toBe('false');
+        });
+
+        it('cancel button is rendered only in edit mode and removed on save', () => {
+            // Arrange
+            addItemAndGet('0');
+            const item = document.getElementById('test-container-item-0');
+
+            // Assert - cancel visible during new-item edit
+            expect(item.querySelector('button[data-cancel="cancel"]')).toBeTruthy();
+
+            // Act - save
+            toggleEditMode('test-container-item-0');
+
+            // Assert - cancel removed after save
+            expect(item.querySelector('button[data-cancel]')).toBeNull();
+        });
+
+        it('new-item hidden marker is rendered during add and removed on save', () => {
+            // Arrange
+            addItemAndGet('0');
+            const item = document.getElementById('test-container-item-0');
+
+            // Assert - marker present during new-item edit
+            const marker = item.querySelector('input[data-new-item-marker="true"]');
+            expect(marker).toBeTruthy();
+            expect(marker.type).toBe('hidden');
+
+            // Act - save
+            toggleEditMode('test-container-item-0');
+
+            // Assert - marker removed after save
+            expect(item.querySelector('input[data-new-item-marker]')).toBeNull();
+        });
+    });
+
+    // Validates initEditArray wires event delegation and emits init events.
+    describe('initEditArray rendering', () => {
+        it('emits editarray:init event for each container on the page', () => {
+            // Arrange
+            const initSpy = jest.fn();
+            document.addEventListener('editarray:init', initSpy);
+
+            // Act
+            initEditArray();
+
+            // Assert
+            expect(initSpy).toHaveBeenCalledTimes(1);
+            expect(initSpy.mock.calls[0][0].detail.container.id).toBe('test-container');
+
+            document.removeEventListener('editarray:init', initSpy);
+        });
+
+        it('wires delegated click handling so Add button works after init', () => {
+            // Arrange
+            initEditArray();
+            const addButton = document.getElementById('test-container-add');
+
+            // Act
+            fireEvent.click(addButton);
+
+            // Assert
+            expect(document.querySelectorAll('#test-container-items .edit-array-item')).toHaveLength(1);
         });
     });
 });

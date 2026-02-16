@@ -11,27 +11,26 @@
  * @emits editarray:edit-entered - After switching from display to edit mode
  */
 
+// J4: Shared DOM-ID constants — makes the C#↔JS contract explicit.
+const HIDDEN_CLASS = 'ea-hidden';
+const SUFFIX_ITEMS = '-items';
+const SUFFIX_DISPLAY = '-display';
+const SUFFIX_EDIT = '-edit';
+const SUFFIX_ADD = '-add';
+const SELECTOR_ITEM = '.edit-array-item';
+const SELECTOR_PLACEHOLDER = '.edit-array-placeholder';
+const SELECTOR_CONTAINER = '.edit-array-container';
+
+// J2: Centralised show/hide helpers.
+function showElement(el) { el.classList.remove(HIDDEN_CLASS); }
+function hideElement(el) { el.classList.add(HIDDEN_CLASS); }
+
 /**
- * Add a new item to an edit-array container
- * @param {string} containerId - The ID of the edit-array container
- * @param {string} templateId - The ID of the template to clone
+ * Replace '__index__' tokens in cloned template elements
+ * @param {DocumentFragment} clone - The cloned template fragment
+ * @param {number} newIndex - The index to replace tokens with
  */
-function addNewItem(containerId, templateId) {
-    const container = document.getElementById(containerId + '-items');
-    const template = document.getElementById(templateId);
-    const clone = template.content.cloneNode(true);
-
-    // Get current count of items to use as new index (only count actual items, not placeholders)
-    const newIndex = container.querySelectorAll('.edit-array-item').length;
-
-    // Enforce max-items limit if configured
-    const maxItems = getMaxItems(containerId);
-    if (maxItems !== null && newIndex >= maxItems) {
-        syncAddButtonState(containerId);
-        return;
-    }
-
-    // Replace '__index__' tokens in one pass to reduce DOM traversals.
+function replaceTemplateTokens(clone, newIndex) {
     const allElements = clone.querySelectorAll(
         '[name],[id],[data-id],[data-display-for],label[for],[data-valmsg-for]'
     );
@@ -64,11 +63,33 @@ function addNewItem(containerId, templateId) {
             }
         }
     });
+}
 
-    
+/**
+ * Add a new item to an edit-array container
+ * @param {string} containerId - The ID of the edit-array container
+ * @param {string} templateId - The ID of the template to clone
+ */
+function addNewItem(containerId, templateId) {
+    const container = document.getElementById(containerId + SUFFIX_ITEMS);
+    const template = document.getElementById(templateId);
+    const clone = template.content.cloneNode(true);
+
+    // Get current count of items to use as new index (only count actual items, not placeholders)
+    const newIndex = container.querySelectorAll(SELECTOR_ITEM).length;
+
+    // Enforce max-items limit if configured
+    const maxItems = getMaxItems(containerId);
+    if (maxItems !== null && newIndex >= maxItems) {
+        syncAddButtonState(containerId);
+        return;
+    }
+
+    // Replace '__index__' tokens in one pass to reduce DOM traversals.
+    replaceTemplateTokens(clone, newIndex);
 
     // Set the ID for the new item
-    const itemDiv = clone.querySelector('.edit-array-item');
+    const itemDiv = clone.querySelector(SELECTOR_ITEM);
     const itemId = `${containerId}-item-${newIndex}`;
     if (itemDiv) {
         itemDiv.id = itemId;
@@ -85,10 +106,10 @@ function addNewItem(containerId, templateId) {
         const editContainer = itemDiv.querySelector('.edit-container');
 
         if (displayContainer && editContainer) {
-            displayContainer.id = `${itemId}-display`;
-            editContainer.id = `${itemId}-edit`;
-            displayContainer.classList.add('ea-hidden');
-            editContainer.classList.remove('ea-hidden');
+            displayContainer.id = `${itemId}${SUFFIX_DISPLAY}`;
+            editContainer.id = `${itemId}${SUFFIX_EDIT}`;
+            hideElement(displayContainer);
+            showElement(editContainer);
 
             const hiddenInput = document.createElement('input');
             hiddenInput.type = 'hidden';
@@ -102,8 +123,6 @@ function addNewItem(containerId, templateId) {
             editContainer.appendChild(hiddenInput);
         }
     }
-    
-
 
     container.appendChild(clone);
 
@@ -111,13 +130,13 @@ function addNewItem(containerId, templateId) {
     refreshUnobtrusiveValidation(container);
 
     // Hide the placeholder if it exists
-    const placeholder = container.querySelector('.edit-array-placeholder');
+    const placeholder = container.querySelector(SELECTOR_PLACEHOLDER);
     if (placeholder) {
-        placeholder.classList.add('ea-hidden');
+        hideElement(placeholder);
     }
 
     // disable the add button
-    const addButton = document.getElementById(containerId + '-add');
+    const addButton = document.getElementById(containerId + SUFFIX_ADD);
     if (addButton) {
         addButton.disabled = true;
     }
@@ -127,16 +146,16 @@ function addNewItem(containerId, templateId) {
     cancelButton.type = 'button';
     cancelButton.textContent = 'Cancel';
     cancelButton.className = 'btn btn-secondary';
-    
+
     cancelButton.addEventListener('click', () => markForDeletion(itemId));
     cancelButton.setAttribute('data-new-item-marker', 'true');
     cancelButton.setAttribute('data-cancel', `cancel`);
-    
+
     const editContainer = itemDiv.querySelector('.edit-container');
     if (editContainer) {
         editContainer.appendChild(cancelButton);
     }
-    
+
     // Notify listeners that a new item was added (e.g. for validation wiring)
     document.dispatchEvent(new CustomEvent('editarray:item-added', {
         detail: { containerId, itemId: itemDiv?.id, container }
@@ -161,11 +180,11 @@ function toggleEditMode(itemId) {
     if (!item) return;
 
     const containerId = getContainerIdFromItemId(itemId);
-    const displayContainer = document.getElementById(`${itemId}-display`);
-    const editContainer = document.getElementById(`${itemId}-edit`);
+    const displayContainer = document.getElementById(`${itemId}${SUFFIX_DISPLAY}`);
+    const editContainer = document.getElementById(`${itemId}${SUFFIX_EDIT}`);
 
     if (displayContainer && editContainer) {
-        if (displayContainer.classList.contains('ea-hidden')) {
+        if (displayContainer.classList.contains(HIDDEN_CLASS)) {
             // Optional dedicated hook for Done button; returning false cancels the transition
             const onDone = item.dataset.onDone;
             if (onDone && typeof window[onDone] === 'function') {
@@ -189,8 +208,8 @@ function toggleEditMode(itemId) {
             updateDisplayFromForm(itemId);
 
             // Switch from edit to display
-            displayContainer.classList.remove('ea-hidden');
-            editContainer.classList.add('ea-hidden');
+            showElement(displayContainer);
+            hideElement(editContainer);
 
             // Safely invoke OnUpdate callback if defined (XSS prevention: validate function exists)
             const onUpdate = item.dataset.onUpdate;
@@ -199,8 +218,8 @@ function toggleEditMode(itemId) {
             }
         } else {
             // Switch from display to edit
-            displayContainer.classList.add('ea-hidden');
-            editContainer.classList.remove('ea-hidden');
+            hideElement(displayContainer);
+            showElement(editContainer);
 
             // Notify listeners that edit mode was entered (e.g. for validation wiring)
             document.dispatchEvent(new CustomEvent('editarray:edit-entered', {
@@ -210,7 +229,7 @@ function toggleEditMode(itemId) {
     }
     // re-enable the add button
     if (containerId) {
-        const addButton = document.getElementById(containerId + '-add');
+        const addButton = document.getElementById(containerId + SUFFIX_ADD);
         if (addButton) {
             addButton.disabled = false;
             syncAddButtonState(containerId);
@@ -221,8 +240,7 @@ function toggleEditMode(itemId) {
     if (cancelButton) {
         cancelButton.remove();
     }
-    
-    
+
     // remove the hidden input for new items if it exists
     const hiddenInput = item.querySelector('input[data-new-item-marker]');
     if (hiddenInput) {
@@ -230,57 +248,69 @@ function toggleEditMode(itemId) {
     }
 }
 
+/**
+ * Remove an unsaved new item entirely and restore UI state
+ * @param {string} itemId - The ID of the unsaved item to remove
+ * @param {string|null} containerId - The ID of the parent edit-array container
+ */
+function removeUnsavedItem(itemId, containerId) {
+    const item = document.getElementById(itemId);
+    if (!item) return;
+
+    item.remove();
+    if (containerId) {
+        const addButton = document.getElementById(containerId + SUFFIX_ADD);
+        if (addButton) {
+            addButton.disabled = false;
+            syncAddButtonState(containerId);
+            addButton.focus();
+        }
+
+        // Show placeholder if there are no items left
+        const itemsContainer = document.getElementById(containerId + SUFFIX_ITEMS);
+        if (itemsContainer) {
+            const itemCount = itemsContainer.querySelectorAll(SELECTOR_ITEM).length;
+            if (itemCount === 0) {
+                const placeholder = itemsContainer.querySelector(SELECTOR_PLACEHOLDER);
+                if (placeholder) {
+                    showElement(placeholder);
+                }
+            }
+        }
+    }
+}
+
 function markForDeletion(itemId) {
     const item = document.getElementById(itemId);
     if (!item) return;
-    
+
     const deleteButton = item.querySelector('.delete-item-btn');
     const editButton = item.querySelector('.edit-item-btn');
     const isDeletedInput = item.querySelector('input[data-is-deleted-marker]');
-    
+
     // Find the container by looking for parent with id ending in '-items' or containing 'edit-array'
-    let container = item.closest('.edit-array-container');
+    let container = item.closest(SELECTOR_CONTAINER);
     if (!container) {
         // Fallback: look for parent with id containing 'items'
         let current = item.parentElement;
         while (current) {
-            if (current.id && current.id.includes('-items')) {
+            if (current.id && current.id.includes(SUFFIX_ITEMS)) {
                 container = current.parentElement;
                 break;
             }
             current = current.parentElement;
         }
     }
-    
+
     const containerId = container ? container.id : null;
     const newItemInput = item.querySelector('input[data-new-item-marker]');
 
     // don't mark for deletion, remove it all together
     if (newItemInput) {
-        item.remove();
-        if (containerId) {
-            const addButton = document.getElementById(containerId + '-add');
-            if (addButton) {
-                addButton.disabled = false;
-                syncAddButtonState(containerId);
-                addButton.focus();
-            }
-
-            // Show placeholder if there are no items left
-            const itemsContainer = document.getElementById(containerId + '-items');
-            if (itemsContainer) {
-                const itemCount = itemsContainer.querySelectorAll('.edit-array-item').length;
-                if (itemCount === 0) {
-                    const placeholder = itemsContainer.querySelector('.edit-array-placeholder');
-                    if (placeholder) {
-                        placeholder.classList.remove('ea-hidden');
-                    }
-                }
-            }
-        }
+        removeUnsavedItem(itemId, containerId);
         return;
     }
-    
+
     // Get button text from container data attributes, with fallback defaults
     const deleteText = container?.dataset?.deleteText || 'Delete';
     const undeleteText = container?.dataset?.undeleteText || 'Undelete';
@@ -328,8 +358,8 @@ function updateDisplayFromForm(itemId) {
     const item = document.getElementById(itemId);
     if (!item) return;
 
-    const displayContainer = document.getElementById(`${itemId}-display`);
-    const editContainer = document.getElementById(`${itemId}-edit`);
+    const displayContainer = document.getElementById(`${itemId}${SUFFIX_DISPLAY}`);
+    const editContainer = document.getElementById(`${itemId}${SUFFIX_EDIT}`);
 
     if (displayContainer && editContainer) {
         const inputs = editContainer.querySelectorAll('input, select, textarea');
@@ -344,7 +374,7 @@ function updateDisplayFromForm(itemId) {
 
 function moveItem(containerId, itemId, offset) {
     const mainContainer = document.getElementById(containerId);
-    const container = document.getElementById(`${containerId}-items`);
+    const container = document.getElementById(`${containerId}${SUFFIX_ITEMS}`);
     const item = document.getElementById(itemId);
     if (!container || !item || offset === 0) return;
 
@@ -354,7 +384,7 @@ function moveItem(containerId, itemId, offset) {
         return;
     }
 
-    const items = Array.from(container.querySelectorAll('.edit-array-item'));
+    const items = Array.from(container.querySelectorAll(SELECTOR_ITEM));
     const currentIndex = items.indexOf(item);
     if (currentIndex === -1) return;
 
@@ -368,7 +398,7 @@ function moveItem(containerId, itemId, offset) {
     renumberItems(containerId);
 
     // Keep focus on the same logical move direction after reordering.
-    const updatedItems = container.querySelectorAll('.edit-array-item');
+    const updatedItems = container.querySelectorAll(SELECTOR_ITEM);
     const movedItem = updatedItems[targetIndex];
     if (!movedItem) return;
 
@@ -381,13 +411,13 @@ function moveItem(containerId, itemId, offset) {
 }
 
 function renumberItems(containerId) {
-    const container = document.getElementById(`${containerId}-items`);
+    const container = document.getElementById(`${containerId}${SUFFIX_ITEMS}`);
     if (!container) {
-        console.error(`Container not found: ${containerId}-items`);
+        console.error(`Container not found: ${containerId}${SUFFIX_ITEMS}`);
         return;
     }
 
-    const items = Array.from(container.querySelectorAll('.edit-array-item'));
+    const items = Array.from(container.querySelectorAll(SELECTOR_ITEM));
     if (items.length === 0) return;
 
     items.forEach((item, newIndex) => {
@@ -484,15 +514,15 @@ function getMaxItems(containerId) {
 }
 
 function syncAddButtonState(containerId) {
-    const addButton = document.getElementById(containerId + '-add');
+    const addButton = document.getElementById(containerId + SUFFIX_ADD);
     if (!addButton) return;
 
     const maxItems = getMaxItems(containerId);
     if (maxItems === null) return;
 
-    const itemsContainer = document.getElementById(containerId + '-items');
+    const itemsContainer = document.getElementById(containerId + SUFFIX_ITEMS);
     const currentCount = itemsContainer
-        ? itemsContainer.querySelectorAll('.edit-array-item').length
+        ? itemsContainer.querySelectorAll(SELECTOR_ITEM).length
         : 0;
     addButton.disabled = currentCount >= maxItems;
 }
@@ -506,7 +536,7 @@ function syncAddButtonState(containerId) {
 function resolveItemId(button) {
     const itemIdAttr = button.dataset.itemId;
     if (itemIdAttr === 'closest') {
-        const item = button.closest('.edit-array-item');
+        const item = button.closest(SELECTOR_ITEM);
         return item ? item.id : null;
     }
     return itemIdAttr || null;
@@ -585,7 +615,7 @@ function initEditArray() {
     document.addEventListener('click', handleEditArrayAction);
 
     // Wire up unobtrusive validation and notify listeners for each container
-    document.querySelectorAll('.edit-array-container').forEach(function(container) {
+    document.querySelectorAll(SELECTOR_CONTAINER).forEach(function(container) {
         refreshUnobtrusiveValidation(container);
         if (container.id) {
             syncAddButtonState(container.id);
@@ -608,16 +638,28 @@ if (typeof module !== 'undefined' && module.exports) {
         addNewItem,
         toggleEditMode,
         markForDeletion,
+        removeUnsavedItem,
         updateDisplayFromForm,
         moveItem,
         renumberItems,
         updateAttributeWithIndex,
         replaceIndexTokens,
+        replaceTemplateTokens,
         getContainerIdFromItemId,
         resolveItemId,
         handleEditArrayAction,
         refreshUnobtrusiveValidation,
-        initEditArray
+        initEditArray,
+        showElement,
+        hideElement,
+        HIDDEN_CLASS,
+        SUFFIX_ITEMS,
+        SUFFIX_DISPLAY,
+        SUFFIX_EDIT,
+        SUFFIX_ADD,
+        SELECTOR_ITEM,
+        SELECTOR_PLACEHOLDER,
+        SELECTOR_CONTAINER
     };
 }
 

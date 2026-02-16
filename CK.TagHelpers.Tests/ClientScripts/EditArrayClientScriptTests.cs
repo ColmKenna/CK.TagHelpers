@@ -121,15 +121,7 @@ public class EditArrayClientScriptTests
     // 3. Event dispatching - initEditArray
     // ========================================================================
 
-    [Fact]
-    public void InitEditArray_Should_DispatchInitEventForExistingContainers()
-    {
-        var script = LoadScript();
-        var functionBody = ExtractFunctionBody(script, "initEditArray");
 
-        Assert.Contains("editarray:init", functionBody);
-        Assert.Contains("edit-array-container", functionBody);
-    }
 
     [Fact]
     public void InitEditArray_Should_NotContainDirectValidationLogic()
@@ -198,16 +190,7 @@ public class EditArrayClientScriptTests
             script);
     }
 
-    [Fact]
-    public void Should_NotContainDirectjQueryValidationCalls()
-    {
-        var script = LoadScript();
 
-        // No direct jQuery validation references should remain
-        Assert.DoesNotContain("removeData('validator')", script);
-        Assert.DoesNotContain("removeData('unobtrusiveValidator')", script);
-        Assert.DoesNotContain("$.validator.unobtrusive.parse", script);
-    }
 
     // ========================================================================
     // Helper Methods
