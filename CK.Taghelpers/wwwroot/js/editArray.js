@@ -31,43 +31,37 @@ function addNewItem(containerId, templateId, data) {
         return;
     }
 
-    // Replace '__index__' with the actual index in all input names and ids
-    const allInputs = clone.querySelectorAll('*');
-    allInputs.forEach(input => {
-        if (input.name) {
-            input.name = input.name.replace('__index__', newIndex);
+    // Replace '__index__' tokens in one pass to reduce DOM traversals.
+    const allElements = clone.querySelectorAll(
+        '[name],[id],[data-id],[data-display-for],label[for],[data-valmsg-for]'
+    );
+    allElements.forEach(element => {
+        if (element.name) {
+            element.name = element.name.replace('__index__', newIndex);
         }
-        if (input.id) {
-            input.id = input.id.replace('__index__', newIndex);
+        if (element.id) {
+            element.id = element.id.replace('__index__', newIndex);
         }
-        
-        // check if it has an attribute 'data-id'
-        if (input.hasAttribute('data-id')) {
-            const newValue = input.getAttribute('data-id').replace('__index__', newIndex);
-            input.setAttribute('data-id', newValue);
+        if (element.hasAttribute('data-id')) {
+            const value = element.getAttribute('data-id');
+            if (value) {
+                element.setAttribute('data-id', value.replace('__index__', newIndex));
+            }
         }
-        
-        // check if it has an attribute 'data-display-for'
-        if (input.hasAttribute('data-display-for')) {
-            const newValue = input.getAttribute('data-display-for').replace('__index__', newIndex);
-            input.setAttribute('data-display-for', newValue);
+        if (element.hasAttribute('data-display-for')) {
+            const value = element.getAttribute('data-display-for');
+            if (value) {
+                element.setAttribute('data-display-for', value.replace('__index__', newIndex));
+            }
         }
-    });
-
-    // Replace '__index__' in labels' for attribute
-    const allLabels = clone.querySelectorAll('label[for]');
-    allLabels.forEach(label => {
-        if (label.htmlFor) {
-            label.htmlFor = label.htmlFor.replace('__index__', newIndex);
+        if (element.htmlFor) {
+            element.htmlFor = element.htmlFor.replace('__index__', newIndex);
         }
-    });
-
-    // Replace '__index__' in validation message elements
-    const allValidationElements = clone.querySelectorAll('[data-valmsg-for]');
-    allValidationElements.forEach(element => {
-        if (element.getAttribute('data-valmsg-for')) {
-            const newValue = element.getAttribute('data-valmsg-for').replace('__index__', newIndex);
-            element.setAttribute('data-valmsg-for', newValue);
+        if (element.hasAttribute('data-valmsg-for')) {
+            const value = element.getAttribute('data-valmsg-for');
+            if (value) {
+                element.setAttribute('data-valmsg-for', value.replace('__index__', newIndex));
+            }
         }
     });
 
@@ -386,7 +380,10 @@ function renumberItems(containerId) {
 
         updateAttributeWithIndex(item, 'id', newIndex, oldId, newId);
 
-        const descendants = item.querySelectorAll('*');
+        const descendants = item.querySelectorAll(
+            '[name],[id],[for],[data-id],[data-display-for],[data-valmsg-for],' +
+            '[data-new-item-marker],[aria-describedby],[data-item-id]'
+        );
         descendants.forEach(child => {
             updateAttributeWithIndex(child, 'id', newIndex, oldId, newId);
             updateAttributeWithIndex(child, 'name', newIndex, oldId, newId);
@@ -424,6 +421,13 @@ function updateAttributeWithIndex(element, attributeName, newIndex, oldId, newId
 }
 
 function replaceIndexTokens(value, newIndex, oldId, newId) {
+    // Fast path when no token patterns are present.
+    if (!value.includes('[') && !value.includes('_') && !value.includes('-item-')) {
+        if (!oldId || !value.includes(oldId)) {
+            return value;
+        }
+    }
+
     let updated = value;
     if (oldId && newId && updated.includes(oldId)) {
         updated = updated.replaceAll(oldId, newId);

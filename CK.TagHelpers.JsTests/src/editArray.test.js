@@ -7,7 +7,8 @@ const {
     markForDeletion,
     moveItem,
     refreshUnobtrusiveValidation,
-    initEditArray
+    initEditArray,
+    replaceIndexTokens
 } = require('../../CK.Taghelpers/wwwroot/js/editArray.js');
 
 function setupFixture(options = {}) {
@@ -357,6 +358,14 @@ describe('editArray.js', () => {
             const fakeField = document.createElement('input');
             validator.settings.onfocusout.call(validator, fakeField);
             expect(validator.element).toHaveBeenCalledWith(fakeField);
+        });
+    });
+
+    // Validates helper token replacement behavior used by renumbering.
+    describe('replaceIndexTokens', () => {
+        // Validates fast path avoids unnecessary processing when no markers are present.
+        it('returns unchanged value when no markers or old id are present', () => {
+            expect(replaceIndexTokens('plain-text', 3, null, null)).toBe('plain-text');
         });
     });
 });
