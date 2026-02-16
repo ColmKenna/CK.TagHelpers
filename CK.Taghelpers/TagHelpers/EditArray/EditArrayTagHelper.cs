@@ -7,7 +7,8 @@ using System.Text.Encodings.Web;
 
 namespace CK.Taghelpers.TagHelpers.EditArray;
 
-public class EditArrayTagHelper : TagHelper
+[HtmlTargetElement("edit-array", TagStructure = TagStructure.NormalOrSelfClosing)]
+public sealed class EditArrayTagHelper : TagHelper
 {
     private const string ItemsAttributeName = "asp-items";
     private const string ViewNameAttributeName = "asp-view-name";
