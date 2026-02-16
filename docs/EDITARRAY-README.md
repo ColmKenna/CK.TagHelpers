@@ -155,7 +155,7 @@ public class TeamViewModel
 
 The `editArray.js` file provides these global functions:
 
-### addNewItem(containerId, templateId, data)
+### addNewItem(containerId, templateId)
 Clones the template and adds a new item to the list.
 
 ```javascript

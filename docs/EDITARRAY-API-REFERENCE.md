@@ -75,7 +75,7 @@ asp-move-down-text="↓"                          <!-- Move down button text -->
 
 All functions are globally available from `editArray.js`.
 
-### addNewItem(containerId, templateId, data?)
+### addNewItem(containerId, templateId)
 Add a new item from template.
 
 ```javascript

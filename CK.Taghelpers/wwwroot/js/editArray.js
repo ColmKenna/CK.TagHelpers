@@ -16,7 +16,7 @@
  * @param {string} containerId - The ID of the edit-array container
  * @param {string} templateId - The ID of the template to clone
  */
-function addNewItem(containerId, templateId, data) {
+function addNewItem(containerId, templateId) {
     const container = document.getElementById(containerId + '-items');
     const template = document.getElementById(templateId);
     const clone = template.content.cloneNode(true);
