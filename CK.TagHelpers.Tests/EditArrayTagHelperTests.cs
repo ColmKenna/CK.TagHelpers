@@ -400,6 +400,39 @@ public class EditArrayTagHelperTests
     }
 
     [Fact]
+    public async Task Should_RenderTemplateIsDeletedMarker_AsDirectChildOfItem()
+    {
+        // Arrange
+        var items = new List<TestItem> { new TestItem() };
+        var tagHelper = CreateTagHelper(items: Array.Empty<object>(), viewName: "_Editor");
+        tagHelper.Items = items;
+        tagHelper.RenderTemplate = true;
+
+        SetupPartialAsync("_Editor", new HtmlString("TemplateContent"));
+        SetupPartialAsync("_Display", new HtmlString("DisplayContent"));
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = output.Content.GetContent();
+        var templateStart = content.IndexOf("<template", StringComparison.Ordinal);
+        var templateEnd = content.IndexOf("</template>", StringComparison.Ordinal);
+        var templateContent = content.Substring(templateStart, templateEnd - templateStart);
+
+        var markerIndex = templateContent.IndexOf("data-is-deleted-marker", StringComparison.Ordinal);
+        var displayContainerIndex = templateContent.IndexOf("class=\"display-container", StringComparison.Ordinal);
+        var editContainerIndex = templateContent.IndexOf("class=\"edit-container", StringComparison.Ordinal);
+
+        Assert.True(markerIndex >= 0, "Template should contain an IsDeleted marker input.");
+        Assert.True(displayContainerIndex > markerIndex, "IsDeleted marker should be rendered before display container.");
+        Assert.True(editContainerIndex > markerIndex, "IsDeleted marker should be rendered before edit container.");
+    }
+
+    [Fact]
     public async Task Should_RenderAddButton_When_ShowAddButtonIsTrue()
     {
         // Arrange

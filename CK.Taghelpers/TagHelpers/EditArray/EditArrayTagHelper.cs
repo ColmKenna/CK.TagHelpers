@@ -823,6 +823,11 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
         var name = $"{templateFieldName}.IsDeleted";
 
+        // IsDeleted marker is a direct child of the item div (consistent with regular items).
+        sb.Append("<input type=\"hidden\" name=\"")
+          .Append(name)
+          .Append("\" value=\"false\" data-is-deleted-marker />");
+
         var hasDisplayView = !string.IsNullOrWhiteSpace(DisplayViewName);
 
         if (hasDisplayView)
@@ -859,10 +864,6 @@ public sealed partial class EditArrayTagHelper : TagHelper
                 viewContent.WriteTo(writer, HtmlEncoder.Default);
                 var templateContent = writer.ToString();
                 sb.Append(templateContent);
-                // Always emit the IsDeleted marker input for consistent JS contract
-                sb.Append("<input type=\"hidden\" name=\"")
-                  .Append(name)
-                  .Append("\" value=\"false\" data-is-deleted-marker />");
             }
         }
 

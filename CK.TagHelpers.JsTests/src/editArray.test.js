@@ -19,6 +19,7 @@ function setupFixture(options = {}) {
                 </div>
                 <template id="test-template">
                     <div class="edit-array-item">
+                        <input type="hidden" data-is-deleted-marker="true" name="Input[__index__].IsDeleted" value="false" />
                         <div class="display-container">
                             <span data-display-for="Input___index__"></span>
                         </div>
@@ -26,7 +27,6 @@ function setupFixture(options = {}) {
                             <label for="Input___index__">Name</label>
                             <input type="text" id="Input___index__" name="Input[__index__]" data-id="input-__index__" data-display-for="Input___index__" value="" />
                             <span data-valmsg-for="Input[__index__]"></span>
-                            <input type="hidden" data-is-deleted-marker="true" name="Input[__index__].IsDeleted" value="false" />
                         </div>
                         <button type="button" class="edit-item-btn" data-action="edit" data-item-id="closest">Edit</button>
                         <button type="button" class="done-item-btn" data-action="done" data-item-id="closest">Done</button>
@@ -87,6 +87,7 @@ describe('editArray.js', () => {
             expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(false);
             expect(item.querySelector('input[data-new-item-marker="true"]')).toBeTruthy();
             expect(item.querySelector('button[data-cancel="cancel"]')).toBeTruthy();
+            expect(item.firstElementChild?.hasAttribute('data-is-deleted-marker')).toBe(true);
             expect(addButton.disabled).toBe(true);
             expect(placeholder.classList.contains('ea-hidden')).toBe(true);
             expect(eventSpy).toHaveBeenCalledTimes(1);
