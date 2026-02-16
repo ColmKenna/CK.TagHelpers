@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CK.Taghelpers.SampleUsage",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CK.TagHelpers.Tests", "CK.TagHelpers.Tests\CK.TagHelpers.Tests.csproj", "{91FF33C8-3F50-4210-A4CA-065CDCF2E23D}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "CK.TagHelpers.JsTests", "CK.TagHelpers.JsTests\CK.TagHelpers.JsTests.esproj", "{5A3D4B6C-7E8F-9A0B-1C2D-3E4F5A6B7C8D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,12 @@ Global
 		{91FF33C8-3F50-4210-A4CA-065CDCF2E23D}.Release|x64.Build.0 = Release|Any CPU
 		{91FF33C8-3F50-4210-A4CA-065CDCF2E23D}.Release|x86.ActiveCfg = Release|Any CPU
 		{91FF33C8-3F50-4210-A4CA-065CDCF2E23D}.Release|x86.Build.0 = Release|Any CPU
+		{5A3D4B6C-7E8F-9A0B-1C2D-3E4F5A6B7C8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A3D4B6C-7E8F-9A0B-1C2D-3E4F5A6B7C8D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5A3D4B6C-7E8F-9A0B-1C2D-3E4F5A6B7C8D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5A3D4B6C-7E8F-9A0B-1C2D-3E4F5A6B7C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A3D4B6C-7E8F-9A0B-1C2D-3E4F5A6B7C8D}.Release|x64.ActiveCfg = Release|Any CPU
+		{5A3D4B6C-7E8F-9A0B-1C2D-3E4F5A6B7C8D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

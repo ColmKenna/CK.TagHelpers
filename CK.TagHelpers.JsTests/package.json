@@ -1,0 +1,16 @@
+
+{
+  "name": "ck-taghelpers-jstests",
+  "version": "1.0.0",
+  "description": "JS tests for CK.TagHelpers",
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "@testing-library/dom": "^10.0.0",
+    "@testing-library/user-event": "^14.5.2"
+  }
+}

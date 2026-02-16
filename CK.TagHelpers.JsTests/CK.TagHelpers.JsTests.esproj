@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.271090-alpha">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>5a3d4b6c-7e8f-9a0b-1c2d-3e4f5a6b7c8d</ProjectGuid>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupCommand>npm test</StartupCommand>
+    <TestCommand>npm run test:coverage</TestCommand>
+    <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
+  </PropertyGroup>
+</Project>
