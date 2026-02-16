@@ -23,7 +23,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="attr-template"
+                <edit-array asp-array-id="attr-template"
                             asp-items="Model.TemplateMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -35,7 +35,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-template\"\n            asp-items=\"Model.TemplateMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-add-text=\"Add teammate\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-template\"\n            asp-items=\"Model.TemplateMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-add-text=\"Add teammate\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -49,7 +49,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="attr-styles"
+                <edit-array asp-array-id="attr-styles"
                             asp-items="Model.StyledMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -61,7 +61,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-styles\"\n            asp-items=\"Model.StyledMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-container-class=\"border border-warning rounded p-3 bg-light\"\n            asp-item-class=\"border rounded p-2 mb-2\"\n            asp-button-class=\"btn btn-outline-primary\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-styles\"\n            asp-items=\"Model.StyledMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-container-class=\"border border-warning rounded p-3 bg-light\"\n            asp-item-class=\"border rounded p-2 mb-2\"\n            asp-button-class=\"btn btn-outline-primary\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -75,7 +75,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="attr-reorder"
+                <edit-array asp-array-id="attr-reorder"
                             asp-items="Model.ReorderMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -88,7 +88,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-reorder\"\n            asp-items=\"Model.ReorderMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-enable-reordering=\"true\"\n            asp-reorder-button-class=\"btn btn-outline-dark btn-sm\"\n            asp-move-up-text=\"Up\"\n            asp-move-down-text=\"Down\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-reorder\"\n            asp-items=\"Model.ReorderMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-enable-reordering=\"true\"\n            asp-reorder-button-class=\"btn btn-outline-dark btn-sm\"\n            asp-move-up-text=\"Up\"\n            asp-move-down-text=\"Down\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -102,7 +102,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="attr-button-text"
+                <edit-array asp-array-id="attr-button-text"
                             asp-items="Model.ButtonTextMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -115,7 +115,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-button-text\"\n            asp-items=\"Model.ButtonTextMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-edit-text=\"Open\"\n            asp-delete-text=\"Remove\"\n            asp-undelete-text=\"Restore\"\n            asp-done-text=\"Close\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-button-text\"\n            asp-items=\"Model.ButtonTextMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-edit-text=\"Open\"\n            asp-delete-text=\"Remove\"\n            asp-undelete-text=\"Restore\"\n            asp-done-text=\"Close\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -129,7 +129,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="attr-callbacks"
+                <edit-array asp-array-id="attr-callbacks"
                             asp-items="Model.CallbackMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -141,7 +141,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-callbacks\"\n            asp-items=\"Model.CallbackMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-on-update=\"handleMemberUpdated\"\n            asp-on-delete=\"handleMemberDeleted\"&gt;\n&lt;/edit-array&gt;\n&lt;div class=\"alert alert-info mt-2\" id=\"callback-status\"&gt;Waiting for an update or delete action.&lt;/div&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-callbacks\"\n            asp-items=\"Model.CallbackMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-on-update=\"handleMemberUpdated\"\n            asp-on-delete=\"handleMemberDeleted\"&gt;\n&lt;/edit-array&gt;\n&lt;div class=\"alert alert-info mt-2\" id=\"callback-status\"&gt;Waiting for an update or delete action.&lt;/div&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -156,7 +156,7 @@
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
                 <form id="done-hook-form" novalidate>
-                    <edit-array id="attr-done-hook"
+                    <edit-array asp-array-id="attr-done-hook"
                                 asp-items="Model.DoneHookMembers"
                                 asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                                 asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -168,7 +168,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;form id=\"done-hook-form\" novalidate&gt;\n    &lt;edit-array id=\"attr-done-hook\"\n                asp-items=\"Model.DoneHookMembers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-on-done=\"guardDoneAction\"&gt;\n    &lt;/edit-array&gt;\n&lt;/form&gt;\n&lt;div class=\"alert alert-warning mt-2\" id=\"done-hook-status\"&gt;Attempt an edit, then click Done.&lt;/div&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;form id=\"done-hook-form\" novalidate&gt;\n    &lt;edit-array asp-array-id=\"attr-done-hook\"\n                asp-items=\"Model.DoneHookMembers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-on-done=\"guardDoneAction\"&gt;\n    &lt;/edit-array&gt;\n&lt;/form&gt;\n&lt;div class=\"alert alert-warning mt-2\" id=\"done-hook-status\"&gt;Attempt an edit, then click Done.&lt;/div&gt;")</code></pre>
                 <pre class="mt-2"><code class="language-javascript">@Html.Raw("function guardDoneAction(itemId) {\n    const editScope = document.getElementById(`${itemId}-edit`);\n    const form = editScope ? editScope.closest('form') : null;\n    if (form && typeof $ === 'function' && $.validator && $.validator.unobtrusive) {\n        $.validator.unobtrusive.parse(editScope);\n        const validator = $(form).data('validator') || $(form).validate();\n        const inputs = $(editScope).find(':input');\n        const isValid = inputs.toArray().every(input => validator.element(input));\n        updateDoneHookStatus(isValid);\n        return isValid;\n    }\n\n    // Fallback: inspect validation spans if unobtrusive scripts are missing\n    const spans = editScope ? editScope.querySelectorAll('span[data-valmsg-for]') : [];\n    const hasErrors = Array.from(spans).some(s => (s.textContent && s.textContent.trim()) || s.classList.contains('field-validation-error'));\n    updateDoneHookStatus(!hasErrors);\n    return !hasErrors;\n}\n\nfunction updateDoneHookStatus(isValid) {\n    const status = document.getElementById('done-hook-status');\n    if (!status) return;\n    status.textContent = isValid\n        ? 'Allowed: Done action proceeded.'\n        : 'Blocked: resolve validation errors before closing.';\n    status.className = isValid ? 'alert alert-success mt-2' : 'alert alert-danger mt-2';\n}")</code></pre>
             </div>
         </div>
@@ -186,7 +186,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="attr-empty"
+                <edit-array asp-array-id="attr-empty"
                             asp-items="Model.EmptyMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -197,7 +197,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"attr-empty\"\n            asp-items=\"Model.EmptyMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-empty-placeholder=\"No members yet. Use Add to get started.\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-empty\"\n            asp-items=\"Model.EmptyMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-empty-placeholder=\"No members yet. Use Add to get started.\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>

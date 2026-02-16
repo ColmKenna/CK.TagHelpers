@@ -1,7 +1,7 @@
 @model EditArrayPartialMembersViewModel
 
 <h4 class="h6">@Model.Title</h4>
-<edit-array id="@Model.Id"
+<edit-array asp-array-id="@Model.Id"
             asp-items="Model.Members"
             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"

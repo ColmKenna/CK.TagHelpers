@@ -1,6 +1,6 @@
 @model CK.Taghelpers.SampleUsage.Models.TagHelperExamples.EditArray.EditArrayRosterViewModel
 
-<edit-array id="@Model.Id"
+<edit-array asp-array-id="@Model.Id"
             asp-items="Model.Members"
             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"

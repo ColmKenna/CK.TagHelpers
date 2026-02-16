@@ -24,12 +24,12 @@
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
                 <h4 class="h6 text-danger">Incorrect</h4>
-                <edit-array id="anti-missing"
+                <edit-array asp-array-id="anti-missing"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml">
                 </edit-array>
 
                 <h4 class="h6 text-success mt-3">Correct</h4>
-                <edit-array id="anti-correct"
+                <edit-array asp-array-id="anti-correct"
                             asp-items="Model.Members"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml">
@@ -37,7 +37,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- Incorrect --&gt;\n&lt;edit-array id=\"anti-missing\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"&gt;\n&lt;/edit-array&gt;\n\n&lt;!-- Correct --&gt;\n&lt;edit-array id=\"anti-correct\"\n            asp-items=\"Model.Members\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- Incorrect --&gt;\n&lt;edit-array asp-array-id=\"anti-missing\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"&gt;\n&lt;/edit-array&gt;\n\n&lt;!-- Correct --&gt;\n&lt;edit-array asp-array-id=\"anti-correct\"\n            asp-items=\"Model.Members\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -52,7 +52,7 @@
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
                 <h4 class="h6 text-danger">Incorrect</h4>
-                <edit-array id="anti-static"
+                <edit-array asp-array-id="anti-static"
                             asp-items="Model.Members"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplayStatic.cshtml"
@@ -60,7 +60,7 @@
                 </edit-array>
 
                 <h4 class="h6 text-success mt-3">Correct</h4>
-                <edit-array id="anti-dynamic"
+                <edit-array asp-array-id="anti-dynamic"
                             asp-items="Model.Members"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -69,7 +69,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- Incorrect --&gt;\n&lt;edit-array id=\"anti-static\"\n            asp-items=\"Model.Members\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplayStatic.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;\n\n&lt;!-- Correct --&gt;\n&lt;edit-array id=\"anti-dynamic\"\n            asp-items=\"Model.Members\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;!-- Incorrect --&gt;\n&lt;edit-array asp-array-id=\"anti-static\"\n            asp-items=\"Model.Members\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplayStatic.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;\n\n&lt;!-- Correct --&gt;\n&lt;edit-array asp-array-id=\"anti-dynamic\"\n            asp-items=\"Model.Members\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
         <div class="example-notes">

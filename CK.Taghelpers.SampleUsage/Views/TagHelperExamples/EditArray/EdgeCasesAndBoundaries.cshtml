@@ -23,7 +23,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="edge-empty"
+                <edit-array asp-array-id="edge-empty"
                             asp-items="Model.EmptyMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -34,7 +34,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"edge-empty\"\n            asp-items=\"Model.EmptyMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-empty-placeholder=\"No entries available.\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"edge-empty\"\n            asp-items=\"Model.EmptyMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-empty-placeholder=\"No entries available.\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -48,7 +48,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="edge-long"
+                <edit-array asp-array-id="edge-long"
                             asp-items="Model.LongNameMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -57,7 +57,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"edge-long\"\n            asp-items=\"Model.LongNameMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"edge-long\"\n            asp-items=\"Model.LongNameMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -71,7 +71,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="edge-special"
+                <edit-array asp-array-id="edge-special"
                             asp-items="Model.SpecialCharacterMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -80,7 +80,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"edge-special\"\n            asp-items=\"Model.SpecialCharacterMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"edge-special\"\n            asp-items=\"Model.SpecialCharacterMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
         <div class="example-notes">
@@ -97,7 +97,7 @@
         <div class="example-container row g-3">
             <div class="example-rendered col-lg-6">
                 <h3 class="h6">Result</h3>
-                <edit-array id="edge-null"
+                <edit-array asp-array-id="edge-null"
                             asp-items="Model.NullValueMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
@@ -106,7 +106,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array id=\"edge-null\"\n            asp-items=\"Model.NullValueMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"edge-null\"\n            asp-items=\"Model.NullValueMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
         <div class="example-notes">

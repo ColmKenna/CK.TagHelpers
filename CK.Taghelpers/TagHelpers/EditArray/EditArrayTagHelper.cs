@@ -11,6 +11,7 @@ namespace CK.Taghelpers.TagHelpers.EditArray;
 public sealed class EditArrayTagHelper : TagHelper
 {
     private const string ItemsAttributeName = "asp-items";
+    private const string ArrayIdAttributeName = "asp-array-id";
     private const string ViewNameAttributeName = "asp-view-name";
     private const string DisplayViewNameAttributeName = "asp-display-view-name";
     private const string ModelExpAttributeName = "asp-for";
@@ -108,7 +109,7 @@ public sealed class EditArrayTagHelper : TagHelper
     /// <remarks>
     /// <para>
     /// <strong>Important:</strong> The provided id value is automatically prefixed with "edit-array-".
-    /// For example, if you set <c>id="myArray"</c>, the actual DOM element id will be <c>"edit-array-myArray"</c>.
+    /// For example, if you set <c>asp-array-id="myArray"</c>, the actual DOM element id will be <c>"edit-array-myArray"</c>.
     /// </para>
     /// <para>
     /// The id is used to generate unique identifiers for all child elements and is referenced by
@@ -133,7 +134,7 @@ public sealed class EditArrayTagHelper : TagHelper
     /// <example>
     /// <code>
     /// &lt;!-- If you specify: --&gt;
-    /// &lt;edit-array id="addresses" asp-items="Model.Addresses" ... /&gt;
+    /// &lt;edit-array asp-array-id="addresses" asp-items="Model.Addresses" ... /&gt;
     /// 
     /// &lt;!-- The rendered HTML will have: --&gt;
     /// &lt;div id="edit-array-addresses" class="edit-array-container"&gt;
@@ -143,8 +144,8 @@ public sealed class EditArrayTagHelper : TagHelper
     /// &lt;/div&gt;
     /// </code>
     /// </example>
-    [HtmlAttributeName("id")]
-    public required string Id { get; set; }
+    [HtmlAttributeName(ArrayIdAttributeName)]
+    public required string ArrayId { get; set; }
 
     // ============================================================
     // OPTIONAL PROPERTIES (Core Functionality)
@@ -1209,7 +1210,7 @@ public sealed class EditArrayTagHelper : TagHelper
     /// Gets the container ID for use in HTML attributes with validation for safe output.
     /// </summary>
     /// <remarks>
-    /// The user-provided Id is validated to contain only safe characters. Razor's SetAttribute()
+    /// The user-provided ArrayId is validated to contain only safe characters. Razor's SetAttribute()
     /// will handle HTML encoding automatically. The resulting container ID is safe for use in both
     /// HTML attributes and JavaScript string literals within those attributes
     /// (e.g., onclick="moveItem('edit-array-id')"). All itemIds derived from this containerId inherit
@@ -1219,8 +1220,8 @@ public sealed class EditArrayTagHelper : TagHelper
     private string GetContainerId()
     {
         // Validate and return raw ID (Razor will encode)
-        ValidateId(Id, nameof(Id));
-        return $"edit-array-{Id}";
+        ValidateId(ArrayId, nameof(ArrayId));
+        return $"edit-array-{ArrayId}";
     }
 
     /// <summary>
@@ -1245,10 +1246,10 @@ public sealed class EditArrayTagHelper : TagHelper
             errors.Add($"'{nameof(Items)}' is required and must not be null. Use an empty collection if there are no items to render.");
         }
 
-        // Validate Id (required for JavaScript functionality)
-        if (string.IsNullOrWhiteSpace(Id))
+        // Validate ArrayId (required for JavaScript functionality)
+        if (string.IsNullOrWhiteSpace(ArrayId))
         {
-            errors.Add($"'id' attribute is required and must not be null, empty, or whitespace. The id is used to generate unique JavaScript function calls and DOM element identifiers.");
+            errors.Add($"'{ArrayIdAttributeName}' attribute is required and must not be null, empty, or whitespace. The id is used to generate unique JavaScript function calls and DOM element identifiers.");
         }
 
         // Validate DisplayViewName (always required as it's marked with 'required' keyword)

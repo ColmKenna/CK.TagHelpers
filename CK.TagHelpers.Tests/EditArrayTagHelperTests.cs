@@ -81,7 +81,7 @@ public class EditArrayTagHelperTests
     {
         // Arrange
         var tagHelper = CreateTagHelper();
-        tagHelper.Id = null!; // Force null
+        tagHelper.ArrayId = null!; // Force null
         
         var context = CreateContext();
         var output = CreateOutput();
@@ -150,7 +150,7 @@ public class EditArrayTagHelperTests
         var tagHelper = CreateTagHelper();
         tagHelper.ViewName = null!;
         tagHelper.Items = null!;
-        tagHelper.Id = null!;
+        tagHelper.ArrayId = null!;
         
         var context = CreateContext();
         var output = CreateOutput();
@@ -568,7 +568,7 @@ public class EditArrayTagHelperTests
         {
             Items = items ?? Array.Empty<object>(),
             ViewName = viewName,
-            Id = id,
+            ArrayId = id,
             DisplayViewName = "_Display",
             // Create a fresh ViewContext for each test to avoid state pollution
             ViewContext = CreateViewContext()
