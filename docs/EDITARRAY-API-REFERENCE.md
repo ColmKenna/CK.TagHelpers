@@ -220,7 +220,7 @@ renumberItems('edit-array-mylist');
 - `data-deleted="true"` - Set on deleted items
 - `data-new-item-marker="true"` - Marks newly added items
 - `data-id="{value}"` - Custom ID tracking
-- `data-reorder-direction="up|down"` - Reorder button direction
+- `data-direction="-1|1"` - Reorder delta used by `moveItem` (-1 up, 1 down)
 - `data-cancel` - Marks cancel button on new items
 
 ## Model Requirements

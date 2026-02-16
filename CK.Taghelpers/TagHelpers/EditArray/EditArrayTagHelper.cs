@@ -924,7 +924,7 @@ public sealed class EditArrayTagHelper : TagHelper
             .Append(CssClasses.ReorderButton)
             .Append(' ')
             .Append(CssClasses.ReorderUpButton)
-            .Append("\" data-reorder-direction=\"up\" aria-label=\"Move item ")
+            .Append("\" aria-label=\"Move item ")
             .Append(itemId)
             .Append(" up\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
@@ -939,7 +939,7 @@ public sealed class EditArrayTagHelper : TagHelper
             .Append(CssClasses.ReorderButton)
             .Append(' ')
             .Append(CssClasses.ReorderDownButton)
-            .Append("\" data-reorder-direction=\"down\" aria-label=\"Move item ")
+            .Append("\" aria-label=\"Move item ")
             .Append(itemId)
             .Append(" down\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
@@ -971,7 +971,7 @@ public sealed class EditArrayTagHelper : TagHelper
             .Append(CssClasses.ReorderButton)
             .Append(' ')
             .Append(CssClasses.ReorderUpButton)
-            .Append("\" data-reorder-direction=\"up\" aria-label=\"Move item up\" data-action=\"move\" data-container-id=\"")
+            .Append("\" aria-label=\"Move item up\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
             .Append("\" data-item-id=\"closest\" data-direction=\"-1\">");
         sb.Append(upText);
@@ -982,7 +982,7 @@ public sealed class EditArrayTagHelper : TagHelper
             .Append(CssClasses.ReorderButton)
             .Append(' ')
             .Append(CssClasses.ReorderDownButton)
-            .Append("\" data-reorder-direction=\"down\" aria-label=\"Move item down\" data-action=\"move\" data-container-id=\"")
+            .Append("\" aria-label=\"Move item down\" data-action=\"move\" data-container-id=\"")
             .Append(containerId)
             .Append("\" data-item-id=\"closest\" data-direction=\"1\">");
         sb.Append(downText);

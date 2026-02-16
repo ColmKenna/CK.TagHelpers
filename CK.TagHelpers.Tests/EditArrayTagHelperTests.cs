@@ -536,6 +536,9 @@ public class EditArrayTagHelperTests
         // Template reorder buttons use data-item-id="closest" for event delegation
         Assert.Contains("data-item-id=\"closest\"", templateContent);
         Assert.Contains("data-action=\"move\"", templateContent);
+        Assert.Contains("data-direction=\"-1\"", templateContent);
+        Assert.Contains("data-direction=\"1\"", templateContent);
+        Assert.DoesNotContain("data-reorder-direction", templateContent);
     }
 
     [Fact]
@@ -563,6 +566,9 @@ public class EditArrayTagHelperTests
         Assert.Contains("Go Up", content);
         Assert.Contains("Go Down", content);
         Assert.Contains("data-action=\"move\"", content);
+        Assert.Contains("data-direction=\"-1\"", content);
+        Assert.Contains("data-direction=\"1\"", content);
+        Assert.DoesNotContain("data-reorder-direction", content);
     }
 
     // ========================================================================
