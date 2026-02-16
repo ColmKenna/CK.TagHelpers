@@ -86,8 +86,8 @@ function addNewItem(containerId, templateId, data) {
         if (displayContainer && editContainer) {
             displayContainer.id = `${itemId}-display`;
             editContainer.id = `${itemId}-edit`;
-            displayContainer.style.display = 'none';
-            editContainer.style.display = 'block';
+            displayContainer.classList.add('ea-hidden');
+            editContainer.classList.remove('ea-hidden');
 
             const hiddenInput = document.createElement('input');
             hiddenInput.type = 'hidden';
@@ -112,7 +112,7 @@ function addNewItem(containerId, templateId, data) {
     // Hide the placeholder if it exists
     const placeholder = container.querySelector('.edit-array-placeholder');
     if (placeholder) {
-        placeholder.style.display = 'none';
+        placeholder.classList.add('ea-hidden');
     }
 
     // disable the add button
@@ -155,7 +155,7 @@ function toggleEditMode(itemId) {
     const editContainer = document.getElementById(`${itemId}-edit`);
 
     if (displayContainer && editContainer) {
-        if (displayContainer.style.display === 'none') {
+        if (displayContainer.classList.contains('ea-hidden')) {
             // Optional dedicated hook for Done button; returning false cancels the transition
             const onDone = item.dataset.onDone;
             if (onDone && typeof window[onDone] === 'function') {
@@ -179,8 +179,8 @@ function toggleEditMode(itemId) {
             updateDisplayFromForm(itemId);
 
             // Switch from edit to display
-            displayContainer.style.display = 'block';
-            editContainer.style.display = 'none';
+            displayContainer.classList.remove('ea-hidden');
+            editContainer.classList.add('ea-hidden');
 
             // Safely invoke OnUpdate callback if defined (XSS prevention: validate function exists)
             const onUpdate = item.dataset.onUpdate;
@@ -189,8 +189,8 @@ function toggleEditMode(itemId) {
             }
         } else {
             // Switch from display to edit
-            displayContainer.style.display = 'none';
-            editContainer.style.display = 'block';
+            displayContainer.classList.add('ea-hidden');
+            editContainer.classList.remove('ea-hidden');
 
             // Notify listeners that edit mode was entered (e.g. for validation wiring)
             document.dispatchEvent(new CustomEvent('editarray:edit-entered', {
@@ -260,7 +260,7 @@ function markForDeletion(itemId) {
                 if (itemCount === 0) {
                     const placeholder = itemsContainer.querySelector('.edit-array-placeholder');
                     if (placeholder) {
-                        placeholder.style.display = '';
+                        placeholder.classList.remove('ea-hidden');
                     }
                 }
             }

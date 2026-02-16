@@ -42,6 +42,7 @@ public sealed class EditArrayTagHelper : TagHelper
         public const string Alert = "alert";
         public const string AlertDanger = "alert-danger";
         public const string EditArrayError = "edit-array-error";
+        public const string Hidden = "ea-hidden";
         public const string EditArrayItems = "edit-array-items";
         public const string EditArrayPlaceholder = "edit-array-placeholder";
         public const string DisplayContainer = "display-container";
@@ -715,19 +716,16 @@ public sealed class EditArrayTagHelper : TagHelper
 
         if (hasDisplayView)
         {
-            var displayVisibility = GetVisibilityStyle(!DisplayMode);
-
             sb.Append("<div class=\"")
-                .Append(CssClasses.DisplayContainer)
-                .Append("\" id=\"")
-                .Append(itemId)
-                .Append("-display\"");
-            if (!string.IsNullOrEmpty(displayVisibility))
+                .Append(CssClasses.DisplayContainer);
+            if (!DisplayMode)
             {
                 sb.Append(' ')
-                  .Append(displayVisibility);
+                  .Append(CssClasses.Hidden);
             }
-            sb.Append('>');
+            sb.Append("\" id=\"")
+                .Append(itemId)
+                .Append("-display\">");
 
             var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, item, viewData);
             using (var writer = new StringWriter())
@@ -741,19 +739,16 @@ public sealed class EditArrayTagHelper : TagHelper
             sb.Append("</div>");
         }
 
-        var editVisibility = GetVisibilityStyle(hasDisplayView && DisplayMode);
-
         sb.Append("<div class=\"")
-            .Append(CssClasses.EditContainer)
-            .Append("\" id=\"")
-            .Append(itemId)
-            .Append("-edit\"");
-        if (!string.IsNullOrEmpty(editVisibility))
+            .Append(CssClasses.EditContainer);
+        if (hasDisplayView && DisplayMode)
         {
             sb.Append(' ')
-              .Append(editVisibility);
+              .Append(CssClasses.Hidden);
         }
-        sb.Append('>');
+        sb.Append("\" id=\"")
+            .Append(itemId)
+            .Append("-edit\">");
 
         var editorViewContent = await _htmlHelper.PartialAsync(ViewName, item, viewData);
         using (var writer = new StringWriter())
@@ -822,17 +817,11 @@ public sealed class EditArrayTagHelper : TagHelper
 
         if (hasDisplayView)
         {
-            var templateDisplayVisibility = GetVisibilityStyle(true);
-
             sb.Append("<div class=\"")
               .Append(CssClasses.DisplayContainer)
-              .Append("\"");
-            if (!string.IsNullOrEmpty(templateDisplayVisibility))
-            {
-                sb.Append(' ')
-                  .Append(templateDisplayVisibility);
-            }
-            sb.Append('>');
+              .Append(' ')
+              .Append(CssClasses.Hidden)
+              .Append("\">");
             if (templateModel != null)
             {
                 var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, templateModel, viewData);
@@ -1145,11 +1134,6 @@ public sealed class EditArrayTagHelper : TagHelper
     {
         ValidateCssClass(ButtonCssClass, nameof(ButtonCssClass));
         return ButtonCssClass; // Return raw, Razor will encode
-    }
-
-    private static string GetVisibilityStyle(bool shouldHide)
-    {
-        return shouldHide ? "style=\"display: none;\"" : string.Empty;
     }
 
     private string GetEncodedButtonText(string text, string fallback)

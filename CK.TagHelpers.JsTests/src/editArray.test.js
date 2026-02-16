@@ -22,7 +22,7 @@ function setupFixture(options = {}) {
                         <div class="display-container">
                             <span data-display-for="Input___index__"></span>
                         </div>
-                        <div class="edit-container" style="display:none;">
+                        <div class="edit-container ea-hidden">
                             <label for="Input___index__">Name</label>
                             <input type="text" id="Input___index__" name="Input[__index__]" data-id="input-__index__" data-display-for="Input___index__" value="" />
                             <span data-valmsg-for="Input[__index__]"></span>
@@ -83,12 +83,12 @@ describe('editArray.js', () => {
             expect(item.querySelector('input[type="text"]').getAttribute('data-display-for')).toBe('Input_0');
             expect(item.querySelector('.display-container').id).toBe('test-container-item-0-display');
             expect(item.querySelector('.edit-container').id).toBe('test-container-item-0-edit');
-            expect(item.querySelector('.display-container').style.display).toBe('none');
-            expect(item.querySelector('.edit-container').style.display).toBe('block');
+            expect(item.querySelector('.display-container').classList.contains('ea-hidden')).toBe(true);
+            expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(false);
             expect(item.querySelector('input[data-new-item-marker="true"]')).toBeTruthy();
             expect(item.querySelector('button[data-cancel="cancel"]')).toBeTruthy();
             expect(addButton.disabled).toBe(true);
-            expect(placeholder.style.display).toBe('none');
+            expect(placeholder.classList.contains('ea-hidden')).toBe(true);
             expect(eventSpy).toHaveBeenCalledTimes(1);
             expect(eventSpy.mock.calls[0][0].detail.itemId).toBe('test-container-item-0');
         });
@@ -122,8 +122,8 @@ describe('editArray.js', () => {
             toggleEditMode('test-container-item-0');
 
             // Assert
-            expect(item.querySelector('.display-container').style.display).toBe('block');
-            expect(item.querySelector('.edit-container').style.display).toBe('none');
+            expect(item.querySelector('.display-container').classList.contains('ea-hidden')).toBe(false);
+            expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(true);
             expect(item.querySelector('[data-display-for="Input_0"]').textContent).toBe('Alice');
             expect(window.onUpdateCallback).toHaveBeenCalledWith('test-container-item-0');
             expect(item.querySelector('button[data-cancel]')).toBeFalsy();
@@ -143,8 +143,8 @@ describe('editArray.js', () => {
 
             // Assert
             expect(window.onDoneCallback).toHaveBeenCalledWith('test-container-item-0');
-            expect(item.querySelector('.display-container').style.display).toBe('none');
-            expect(item.querySelector('.edit-container').style.display).toBe('block');
+            expect(item.querySelector('.display-container').classList.contains('ea-hidden')).toBe(true);
+            expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(false);
         });
 
         // Validates cancelable save event lets external validators prevent invalid transitions.
@@ -158,8 +158,8 @@ describe('editArray.js', () => {
             toggleEditMode('test-container-item-0');
 
             // Assert
-            expect(item.querySelector('.display-container').style.display).toBe('none');
-            expect(item.querySelector('.edit-container').style.display).toBe('block');
+            expect(item.querySelector('.display-container').classList.contains('ea-hidden')).toBe(true);
+            expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(false);
 
             document.removeEventListener('editarray:edit-saving', cancelHandler);
         });
@@ -176,8 +176,8 @@ describe('editArray.js', () => {
             toggleEditMode('test-container-item-0');
 
             // Assert
-            expect(item.querySelector('.display-container').style.display).toBe('none');
-            expect(item.querySelector('.edit-container').style.display).toBe('block');
+            expect(item.querySelector('.display-container').classList.contains('ea-hidden')).toBe(true);
+            expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(false);
             expect(eventSpy).toHaveBeenCalledTimes(1);
             expect(eventSpy.mock.calls[0][0].detail.itemId).toBe('test-container-item-0');
         });
@@ -198,7 +198,7 @@ describe('editArray.js', () => {
             const itemsContainer = document.getElementById('test-container-items');
             expect(document.getElementById('test-container-item-0')).toBeFalsy();
             expect(addButton.disabled).toBe(false);
-            expect(itemsContainer.querySelector('.edit-array-placeholder').style.display).toBe('');
+            expect(itemsContainer.querySelector('.edit-array-placeholder').classList.contains('ea-hidden')).toBe(false);
         });
 
         // Validates persisted rows toggle deleted state, edit availability, and delete callback.

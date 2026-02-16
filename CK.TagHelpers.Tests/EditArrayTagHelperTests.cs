@@ -293,8 +293,7 @@ public class EditArrayTagHelperTests
         Assert.Contains("<label>", content); // Display content
         
         // Check edit container (should be hidden initially)
-        Assert.Contains("class=\"edit-container\"", content);
-        Assert.Contains("style=\"display: none;\"", content);
+        Assert.Contains("class=\"edit-container ea-hidden\"", content);
         Assert.Contains("<input>", content); // Edit content
         
         // Check toggle buttons (use data attributes for event delegation, not inline onclick)
