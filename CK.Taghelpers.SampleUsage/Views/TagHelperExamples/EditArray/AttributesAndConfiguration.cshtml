@@ -18,6 +18,7 @@
         <h2>Template and add button</h2>
         <p class="example-description">
             Enable the template and add button to let users create new items dynamically.
+            Use <code>asp-max-items</code> to cap the list size.
         </p>
 
         <div class="example-container row g-3">
@@ -30,12 +31,13 @@
                             asp-display-mode="true"
                             asp-template="true"
                             asp-add-button="true"
+                            asp-max-items="3"
                             asp-add-text="Add teammate">
                 </edit-array>
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-template\"\n            asp-items=\"Model.TemplateMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-add-text=\"Add teammate\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-template\"\n            asp-items=\"Model.TemplateMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-max-items=\"3\"\n            asp-add-text=\"Add teammate\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>

@@ -122,6 +122,28 @@ public class EditArrayTagHelperTests
     }
 
     [Fact]
+    public async Task Should_RenderErrorMessage_When_MaxItemsIsZero()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.MaxItems = 0;
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - should render error panel instead of throwing
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+
+        var content = output.Content.GetContent();
+        Assert.Contains("MaxItems", content);
+        Assert.Contains("greater than 0", content);
+    }
+
+    [Fact]
     public async Task Should_RenderErrorMessage_When_ViewContextIsNull()
     {
         // Arrange
@@ -236,6 +258,41 @@ public class EditArrayTagHelperTests
         // Assert
         Assert.True(output.Attributes.ContainsName("data-reorder-enabled"));
         Assert.Equal("true", output.Attributes["data-reorder-enabled"].Value.ToString());
+    }
+
+    [Fact]
+    public async Task Should_RenderMaxItemsDataAttribute_When_MaxItemsIsSet()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.MaxItems = 5;
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.True(output.Attributes.ContainsName("data-max-items"));
+        Assert.Equal("5", output.Attributes["data-max-items"].Value.ToString());
+    }
+
+    [Fact]
+    public async Task Should_NotRenderMaxItemsDataAttribute_When_MaxItemsIsNull()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.MaxItems = null;
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.False(output.Attributes.ContainsName("data-max-items"));
     }
 
     [Fact]

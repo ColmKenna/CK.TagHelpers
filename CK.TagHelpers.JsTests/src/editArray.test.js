@@ -6,14 +6,16 @@ const {
     toggleEditMode,
     markForDeletion,
     moveItem,
-    refreshUnobtrusiveValidation
+    refreshUnobtrusiveValidation,
+    initEditArray
 } = require('../../CK.Taghelpers/wwwroot/js/editArray.js');
 
 function setupFixture(options = {}) {
-    const { reorderEnabled = false } = options;
+    const { reorderEnabled = false, maxItems = null } = options;
+    const maxItemsAttribute = Number.isInteger(maxItems) ? `data-max-items="${maxItems}"` : '';
     document.body.innerHTML = `
         <form id="test-form">
-            <div id="test-container" class="edit-array-container" data-delete-text="Delete" data-undelete-text="Undelete" data-reorder-enabled="${reorderEnabled ? 'true' : 'false'}">
+            <div id="test-container" class="edit-array-container" data-delete-text="Delete" data-undelete-text="Undelete" data-reorder-enabled="${reorderEnabled ? 'true' : 'false'}" ${maxItemsAttribute}>
                 <div id="test-container-items">
                     <div class="edit-array-placeholder">No items yet</div>
                 </div>
@@ -105,6 +107,37 @@ describe('editArray.js', () => {
             // Assert
             const items = document.querySelectorAll('#test-container-items .edit-array-item');
             expect(items).toHaveLength(1);
+        });
+
+        it('respects max-items limit and blocks additions beyond the configured maximum', () => {
+            // Arrange
+            setupFixture({ maxItems: 1 });
+
+            // Act
+            addNewItem('test-container', 'test-template');
+            toggleEditMode('test-container-item-0');
+            addNewItem('test-container', 'test-template');
+
+            // Assert
+            const items = document.querySelectorAll('#test-container-items .edit-array-item');
+            const addButton = document.getElementById('test-container-add');
+            expect(items).toHaveLength(1);
+            expect(addButton.disabled).toBe(true);
+        });
+
+        it('disables add button on init when existing item count already reaches max-items', () => {
+            // Arrange
+            setupFixture({ maxItems: 1 });
+            const itemsContainer = document.getElementById('test-container-items');
+            itemsContainer.insertAdjacentHTML('beforeend', '<div class="edit-array-item" id="existing-item"></div>');
+            const addButton = document.getElementById('test-container-add');
+            addButton.disabled = false;
+
+            // Act
+            initEditArray();
+
+            // Assert
+            expect(addButton.disabled).toBe(true);
         });
     });
 

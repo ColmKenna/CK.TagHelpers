@@ -24,6 +24,13 @@ function addNewItem(containerId, templateId, data) {
     // Get current count of items to use as new index (only count actual items, not placeholders)
     const newIndex = container.querySelectorAll('.edit-array-item').length;
 
+    // Enforce max-items limit if configured
+    const maxItems = getMaxItems(containerId);
+    if (maxItems !== null && newIndex >= maxItems) {
+        syncAddButtonState(containerId);
+        return;
+    }
+
     // Replace '__index__' with the actual index in all input names and ids
     const allInputs = clone.querySelectorAll('*');
     allInputs.forEach(input => {
@@ -203,6 +210,7 @@ function toggleEditMode(itemId) {
         const addButton = document.getElementById(containerId + '-add');
         if (addButton) {
             addButton.disabled = false;
+            syncAddButtonState(containerId);
         }
     }
 
@@ -251,6 +259,7 @@ function markForDeletion(itemId) {
             const addButton = document.getElementById(containerId + '-add');
             if (addButton) {
                 addButton.disabled = false;
+                syncAddButtonState(containerId);
             }
 
             // Show placeholder if there are no items left
@@ -434,6 +443,34 @@ function getContainerIdFromItemId(itemId) {
     return match && match[1] ? match[1] : null;
 }
 
+function getMaxItems(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return null;
+
+    const maxItemsAttr = container.dataset.maxItems;
+    if (!maxItemsAttr) return null;
+
+    const parsed = parseInt(maxItemsAttr, 10);
+    if (Number.isNaN(parsed) || parsed <= 0) {
+        return null;
+    }
+    return parsed;
+}
+
+function syncAddButtonState(containerId) {
+    const addButton = document.getElementById(containerId + '-add');
+    if (!addButton) return;
+
+    const maxItems = getMaxItems(containerId);
+    if (maxItems === null) return;
+
+    const itemsContainer = document.getElementById(containerId + '-items');
+    const currentCount = itemsContainer
+        ? itemsContainer.querySelectorAll('.edit-array-item').length
+        : 0;
+    addButton.disabled = currentCount >= maxItems;
+}
+
 /**
  * Resolves the item ID from a button's data-item-id attribute.
  * If the value is "closest", finds the nearest .edit-array-item ancestor's ID.
@@ -524,6 +561,9 @@ function initEditArray() {
     // Wire up unobtrusive validation and notify listeners for each container
     document.querySelectorAll('.edit-array-container').forEach(function(container) {
         refreshUnobtrusiveValidation(container);
+        if (container.id) {
+            syncAddButtonState(container.id);
+        }
         document.dispatchEvent(new CustomEvent('editarray:init', {
             detail: { container }
         }));

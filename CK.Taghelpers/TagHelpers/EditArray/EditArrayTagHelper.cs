@@ -26,6 +26,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
     private const string ItemCssClassAttributeName = "asp-item-class";
     private const string ButtonCssClassAttributeName = "asp-button-class";
     private const string EmptyPlaceholderAttributeName = "asp-empty-placeholder";
+    private const string MaxItemsAttributeName = "asp-max-items";
     private const string EnableReorderAttributeName = "asp-enable-reordering";
     private const string ReorderButtonCssClassAttributeName = "asp-reorder-button-class";
     private const string MoveUpButtonTextAttributeName = "asp-move-up-text";
@@ -291,6 +292,13 @@ public sealed partial class EditArrayTagHelper : TagHelper
     /// </remarks>
     [HtmlAttributeName(EmptyPlaceholderAttributeName)]
     public string? EmptyPlaceholder { get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum number of items allowed in the collection.
+    /// When set, the Add button is disabled once this limit is reached.
+    /// </summary>
+    [HtmlAttributeName(MaxItemsAttributeName)]
+    public int? MaxItems { get; set; }
 
     // ============================================================
     // CALLBACK PROPERTIES
@@ -642,6 +650,10 @@ public sealed partial class EditArrayTagHelper : TagHelper
         // Add button text data attributes for JavaScript consumption
         output.Attributes.SetAttribute("data-delete-text", DeleteButtonText);
         output.Attributes.SetAttribute("data-undelete-text", UndeleteButtonText);
+        if (MaxItems.HasValue)
+        {
+            output.Attributes.SetAttribute("data-max-items", MaxItems.Value.ToString());
+        }
 
         // Setup HtmlHelper to be used in our views
         (_htmlHelper as IViewContextAware)?.Contextualize(ViewContext);
@@ -1291,6 +1303,12 @@ public sealed partial class EditArrayTagHelper : TagHelper
         if (DisplayMode && string.IsNullOrWhiteSpace(DisplayViewName))
         {
             errors.Add($"'{nameof(DisplayViewName)}' is required when DisplayMode is enabled. Specify the name of the partial view to render for display mode.");
+        }
+
+        // Validate max items setting
+        if (MaxItems.HasValue && MaxItems.Value <= 0)
+        {
+            errors.Add($"'{nameof(MaxItems)}' must be greater than 0.");
         }
 
         // Validate ViewContext and nested properties

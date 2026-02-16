@@ -25,6 +25,7 @@ asp-display-mode="true"                         <!-- Start in display mode (defa
 <!-- Add new items -->
 asp-template="true"                             <!-- Render template for new items -->
 asp-add-button="true"                           <!-- Show Add button -->
+asp-max-items="5"                               <!-- Optional cap on total items -->
 
 <!-- Reordering -->
 asp-enable-reordering="true"                    <!-- Enable Move Up/Down buttons -->
@@ -211,6 +212,7 @@ renumberItems('edit-array-mylist');
 
 ### Used by TagHelper
 - `data-reorder-enabled="true"` - Set on container when reordering is enabled
+- `data-max-items="{number}"` - Set on container when max item count is configured
 - `data-delete-text="{text}"` - Configurable Delete button text (set on container)
 - `data-undelete-text="{text}"` - Configurable Undelete button text (set on container)
 - `data-is-deleted-marker` - Marks the IsDeleted hidden input
@@ -397,6 +399,7 @@ Requires:
 | `asp-display-mode` | `false` |
 | `asp-template` | `false` |
 | `asp-add-button` | `false` |
+| `asp-max-items` | `null` |
 | `asp-enable-reordering` | `false` |
 | `asp-container-class` | `"edit-array-container"` (always included) |
 | `asp-item-class` | `"edit-array-item"` (always included) |
