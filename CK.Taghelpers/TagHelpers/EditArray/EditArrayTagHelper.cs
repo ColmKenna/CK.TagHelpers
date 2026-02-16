@@ -660,7 +660,16 @@ public sealed partial class EditArrayTagHelper : TagHelper
         }
 
         // Setup HtmlHelper to be used in our views
-        (_htmlHelper as IViewContextAware)?.Contextualize(ViewContext);
+        if (_htmlHelper is IViewContextAware viewContextAware)
+        {
+            viewContextAware.Contextualize(ViewContext);
+        }
+        else
+        {
+            throw new InvalidOperationException(
+                "The injected IHtmlHelper does not implement IViewContextAware. " +
+                "Ensure the default ASP.NET Core HTML helper is registered in DI.");
+        }
 
         return containerId;
     }

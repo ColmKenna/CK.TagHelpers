@@ -336,6 +336,43 @@ public class EditArrayTagHelperTests
         Assert.Contains("<span>Rendered</span>", content);
     }
 
+    [Fact]
+    public async Task Should_ContextualizeHtmlHelper_When_HelperImplementsIViewContextAware()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        _viewContextAwareMock.Verify(v => v.Contextualize(It.IsAny<ViewContext>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Should_ThrowInvalidOperationException_When_HtmlHelperIsNotIViewContextAware()
+    {
+        // Arrange
+        var htmlHelperWithoutContextAware = new Mock<IHtmlHelper>();
+        var tagHelper = new EditArrayTagHelper(htmlHelperWithoutContextAware.Object)
+        {
+            Items = Array.Empty<object>(),
+            ViewName = "_ItemEditor",
+            ArrayId = "test-array",
+            DisplayViewName = "_Display",
+            ViewContext = CreateViewContext()
+        };
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act / Assert
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => tagHelper.ProcessAsync(context, output));
+        Assert.Contains("IViewContextAware", ex.Message);
+    }
+
     // ========================================================================
     // 3. Display Mode & Interaction Tests
     // ========================================================================
