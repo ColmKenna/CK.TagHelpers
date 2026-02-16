@@ -218,6 +218,24 @@ public class EditArrayTagHelperTests
     }
 
     [Fact]
+    public async Task Should_RenderDeleteUndeleteTextDataAttributes_OnContainer()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.DeleteButtonText = "Remove";
+        tagHelper.UndeleteButtonText = "Restore";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("Remove", output.Attributes["data-delete-text"].Value.ToString());
+        Assert.Equal("Restore", output.Attributes["data-undelete-text"].Value.ToString());
+    }
+
+    [Fact]
     public async Task Should_NotDuplicateDefaultClass_When_ItemCssClassContainsDefault()
     {
         // Arrange
@@ -506,6 +524,35 @@ public class EditArrayTagHelperTests
         Assert.Contains("<template", content);
         Assert.Contains("</template>", content);
         Assert.Contains("__index__", content); // Check placeholder replacement logic
+    }
+
+    [Fact]
+    public async Task Should_RenderTemplateButtons_WithClosestItemIdForDelegation()
+    {
+        // Arrange
+        var items = new List<TestItem> { new TestItem() };
+        var tagHelper = CreateTagHelper(items: Array.Empty<object>(), viewName: "_Editor");
+        tagHelper.Items = items;
+        tagHelper.RenderTemplate = true;
+
+        SetupPartialAsync("_Editor", new HtmlString("TemplateContent"));
+        SetupPartialAsync("_Display", new HtmlString("DisplayContent"));
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = output.Content.GetContent();
+        var templateStart = content.IndexOf("<template", StringComparison.Ordinal);
+        var templateEnd = content.IndexOf("</template>", StringComparison.Ordinal);
+        var templateContent = content.Substring(templateStart, templateEnd - templateStart);
+
+        Assert.Contains("data-action=\"edit\" data-item-id=\"closest\"", templateContent);
+        Assert.Contains("data-action=\"delete\" data-item-id=\"closest\"", templateContent);
+        Assert.Contains("data-action=\"done\" data-item-id=\"closest\"", templateContent);
     }
 
     [Fact]

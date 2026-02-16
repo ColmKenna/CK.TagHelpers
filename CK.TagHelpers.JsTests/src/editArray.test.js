@@ -172,15 +172,46 @@ describe('editArray.js', () => {
             // Arrange
             const item = addItemAndGet('0');
             window.onDoneCallback = jest.fn(() => false);
+            window.onUpdateCallback = jest.fn();
             item.dataset.onDone = 'onDoneCallback';
+            item.dataset.onUpdate = 'onUpdateCallback';
 
             // Act
             toggleEditMode('test-container-item-0');
 
             // Assert
             expect(window.onDoneCallback).toHaveBeenCalledWith('test-container-item-0');
+            expect(window.onUpdateCallback).not.toHaveBeenCalled();
             expect(item.querySelector('.display-container').classList.contains('ea-hidden')).toBe(true);
             expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(false);
+        });
+
+        it('calls callbacks in order: onDone, edit-saving event, then onUpdate', () => {
+            // Arrange
+            const item = addItemAndGet('0');
+            const callOrder = [];
+
+            window.onDoneCallback = jest.fn(() => {
+                callOrder.push('done');
+                return true;
+            });
+            window.onUpdateCallback = jest.fn(() => {
+                callOrder.push('update');
+            });
+            item.dataset.onDone = 'onDoneCallback';
+            item.dataset.onUpdate = 'onUpdateCallback';
+
+            const savingHandler = () => {
+                callOrder.push('saving');
+            };
+            document.addEventListener('editarray:edit-saving', savingHandler);
+
+            // Act
+            toggleEditMode('test-container-item-0');
+
+            // Assert
+            expect(callOrder).toEqual(['done', 'saving', 'update']);
+            document.removeEventListener('editarray:edit-saving', savingHandler);
         });
 
         // Validates cancelable save event lets external validators prevent invalid transitions.
