@@ -296,6 +296,22 @@ public class EditArrayTagHelperTests
     }
 
     [Fact]
+    public async Task Should_RenderItemsContainerWithAriaLivePolite()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = output.Content.GetContent();
+        Assert.Contains("id=\"edit-array-test-array-items\" aria-live=\"polite\"", content);
+    }
+
+    [Fact]
     public async Task Should_CallPartialAsyncForEachItem_When_ItemsArePresent()
     {
         // Arrange
@@ -358,6 +374,38 @@ public class EditArrayTagHelperTests
         Assert.Contains("data-action=\"done\"", content);
         Assert.Contains("Edit", content); // Edit button text
         Assert.Contains("Done", content); // Done button text
+    }
+
+    [Fact]
+    public async Task Should_RenderIndexedAriaLabels_ForItemActionButtons()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new[] { "Item1", "Item2" }, viewName: "_Editor");
+        tagHelper.DisplayMode = true;
+        tagHelper.DisplayViewName = "_Display";
+
+        SetupPartialAsync("_Editor", new HtmlString("<input>"));
+        SetupPartialAsync("_Display", new HtmlString("<label>"));
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = output.Content.GetContent();
+        Assert.Contains("aria-label=\"Edit item 1\"", content);
+        Assert.Contains("aria-label=\"Delete item 1\"", content);
+        Assert.Contains("aria-label=\"Done editing item 1\"", content);
+        Assert.Contains("aria-label=\"Edit item 2\"", content);
+        Assert.Contains("aria-label=\"Delete item 2\"", content);
+        Assert.Contains("aria-label=\"Done editing item 2\"", content);
+
+        // Ensure item IDs are no longer surfaced in button aria labels.
+        Assert.DoesNotContain("aria-label=\"Edit item edit-array-test-array-item-0\"", content);
+        Assert.DoesNotContain("aria-label=\"Delete item edit-array-test-array-item-0\"", content);
+        Assert.DoesNotContain("aria-label=\"Done editing item edit-array-test-array-item-0\"", content);
     }
 
     [Fact]

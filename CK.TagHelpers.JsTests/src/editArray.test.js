@@ -93,6 +93,7 @@ describe('editArray.js', () => {
             expect(item.firstElementChild?.hasAttribute('data-is-deleted-marker')).toBe(true);
             expect(addButton.disabled).toBe(true);
             expect(placeholder.classList.contains('ea-hidden')).toBe(true);
+            expect(document.activeElement).toBe(item.querySelector('input[type="text"]'));
             expect(eventSpy).toHaveBeenCalledTimes(1);
             expect(eventSpy.mock.calls[0][0].detail.itemId).toBe('test-container-item-0');
         });
@@ -234,6 +235,7 @@ describe('editArray.js', () => {
             expect(document.getElementById('test-container-item-0')).toBeFalsy();
             expect(addButton.disabled).toBe(false);
             expect(itemsContainer.querySelector('.edit-array-placeholder').classList.contains('ea-hidden')).toBe(false);
+            expect(document.activeElement).toBe(addButton);
         });
 
         // Validates persisted rows toggle deleted state, edit availability, and delete callback.
@@ -297,6 +299,10 @@ describe('editArray.js', () => {
             expect(items[0].querySelector('.delete-item-btn').dataset.itemId).toBe('test-container-item-1');
             expect(items[1].querySelector('.delete-item-btn').dataset.itemId).toBe('test-container-item-0');
             expect(warnSpy).toHaveBeenCalled();
+
+            const movedItem = items[1];
+            const expectedFocusedButton = movedItem.querySelector('[data-action="move"][data-direction="1"]');
+            expect(document.activeElement).toBe(expectedFocusedButton);
         });
 
         // Validates guard clause blocks reordering when container has not opted in.

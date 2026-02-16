@@ -677,7 +677,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
           .Append(CssClasses.EditArrayItems)
           .Append("\" id=\"")
           .Append(containerId)
-          .Append("-items\">");
+          .Append("-items\" aria-live=\"polite\">");
 
         var hasItems = false;
         var index = 0;
@@ -713,7 +713,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
                 Model = item
             };
 
-            await RenderItemDisplayMode(sb, item, itemId, viewData);
+            await RenderItemDisplayMode(sb, item, itemId, viewData, index + 1);
 
             AppendReorderButtons(sb, containerId, itemId);
 
@@ -732,7 +732,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         sb.Append("</div>");
     }
 
-    private async Task RenderItemDisplayMode(StringBuilder sb, object item, string itemId, ViewDataDictionary<object> viewData)
+    private async Task RenderItemDisplayMode(StringBuilder sb, object item, string itemId, ViewDataDictionary<object> viewData, int displayIndex)
     {
         var hasDisplayView = !string.IsNullOrWhiteSpace(DisplayViewName);
 
@@ -756,8 +756,8 @@ public sealed partial class EditArrayTagHelper : TagHelper
                 sb.Append(writer.ToString());
             }
 
-            sb.Append(GenerateButton("edit", itemId, false));
-            sb.Append(GenerateButton("delete", itemId, false));
+            sb.Append(GenerateButton("edit", itemId, false, displayIndex));
+            sb.Append(GenerateButton("delete", itemId, false, displayIndex));
             sb.Append("</div>");
         }
 
@@ -781,11 +781,11 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
         if (hasDisplayView)
         {
-            sb.Append(GenerateButton("done", itemId, false));
+            sb.Append(GenerateButton("done", itemId, false, displayIndex));
         }
         else
         {
-            sb.Append(GenerateButton("delete", itemId, false));
+            sb.Append(GenerateButton("delete", itemId, false, displayIndex));
         }
         sb.Append("</div>");
     }
@@ -1204,9 +1204,10 @@ public sealed partial class EditArrayTagHelper : TagHelper
     /// <param name="itemId">The ID of the item (or null for template buttons)</param>
     /// <param name="isTemplate">True if generating button for template, false for item</param>
     /// <returns>The generated button HTML string</returns>
-    private string GenerateButton(string buttonType, string? itemId, bool isTemplate = false)
+    private string GenerateButton(string buttonType, string? itemId, bool isTemplate = false, int displayIndex = 0)
     {
         var sb = new StringBuilder();
+        var indexSuffix = (!isTemplate && displayIndex > 0) ? $" {displayIndex}" : string.Empty;
 
         // Determine button-specific properties
         string cssModifier, buttonText, ariaLabel;
@@ -1215,17 +1216,17 @@ public sealed partial class EditArrayTagHelper : TagHelper
             case "edit":
                 cssModifier = CssClasses.EditButtonModifier;
                 buttonText = EditButtonText;
-                ariaLabel = isTemplate ? "Edit item" : $"Edit item {itemId}";
+                ariaLabel = $"Edit item{indexSuffix}";
                 break;
             case "delete":
                 cssModifier = CssClasses.DeleteButtonModifier;
                 buttonText = DeleteButtonText;
-                ariaLabel = isTemplate ? "Delete item" : $"Delete item {itemId}";
+                ariaLabel = $"Delete item{indexSuffix}";
                 break;
             case "done":
                 cssModifier = CssClasses.DoneButtonModifier;
                 buttonText = DoneButtonText;
-                ariaLabel = isTemplate ? "Done editing item" : $"Done editing item {itemId}";
+                ariaLabel = $"Done editing item{indexSuffix}";
                 break;
             default:
                 throw new ArgumentException($"Unknown button type: {buttonType}", nameof(buttonType));

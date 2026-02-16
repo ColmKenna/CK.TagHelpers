@@ -141,6 +141,15 @@ function addNewItem(containerId, templateId) {
     document.dispatchEvent(new CustomEvent('editarray:item-added', {
         detail: { containerId, itemId: itemDiv?.id, container }
     }));
+
+    // Keep keyboard users in context by moving focus into the new item editor.
+    const newItem = document.getElementById(itemId);
+    if (newItem) {
+        const firstInput = newItem.querySelector('input:not([type="hidden"]), select, textarea');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
 }
 
 /**
@@ -254,6 +263,7 @@ function markForDeletion(itemId) {
             if (addButton) {
                 addButton.disabled = false;
                 syncAddButtonState(containerId);
+                addButton.focus();
             }
 
             // Show placeholder if there are no items left
@@ -356,6 +366,18 @@ function moveItem(containerId, itemId, offset) {
     container.insertBefore(item, insertBeforeNode);
 
     renumberItems(containerId);
+
+    // Keep focus on the same logical move direction after reordering.
+    const updatedItems = container.querySelectorAll('.edit-array-item');
+    const movedItem = updatedItems[targetIndex];
+    if (!movedItem) return;
+
+    const moveButton = movedItem.querySelector(
+        `[data-action="move"][data-direction="${offset < 0 ? '-1' : '1'}"]`
+    );
+    if (moveButton) {
+        moveButton.focus();
+    }
 }
 
 function renumberItems(containerId) {
