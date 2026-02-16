@@ -499,6 +499,57 @@ public class EditArrayTagHelperTests
         Assert.Contains("data-action=\"edit\"", content);
     }
 
+    [Fact]
+    public async Task Should_ThrowArgumentException_When_ArrayIdStartsWithDigit()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(id: "1invalid");
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act / Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => tagHelper.ProcessAsync(context, output));
+    }
+
+    [Fact]
+    public async Task Should_ThrowInvalidOperationException_When_OnUpdateCallbackIsInvalid()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new[] { "Item1" }, viewName: "_Editor");
+        tagHelper.OnUpdate = "alert('xss')";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act / Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => tagHelper.ProcessAsync(context, output));
+    }
+
+    [Fact]
+    public async Task Should_ThrowInvalidOperationException_When_OnDoneCallbackIsInvalid()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new[] { "Item1" }, viewName: "_Editor");
+        tagHelper.OnDone = "on.done";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act / Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => tagHelper.ProcessAsync(context, output));
+    }
+
+    [Fact]
+    public async Task Should_ThrowInvalidOperationException_When_OnDeleteCallbackIsInvalid()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new[] { "Item1" }, viewName: "_Editor");
+        tagHelper.OnDelete = "delete-item";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act / Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => tagHelper.ProcessAsync(context, output));
+    }
+
     // ========================================================================
     // 7. Styling & Reordering Tests
     // ========================================================================

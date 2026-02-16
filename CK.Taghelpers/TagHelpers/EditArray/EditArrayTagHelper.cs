@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Primitives;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 
 namespace CK.Taghelpers.TagHelpers.EditArray;
 
 [HtmlTargetElement("edit-array", TagStructure = TagStructure.NormalOrSelfClosing)]
-public sealed class EditArrayTagHelper : TagHelper
+public sealed partial class EditArrayTagHelper : TagHelper
 {
     private const string ItemsAttributeName = "asp-items";
     private const string ArrayIdAttributeName = "asp-array-id";
@@ -65,6 +66,15 @@ public sealed class EditArrayTagHelper : TagHelper
         public const string AddButtonModifier = ButtonPrimary + " " + MarginTop2;
         public const string ErrorPanel = EditArrayError + " " + Alert + " " + AlertDanger;
     }
+
+    [GeneratedRegex(@"^[a-zA-Z0-9\s\-_]*$")]
+    private static partial Regex SafeCssClassRegex();
+
+    [GeneratedRegex(@"^[a-zA-Z][a-zA-Z0-9\-_]*$")]
+    private static partial Regex SafeIdRegex();
+
+    [GeneratedRegex(@"^[a-zA-Z_$][a-zA-Z0-9_$]*$")]
+    private static partial Regex SafeJsIdentifierRegex();
 
     // ============================================================
     // REQUIRED PROPERTIES
@@ -1003,6 +1013,7 @@ public sealed class EditArrayTagHelper : TagHelper
     {
         if (!string.IsNullOrWhiteSpace(OnUpdate))
         {
+            ValidateCallbackName(OnUpdate, nameof(OnUpdate));
             sb.Append(" data-on-update=\"")
               .Append(HtmlEncoder.Default.Encode(OnUpdate))
               .Append("\"");
@@ -1010,6 +1021,7 @@ public sealed class EditArrayTagHelper : TagHelper
 
         if (!string.IsNullOrWhiteSpace(OnDone))
         {
+            ValidateCallbackName(OnDone, nameof(OnDone));
             sb.Append(" data-on-done=\"")
               .Append(HtmlEncoder.Default.Encode(OnDone))
               .Append("\"");
@@ -1017,6 +1029,7 @@ public sealed class EditArrayTagHelper : TagHelper
 
         if (!string.IsNullOrWhiteSpace(OnDelete))
         {
+            ValidateCallbackName(OnDelete, nameof(OnDelete));
             sb.Append(" data-on-delete=\"")
               .Append(HtmlEncoder.Default.Encode(OnDelete))
               .Append("\"");
@@ -1053,9 +1066,9 @@ public sealed class EditArrayTagHelper : TagHelper
     /// <param name="cssClass">The CSS class string to validate.</param>
     /// <param name="propertyName">The name of the property being validated (for error messages).</param>
     /// <exception cref="InvalidOperationException">Thrown when the CSS class contains invalid characters.</exception>
-    private void ValidateCssClass(string cssClass, string propertyName)
+    private static void ValidateCssClass(string cssClass, string propertyName)
     {
-        if (!System.Text.RegularExpressions.Regex.IsMatch(cssClass, @"^[a-zA-Z0-9\s\-_]*$"))
+        if (!SafeCssClassRegex().IsMatch(cssClass))
         {
             throw new InvalidOperationException(
                 $"{propertyName} contains invalid characters. " +
@@ -1069,13 +1082,29 @@ public sealed class EditArrayTagHelper : TagHelper
     /// <param name="id">The ID string to validate.</param>
     /// <param name="propertyName">The name of the property being validated (for error messages).</param>
     /// <exception cref="ArgumentException">Thrown when the ID contains invalid characters.</exception>
-    private void ValidateId(string id, string propertyName)
+    private static void ValidateId(string id, string propertyName)
     {
-        if (!System.Text.RegularExpressions.Regex.IsMatch(id, @"^[a-zA-Z0-9\-_]*$"))
+        if (!SafeIdRegex().IsMatch(id))
         {
             throw new ArgumentException(
-                "Contains invalid characters. Only alphanumeric, hyphens, and underscores allowed.",
+                "Contains invalid characters. Only letters, digits, hyphens, and underscores allowed, and must start with a letter.",
                 propertyName);
+        }
+    }
+
+    private static void ValidateCallbackName(string? callbackName, string propertyName)
+    {
+        if (string.IsNullOrWhiteSpace(callbackName))
+        {
+            return;
+        }
+
+        if (!SafeJsIdentifierRegex().IsMatch(callbackName))
+        {
+            throw new InvalidOperationException(
+                $"{propertyName} must be a valid JavaScript identifier. " +
+                "Only letters, digits, underscores, and dollar signs allowed, " +
+                "and must start with a letter, underscore, or dollar sign.");
         }
     }
 
