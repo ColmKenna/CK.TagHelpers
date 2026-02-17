@@ -588,7 +588,6 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
-        // Validate required configuration - returns false and renders error UI if validation fails
         if (!ValidateConfiguration(output))
         {
             return;
@@ -596,24 +595,19 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
         var containerId = ConfigureContainerElement(output);
 
-        // Create container for rendered items and template sections
         var sb = new StringBuilder(EstimateInitialCapacity());
 
-        // Get the model expression prefix from ViewContext
         var modelExpressionPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
 
-        // Extract the property name from the ModelExpression if provided
         string collectionName = For?.Name ?? string.Empty;
 
         await RenderItemsAndTemplate(sb, containerId, modelExpressionPrefix, collectionName);
 
-        // Set the output content
         output.Content.SetHtmlContent(sb.ToString());
     }
 
     private string ConfigureContainerElement(TagHelperOutput output)
     {
-        // Reset the TagHelper output
         output.TagName = "div";
         output.TagMode = TagMode.StartTagAndEndTag;
 
@@ -625,7 +619,6 @@ public sealed partial class EditArrayTagHelper : TagHelper
             : $"{existingClass} {containerClass}";
         output.Attributes.SetAttribute("class", finalClass);
 
-        // Create an ID for the container to use with JavaScript
         var containerId = GetContainerId();
         output.Attributes.SetAttribute("id", containerId);
         if (EnableReordering)
@@ -641,7 +634,6 @@ public sealed partial class EditArrayTagHelper : TagHelper
             output.Attributes.SetAttribute("data-max-items", MaxItems.Value.ToString());
         }
 
-        // Setup HtmlHelper to be used in our views
         if (_htmlHelper is IViewContextAware viewContextAware)
         {
             viewContextAware.Contextualize(ViewContext);
@@ -1149,7 +1141,6 @@ public sealed partial class EditArrayTagHelper : TagHelper
         var sb = new StringBuilder();
         var indexSuffix = (!isTemplate && displayIndex > 0) ? $" {displayIndex}" : string.Empty;
 
-        // Determine button-specific properties
         var (cssModifier, buttonText, ariaLabel, dataAction) = buttonKind switch
         {
             ButtonKind.Edit => (CssClasses.EditButtonModifier, EditButtonText, $"Edit item{indexSuffix}", "edit"),
@@ -1158,7 +1149,6 @@ public sealed partial class EditArrayTagHelper : TagHelper
             _ => throw new ArgumentOutOfRangeException(nameof(buttonKind), buttonKind, "Unknown button kind")
         };
 
-        // Build the button HTML
         sb.Append("<button type=\"button\" class=\"")
           .Append(GetButtonCssClass())
           .Append(' ')
@@ -1193,7 +1183,6 @@ public sealed partial class EditArrayTagHelper : TagHelper
     /// <returns>The raw container ID (e.g., "edit-array-myId"). Razor will encode.</returns>
     private string GetContainerId()
     {
-        // Validate and return raw ID (Razor will encode)
         ValidateId(ArrayId, nameof(ArrayId));
         return $"edit-array-{ArrayId}";
     }
@@ -1208,37 +1197,31 @@ public sealed partial class EditArrayTagHelper : TagHelper
     {
         var errors = new List<string>();
 
-        // Validate ViewName
         if (string.IsNullOrWhiteSpace(ViewName))
         {
             errors.Add($"'{nameof(ViewName)}' is required and must not be null or empty. Specify the name of the partial view to render for each item.");
         }
 
-        // Validate Items
         if (Items == null)
         {
             errors.Add($"'{nameof(Items)}' is required and must not be null. Use an empty collection if there are no items to render.");
         }
 
-        // Validate ArrayId (required for JavaScript functionality)
         if (string.IsNullOrWhiteSpace(ArrayId))
         {
             errors.Add($"'{ArrayIdAttributeName}' attribute is required and must not be null, empty, or whitespace. The id is used to generate unique JavaScript function calls and DOM element identifiers.");
         }
 
-        // Validate DisplayViewName when display mode is enabled
         if (DisplayMode && string.IsNullOrWhiteSpace(DisplayViewName))
         {
             errors.Add($"'{nameof(DisplayViewName)}' is required when DisplayMode is enabled. Specify the name of the partial view to render for display mode.");
         }
 
-        // Validate max items setting
         if (MaxItems.HasValue && MaxItems.Value <= 0)
         {
             errors.Add($"'{nameof(MaxItems)}' must be greater than 0.");
         }
 
-        // Validate ViewContext and nested properties
         if (ViewContext == null)
         {
             errors.Add($"'{nameof(ViewContext)}' is required and must not be null.");
@@ -1248,7 +1231,6 @@ public sealed partial class EditArrayTagHelper : TagHelper
             errors.Add("ViewContext.ViewData must not be null. Ensure ViewContext is properly initialized.");
         }
 
-        // If there are errors, render diagnostic output instead of throwing
         if (errors.Count > 0)
         {
             RenderValidationErrors(output, errors);
