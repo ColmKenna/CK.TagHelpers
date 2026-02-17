@@ -1,6 +1,5 @@
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -127,13 +126,10 @@ public class DynamicEditorViewModel
 /// It automatically generates form fields based on the model's properties
 /// and dispatches custom events for confirm/cancel actions.
 /// </summary>
-public partial class DynamicEditorViewComponent : ViewComponent
+public class DynamicEditorViewComponent : ViewComponent
 {
     private const string DefaultEventName = "entity";
     private readonly IModelMetadataProvider _metadataProvider;
-
-    [GeneratedRegex(@"^[a-zA-Z0-9_-]+$")]
-    private static partial Regex SafeEventNamePattern();
 
     public DynamicEditorViewComponent(IModelMetadataProvider metadataProvider)
     {
@@ -156,7 +152,7 @@ public partial class DynamicEditorViewComponent : ViewComponent
         var validatedEventName = string.IsNullOrWhiteSpace(eventName) ? DefaultEventName : eventName;
 
         // Validate eventName contains only safe characters
-        if (!SafeEventNamePattern().IsMatch(validatedEventName))
+        if (!ValidationRegex.SafeEventName().IsMatch(validatedEventName))
         {
             throw new ArgumentException(
                 "Event name must contain only letters, digits, hyphens, and underscores.",
