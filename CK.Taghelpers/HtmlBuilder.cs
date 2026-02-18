@@ -5,166 +5,348 @@ using Microsoft.AspNetCore.Html;
 namespace CK.Taghelpers;
 
 /// <summary>
-/// A fluent builder for constructing HTML strings safely with automatic encoding.
+/// Content phase: inside a tag body or at root level.
+/// Add text, open child tags, or close the current tag.
+/// Attributes are not available.
 /// </summary>
-public sealed class HtmlBuilder
+public interface IHtmlFlow
+{
+    /// <summary>Opens a tag, entering the attribute phase: &lt;tag</summary>
+    IHtmlTag OpenTag(string tag);
+
+    /// <summary>Appends a complete opening tag: &lt;tag&gt; with optional class/id shorthand.</summary>
+    IHtmlFlow Tag(string tag, string? cssClass = null, string? id = null);
+
+    /// <summary>Appends a complete element: &lt;tag&gt;encoded-text&lt;/tag&gt;</summary>
+    IHtmlFlow Element(string tag, string text, string? cssClass = null, string? id = null);
+
+    /// <summary>Appends HTML-encoded text content.</summary>
+    IHtmlFlow Text(string text);
+
+    /// <summary>Conditionally appends HTML-encoded text content.</summary>
+    IHtmlFlow TextIf(bool condition, string text);
+
+    /// <summary>Appends pre-encoded or trusted HTML. Use with caution.</summary>
+    IHtmlFlow Raw(string html);
+
+    /// <summary>Appends content from an <see cref="IHtmlContent"/>.</summary>
+    IHtmlFlow AppendHtml(IHtmlContent content);
+
+    /// <summary>Appends a closing tag: &lt;/tag&gt;</summary>
+    IHtmlFlow CloseTag(string tag);
+
+    /// <summary>Opens a scoped tag that auto-closes on dispose.</summary>
+    HtmlBuilder.ElementScope Scope(string tag, string? cssClass = null, string? id = null);
+
+    /// <summary>
+    /// Opens a scoped tag without closing the start bracket.
+    /// Use <see cref="HtmlBuilder.TagScope.Tag"/> to add attributes,
+    /// then call <see cref="IHtmlTag.CloseStart"/> before adding content.
+    /// The closing tag is appended on dispose.
+    /// </summary>
+    HtmlBuilder.TagScope OpenScope(string tag, string? cssClass = null, string? id = null);
+
+    /// <summary>Appends a self-closing hidden input.</summary>
+    IHtmlFlow HiddenInput(string name, string value);
+
+    /// <summary>Appends a button element with type="button".</summary>
+    IHtmlFlow Button(string text, string? cssClass = null);
+
+    /// <summary>Direct StringBuilder access for advanced scenarios. Bypasses encoding.</summary>
+    IHtmlFlow Dangerous(Action<StringBuilder> action);
+
+    /// <summary>Returns the accumulated HTML string.</summary>
+    string ToHtml();
+
+    /// <summary>Length of the accumulated content.</summary>
+    int Length { get; }
+}
+
+/// <summary>
+/// Attribute phase: a tag is open but the start bracket isn't closed.
+/// Add attributes, then transition back to content phase
+/// via <see cref="CloseStart"/> or <see cref="SelfClose"/>.
+/// Text and child tags are not available.
+/// </summary>
+public interface IHtmlTag
+{
+    /// <summary>Appends an encoded attribute: name="encoded-value"</summary>
+    IHtmlTag Attr(string name, string value);
+
+    /// <summary>Appends multiple encoded attributes.</summary>
+    IHtmlTag Attr(params (string Name, string Value)[] attributes);
+
+    /// <summary>Conditionally appends an attribute.</summary>
+    IHtmlTag AttrIf(bool condition, string name, string value);
+
+    /// <summary>Appends a boolean attribute (e.g. disabled, hidden).</summary>
+    IHtmlTag BoolAttr(string name);
+
+    /// <summary>Conditionally appends a boolean attribute.</summary>
+    IHtmlTag BoolAttrIf(bool condition, string name);
+
+    /// <summary>Appends a class attribute with a base class and conditional additions.</summary>
+    IHtmlTag CssClass(string baseClass, params (bool Condition, string Class)[] conditional);
+
+    /// <summary>Closes the opening tag: &gt; - transitions to content phase.</summary>
+    IHtmlFlow CloseStart();
+
+    /// <summary>Self-closes the tag: /&gt; - transitions to content phase.</summary>
+    IHtmlFlow SelfClose();
+}
+
+/// <summary>
+/// A fluent, phase-safe builder for constructing HTML strings with automatic encoding.
+/// <para>
+/// Use <see cref="Create"/> to start a builder chain. The return types guide you
+/// through valid construction sequences.
+/// </para>
+/// </summary>
+public sealed class HtmlBuilder : IHtmlFlow, IHtmlTag, IHtmlContent
 {
     private readonly StringBuilder _sb;
 
-    public HtmlBuilder(int capacity = 256) => _sb = new StringBuilder(capacity);
-    public HtmlBuilder(StringBuilder sb) => _sb = sb ?? throw new ArgumentNullException(nameof(sb));
+    private HtmlBuilder(int capacity) => _sb = new StringBuilder(capacity);
 
-    /// <summary>Opens a tag: &lt;tag</summary>
-    public HtmlBuilder OpenTag(string tag)
+    /// <summary>Creates a new builder in the content phase.</summary>
+    public static IHtmlFlow Create(int capacity = 256) => new HtmlBuilder(capacity);
+
+    IHtmlTag IHtmlFlow.OpenTag(string tag)
     {
         _sb.Append('<').Append(tag);
         return this;
     }
 
-    /// <summary>Opens a tag with optional class and id shorthand.</summary>
-    public HtmlBuilder OpenTag(string tag, string? cssClass = null, string? id = null)
+    IHtmlFlow IHtmlFlow.Tag(string tag, string? cssClass, string? id)
     {
         _sb.Append('<').Append(tag);
-        if (cssClass is not null) Attr("class", cssClass);
-        if (id is not null) Attr("id", id);
-        return this;
-    }
-
-    /// <summary>Appends a complete opening tag: &lt;tag&gt; with optional class and id shorthand.</summary>
-    public HtmlBuilder Tag(string tag, string? cssClass = null, string? id = null)
-    {
-        return OpenTag(tag, cssClass, id).CloseStart();
-    }
-
-    /// <summary>Appends a complete element with encoded text content.</summary>
-    public HtmlBuilder Element(string tag, string text, string? cssClass = null, string? id = null)
-    {
-        return Tag(tag, cssClass, id).Text(text).CloseTag(tag);
-    }
-
-    /// <summary>Appends an encoded attribute: name="encoded-value"</summary>
-    public HtmlBuilder Attr(string name, string value)
-    {
-        _sb.Append(' ').Append(name).Append("=\"")
-           .Append(HtmlEncoder.Default.Encode(value))
-           .Append('"');
-        return this;
-    }
-
-    /// <summary>Appends multiple encoded attributes in one call. Each entry must be [name, value].</summary>
-    public HtmlBuilder Attr(params string[][] attributes)
-    {
-        ArgumentNullException.ThrowIfNull(attributes);
-
-        foreach (var attribute in attributes)
+        if (cssClass is not null)
         {
-            ArgumentNullException.ThrowIfNull(attribute);
-
-            if (attribute.Length != 2)
-            {
-                throw new ArgumentException(
-                    "Each attribute must contain exactly two values: [name, value].",
-                    nameof(attributes));
-            }
-
-            Attr(attribute[0], attribute[1]);
+            AppendAttr("class", cssClass);
         }
-
-        return this;
-    }
-
-    /// <summary>Conditionally appends an attribute.</summary>
-    public HtmlBuilder AttrIf(bool condition, string name, string value)
-    {
-        return condition ? Attr(name, value) : this;
-    }
-
-    /// <summary>Appends a boolean attribute (e.g. disabled, hidden).</summary>
-    public HtmlBuilder BoolAttr(string name)
-    {
-        _sb.Append(' ').Append(name);
-        return this;
-    }
-
-    /// <summary>Conditionally appends a boolean attribute.</summary>
-    public HtmlBuilder BoolAttrIf(bool condition, string name)
-    {
-        return condition ? BoolAttr(name) : this;
-    }
-
-    /// <summary>Closes the opening tag: &gt;</summary>
-    public HtmlBuilder CloseStart()
-    {
+        if (id is not null)
+        {
+            AppendAttr("id", id);
+        }
         _sb.Append('>');
         return this;
     }
 
-    /// <summary>Self-closes the tag: /&gt;</summary>
-    public HtmlBuilder SelfClose()
+    IHtmlFlow IHtmlFlow.Element(string tag, string text, string? cssClass, string? id)
     {
-        _sb.Append(" />");
-        return this;
-    }
-
-    /// <summary>Appends a closing tag: &lt;/tag&gt;</summary>
-    public HtmlBuilder CloseTag(string tag)
-    {
+        ((IHtmlFlow)this).Tag(tag, cssClass, id);
+        _sb.Append(HtmlEncoder.Default.Encode(text));
         _sb.Append("</").Append(tag).Append('>');
         return this;
     }
 
-    /// <summary>Appends HTML-encoded text content.</summary>
-    public HtmlBuilder Text(string text)
+    IHtmlFlow IHtmlFlow.Text(string text)
     {
         _sb.Append(HtmlEncoder.Default.Encode(text));
         return this;
     }
 
-    /// <summary>Appends pre-encoded or trusted HTML. Use with caution.</summary>
-    public HtmlBuilder Raw(string html)
+    IHtmlFlow IHtmlFlow.TextIf(bool condition, string text)
+    {
+        if (condition)
+        {
+            _sb.Append(HtmlEncoder.Default.Encode(text));
+        }
+        return this;
+    }
+
+    IHtmlFlow IHtmlFlow.Raw(string html)
     {
         _sb.Append(html);
         return this;
     }
 
-    /// <summary>Appends content from an IHtmlContent (e.g. partial view result).</summary>
-    public HtmlBuilder AppendHtmlContent(IHtmlContent content)
+    IHtmlFlow IHtmlFlow.AppendHtml(IHtmlContent content)
     {
-        using var writer = new StringWriter();
+        using var writer = new StringWriter(_sb);
         content.WriteTo(writer, HtmlEncoder.Default);
-        _sb.Append(writer.ToString());
         return this;
     }
 
-    /// <summary>Shorthand for a complete void element: &lt;input type="hidden" .../&gt;</summary>
-    public HtmlBuilder HiddenInput(string name, string value)
+    IHtmlFlow IHtmlFlow.CloseTag(string tag)
     {
-        return OpenTag("input")
-            .Attr("type", "hidden")
-            .Attr("name", name)
-            .Attr("value", value)
-            .SelfClose();
+        _sb.Append("</").Append(tag).Append('>');
+        return this;
     }
 
-    /// <summary>Shorthand for a complete button element.</summary>
-    public HtmlBuilder Button(string cssClass, string text, string ariaLabel,
-        IEnumerable<KeyValuePair<string, string>>? dataAttrs = null)
+    ElementScope IHtmlFlow.Scope(string tag, string? cssClass, string? id)
     {
-        OpenTag("button").Attr("type", "button").Attr("class", cssClass).Attr("aria-label", ariaLabel);
-        if (dataAttrs is not null)
+        ((IHtmlFlow)this).Tag(tag, cssClass, id);
+        return new ElementScope(this, tag);
+    }
+
+    TagScope IHtmlFlow.OpenScope(string tag, string? cssClass, string? id)
+    {
+        _sb.Append('<').Append(tag);
+        if (cssClass is not null)
         {
-            foreach (var (key, val) in dataAttrs)
-                Attr(key, val);
+            AppendAttr("class", cssClass);
         }
-        return CloseStart().Text(text).CloseTag("button");
+        if (id is not null)
+        {
+            AppendAttr("id", id);
+        }
+        return new TagScope(this, tag);
     }
 
-    /// <summary>Returns the accumulated HTML string.</summary>
+    IHtmlFlow IHtmlFlow.HiddenInput(string name, string value)
+    {
+        _sb.Append("<input");
+        AppendAttr("type", "hidden");
+        AppendAttr("name", name);
+        AppendAttr("value", value);
+        _sb.Append(" />");
+        return this;
+    }
+
+    IHtmlFlow IHtmlFlow.Button(string text, string? cssClass)
+    {
+        _sb.Append("<button");
+        AppendAttr("type", "button");
+        if (cssClass is not null)
+        {
+            AppendAttr("class", cssClass);
+        }
+        _sb.Append('>');
+        _sb.Append(HtmlEncoder.Default.Encode(text));
+        _sb.Append("</button>");
+        return this;
+    }
+
+    IHtmlFlow IHtmlFlow.Dangerous(Action<StringBuilder> action)
+    {
+        action(_sb);
+        return this;
+    }
+
+    string IHtmlFlow.ToHtml() => _sb.ToString();
+
+    int IHtmlFlow.Length => _sb.Length;
+
+    IHtmlTag IHtmlTag.Attr(string name, string value)
+    {
+        AppendAttr(name, value);
+        return this;
+    }
+
+    IHtmlTag IHtmlTag.Attr(params (string Name, string Value)[] attributes)
+    {
+        foreach (var (name, value) in attributes)
+        {
+            AppendAttr(name, value);
+        }
+        return this;
+    }
+
+    IHtmlTag IHtmlTag.AttrIf(bool condition, string name, string value)
+    {
+        if (condition)
+        {
+            AppendAttr(name, value);
+        }
+        return this;
+    }
+
+    IHtmlTag IHtmlTag.BoolAttr(string name)
+    {
+        _sb.Append(' ').Append(name);
+        return this;
+    }
+
+    IHtmlTag IHtmlTag.BoolAttrIf(bool condition, string name)
+    {
+        if (condition)
+        {
+            _sb.Append(' ').Append(name);
+        }
+        return this;
+    }
+
+    IHtmlTag IHtmlTag.CssClass(string baseClass, params (bool Condition, string Class)[] conditional)
+    {
+        var combined = new StringBuilder(baseClass);
+        foreach (var (condition, @class) in conditional)
+        {
+            if (condition)
+            {
+                combined.Append(' ').Append(@class);
+            }
+        }
+        AppendAttr("class", combined.ToString());
+        return this;
+    }
+
+    IHtmlFlow IHtmlTag.CloseStart()
+    {
+        _sb.Append('>');
+        return this;
+    }
+
+    IHtmlFlow IHtmlTag.SelfClose()
+    {
+        _sb.Append(" />");
+        return this;
+    }
+
+    public void WriteTo(TextWriter writer, HtmlEncoder encoder)
+    {
+        foreach (var chunk in _sb.GetChunks())
+        {
+            writer.Write(chunk.Span);
+        }
+    }
+
+    private void AppendAttr(string name, string value)
+    {
+        _sb.Append(' ').Append(name).Append("=\"")
+           .Append(HtmlEncoder.Default.Encode(value))
+           .Append('"');
+    }
+
     public override string ToString() => _sb.ToString();
 
-    /// <summary>Returns the length of the accumulated content.</summary>
-    public int Length => _sb.Length;
+    /// <summary>
+    /// Auto-closes a tag on dispose. The start bracket is already closed.
+    /// </summary>
+    public readonly struct ElementScope : IDisposable
+    {
+        private readonly HtmlBuilder _builder;
+        private readonly string _tag;
 
-    /// <summary>Provides direct access to the underlying StringBuilder for advanced scenarios.</summary>
-    public StringBuilder InnerBuilder => _sb;
+        internal ElementScope(HtmlBuilder builder, string tag)
+        {
+            _builder = builder;
+            _tag = tag;
+        }
+
+        public void Dispose() => _builder._sb.Append("</").Append(_tag).Append('>');
+    }
+
+    /// <summary>
+    /// A scoped tag whose start bracket is still open.
+    /// Use <see cref="Tag"/> to add attributes, then call
+    /// <see cref="IHtmlTag.CloseStart"/> before adding content.
+    /// The closing tag is appended on dispose.
+    /// </summary>
+    public readonly struct TagScope : IDisposable
+    {
+        private readonly HtmlBuilder _builder;
+        private readonly string _tag;
+
+        internal TagScope(HtmlBuilder builder, string tag)
+        {
+            _builder = builder;
+            _tag = tag;
+        }
+
+        /// <summary>Attribute-phase handle. Add attributes, then call CloseStart().</summary>
+        public IHtmlTag Tag => _builder;
+
+        public void Dispose() => _builder._sb.Append("</").Append(_tag).Append('>');
+    }
 }

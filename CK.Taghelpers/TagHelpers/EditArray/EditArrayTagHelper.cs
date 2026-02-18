@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
@@ -599,7 +600,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
         var containerId = ConfigureContainerElement(output);
 
-        var html = new HtmlBuilder(EstimateInitialCapacity());
+        IHtmlFlow html = HtmlBuilder.Create(EstimateInitialCapacity());
 
         var modelExpressionPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
 
@@ -607,7 +608,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
         await RenderItemsAndTemplate(html, containerId, modelExpressionPrefix, collectionName);
 
-        output.Content.SetHtmlContent(html.ToString());
+        output.Content.SetHtmlContent((IHtmlContent)html);
     }
 
     private string ConfigureContainerElement(TagHelperOutput output)
@@ -652,7 +653,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         return containerId;
     }
 
-    private async Task RenderItemsAndTemplate(HtmlBuilder html, string containerId, string modelExpressionPrefix, string collectionName)
+    private async Task RenderItemsAndTemplate(IHtmlFlow html, string containerId, string modelExpressionPrefix, string collectionName)
     {
         await RenderItems(html, containerId, modelExpressionPrefix, collectionName);
 
@@ -662,13 +663,13 @@ public sealed partial class EditArrayTagHelper : TagHelper
         }
     }
 
-    private async Task RenderItems(HtmlBuilder html, string containerId, string modelExpressionPrefix, string collectionName)
+    private async Task RenderItems(IHtmlFlow html, string containerId, string modelExpressionPrefix, string collectionName)
     {
         html.OpenTag("div")
             .Attr(
-                ["class", CssClasses.EditArrayItems],
-                ["id", $"{containerId}-items"],
-                ["aria-live", "polite"])
+                ("class", CssClasses.EditArrayItems),
+                ("id", $"{containerId}-items"),
+                ("aria-live", "polite"))
             .CloseStart();
 
         var hasItems = false;
@@ -681,21 +682,21 @@ public sealed partial class EditArrayTagHelper : TagHelper
             var fieldName = GetFieldName(modelExpressionPrefix, collectionName, index);
             var itemId = $"{containerId}-item-{index}";
 
-            html.OpenTag("div")
+            var itemTag = html.OpenTag("div")
                 .Attr(
-                    ["class", GetItemCssClass()],
-                    ["id", itemId]);
+                    ("class", GetItemCssClass()),
+                    ("id", itemId));
 
             // Add callback data attributes for safe JS invocation (XSS prevention)
-            AppendCallbackDataAttributes(html);
-            html.CloseStart();
+            AppendCallbackDataAttributes(itemTag);
+            itemTag.CloseStart();
 
             // Always emit the IsDeleted marker input for consistent JS contract
             html.OpenTag("input")
                 .Attr(
-                    ["type", "hidden"],
-                    ["name", $"{fieldName}.IsDeleted"],
-                    ["value", "false"])
+                    ("type", "hidden"),
+                    ("name", $"{fieldName}.IsDeleted"),
+                    ("value", "false"))
                 .BoolAttr("data-is-deleted-marker")
                 .SelfClose();
 
@@ -726,7 +727,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         html.CloseTag("div");
     }
 
-    private async Task RenderItemDisplayMode(HtmlBuilder html, object item, string itemId, ViewDataDictionary<object> viewData, int displayIndex)
+    private async Task RenderItemDisplayMode(IHtmlFlow html, object item, string itemId, ViewDataDictionary<object> viewData, int displayIndex)
     {
         var hasDisplayView = !string.IsNullOrWhiteSpace(DisplayViewName);
 
@@ -745,7 +746,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
     }
 
     private async Task AppendItemSection(
-        HtmlBuilder html, string cssClass, string sectionId,
+        IHtmlFlow html, string cssClass, string sectionId,
         bool isHidden, string viewName, object model,
         ViewDataDictionary<object> viewData, string itemId, int displayIndex,
         params ButtonKind[] buttons)
@@ -753,12 +754,12 @@ public sealed partial class EditArrayTagHelper : TagHelper
         var fullClass = isHidden ? $"{cssClass} {CssClasses.Hidden}" : cssClass;
         html.OpenTag("div")
             .Attr(
-                ["class", fullClass],
-                ["id", sectionId])
+                ("class", fullClass),
+                ("id", sectionId))
             .CloseStart();
 
         var content = await _htmlHelper.PartialAsync(viewName, model, viewData);
-        html.AppendHtmlContent(content);
+        html.AppendHtml(content);
 
         foreach (var button in buttons)
         {
@@ -768,7 +769,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         html.CloseTag("div");
     }
 
-    private async Task RenderTemplateSection(HtmlBuilder html, string containerId, string modelExpressionPrefix, string collectionName)
+    private async Task RenderTemplateSection(IHtmlFlow html, string containerId, string modelExpressionPrefix, string collectionName)
     {
         var templateId = $"{containerId}-template";
         html.OpenTag("template")
@@ -802,21 +803,21 @@ public sealed partial class EditArrayTagHelper : TagHelper
             Model = templateModel
         };
 
-        html.OpenTag("div")
+        var itemTag = html.OpenTag("div")
             .Attr("class", GetItemCssClass());
 
         // Add callback data attributes for safe JS invocation (XSS prevention)
-        AppendCallbackDataAttributes(html);
-        html.CloseStart();
+        AppendCallbackDataAttributes(itemTag);
+        itemTag.CloseStart();
 
         var name = $"{templateFieldName}.IsDeleted";
 
         // IsDeleted marker is a direct child of the item div (consistent with regular items).
         html.OpenTag("input")
             .Attr(
-                ["type", "hidden"],
-                ["name", name],
-                ["value", "false"])
+                ("type", "hidden"),
+                ("name", name),
+                ("value", "false"))
             .BoolAttr("data-is-deleted-marker")
             .SelfClose();
 
@@ -830,7 +831,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
             if (templateModel != null)
             {
                 var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, templateModel, viewData);
-                html.AppendHtmlContent(displayViewContent);
+                html.AppendHtml(displayViewContent);
             }
 
             AppendActionButton(html, ButtonKind.Edit, null, true);
@@ -845,7 +846,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         if (templateModel != null)
         {
             var viewContent = await _htmlHelper.PartialAsync(ViewName, templateModel, viewData);
-            html.AppendHtmlContent(viewContent);
+            html.AppendHtml(viewContent);
         }
 
         if (hasDisplayView)
@@ -868,20 +869,20 @@ public sealed partial class EditArrayTagHelper : TagHelper
         {
             html.OpenTag("button")
                 .Attr(
-                    ["type", "button"],
-                    ["class", $"{GetButtonCssClass()} {CssClasses.AddButtonModifier}"],
-                    ["id", $"{containerId}-add"],
-                    ["aria-label", "Add new item"],
-                    ["data-action", "add"],
-                    ["data-container-id", containerId],
-                    ["data-template-id", templateId])
+                    ("type", "button"),
+                    ("class", $"{GetButtonCssClass()} {CssClasses.AddButtonModifier}"),
+                    ("id", $"{containerId}-add"),
+                    ("aria-label", "Add new item"),
+                    ("data-action", "add"),
+                    ("data-container-id", containerId),
+                    ("data-template-id", templateId))
                 .CloseStart()
                 .Text(AddButtonText)
                 .CloseTag("button");
         }
     }
 
-    private void RenderEmptyPlaceholder(HtmlBuilder html)
+    private void RenderEmptyPlaceholder(IHtmlFlow html)
     {
         if (string.IsNullOrWhiteSpace(EmptyPlaceholder))
         {
@@ -891,7 +892,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         html.Element("div", EmptyPlaceholder, cssClass: CssClasses.EditArrayPlaceholder);
     }
 
-    private void AppendReorderButtons(HtmlBuilder html, string containerId, string? itemId, bool isTemplate)
+    private void AppendReorderButtons(IHtmlFlow html, string containerId, string? itemId, bool isTemplate)
     {
         if (!EnableReordering)
         {
@@ -905,6 +906,8 @@ public sealed partial class EditArrayTagHelper : TagHelper
         var upAriaLabel = isTemplate ? "Move item up" : $"Move item {itemId} up";
         var downAriaLabel = isTemplate ? "Move item down" : $"Move item {itemId} down";
 
+        
+        
         html.OpenTag("div")
             .Attr("class", CssClasses.ReorderControls)
             .CloseStart();
@@ -940,15 +943,15 @@ public sealed partial class EditArrayTagHelper : TagHelper
     /// JavaScript callbacks, preventing XSS vulnerabilities. The JavaScript code validates
     /// that callback names resolve to actual functions before invoking them.
     /// </remarks>
-    /// <param name="html">The HtmlBuilder to append attributes to.</param>
-    private void AppendCallbackDataAttributes(HtmlBuilder html)
+    /// <param name="html">The open tag to append attributes to.</param>
+    private void AppendCallbackDataAttributes(IHtmlTag html)
     {
         AppendCallbackDataAttribute(html, OnUpdate, nameof(OnUpdate), "data-on-update");
         AppendCallbackDataAttribute(html, OnDone, nameof(OnDone), "data-on-done");
         AppendCallbackDataAttribute(html, OnDelete, nameof(OnDelete), "data-on-delete");
     }
 
-    private static void AppendCallbackDataAttribute(HtmlBuilder html, string? callbackName, string propertyName, string attributeName)
+    private static void AppendCallbackDataAttribute(IHtmlTag html, string? callbackName, string propertyName, string attributeName)
     {
         if (string.IsNullOrWhiteSpace(callbackName))
         {
@@ -1102,7 +1105,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
             : $"{prefix}.{collectionName}[{index}]";
     }
 
-    private void AppendActionButton(HtmlBuilder html, ButtonKind buttonKind, string? itemId, bool isTemplate = false, int displayIndex = 0)
+    private void AppendActionButton(IHtmlFlow html, ButtonKind buttonKind, string? itemId, bool isTemplate = false, int displayIndex = 0)
     {
         var indexSuffix = (!isTemplate && displayIndex > 0) ? $" {displayIndex}" : string.Empty;
 
@@ -1124,24 +1127,24 @@ public sealed partial class EditArrayTagHelper : TagHelper
     }
 
     private static void AppendButton(
-        HtmlBuilder html,
+        IHtmlFlow html,
         string cssClass,
         string text,
         string ariaLabel,
         params (string Key, string Value)[] dataAttrs)
     {
-        html.OpenTag("button")
+        var buttonTag = html.OpenTag("button")
             .Attr(
-                ["type", "button"],
-                ["class", cssClass],
-                ["aria-label", ariaLabel]);
+                ("type", "button"),
+                ("class", cssClass),
+                ("aria-label", ariaLabel));
 
         foreach (var (key, value) in dataAttrs)
         {
-            html.Attr($"data-{key}", value);
+            buttonTag.Attr($"data-{key}", value);
         }
 
-        html.CloseStart()
+        buttonTag.CloseStart()
             .Text(text)
             .CloseTag("button");
     }
@@ -1227,7 +1230,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         output.Attributes.SetAttribute("class", CssClasses.ErrorPanel);
         output.TagMode = TagMode.StartTagAndEndTag;
 
-        var html = new HtmlBuilder();
+        IHtmlFlow html = HtmlBuilder.Create();
         html.Element("strong", "EditArrayTagHelper Configuration Error:");
         html.Tag("ul");
         foreach (var error in errors)
@@ -1236,7 +1239,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         }
         html.CloseTag("ul");
 
-        output.Content.SetHtmlContent(html.ToString());
+        output.Content.SetHtmlContent((IHtmlContent)html);
     }
 
 }

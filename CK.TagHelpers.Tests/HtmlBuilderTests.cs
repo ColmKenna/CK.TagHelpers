@@ -1,578 +1,271 @@
-using System.Text;
 using System.Text.Encodings.Web;
+using CK.Taghelpers;
 using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Xunit;
 
 namespace CK.TagHelpers.Tests;
 
 public class HtmlBuilderTests
 {
-    // ── Constructor tests ──────────────────────────────────────────────
-
     [Fact]
-    public void DefaultConstructor_CreatesEmptyBuilder()
+    public void Create_DefaultBuilder_IsEmpty()
     {
-        var builder = new Taghelpers.HtmlBuilder();
-        Assert.Equal(string.Empty, builder.ToString());
-        Assert.Equal(0, builder.Length);
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        Assert.Equal(string.Empty, html.ToHtml());
+        Assert.Equal(0, html.Length);
     }
 
     [Fact]
-    public void Constructor_WithCapacity_CreatesEmptyBuilder()
+    public void Create_WithCapacity_IsEmpty()
     {
-        var builder = new Taghelpers.HtmlBuilder(512);
-        Assert.Equal(string.Empty, builder.ToString());
+        IHtmlFlow html = HtmlBuilder.Create(512);
+
+        Assert.Equal(string.Empty, html.ToHtml());
     }
 
     [Fact]
-    public void Constructor_WithStringBuilder_UsesProvidedBuilder()
+    public void OpenTag_Attr_CloseStart_BuildsTag()
     {
-        var sb = new StringBuilder("existing");
-        var builder = new Taghelpers.HtmlBuilder(sb);
-        Assert.Equal("existing", builder.ToString());
-        Assert.Same(sb, builder.InnerBuilder);
-    }
+        IHtmlFlow html = HtmlBuilder.Create();
 
-    [Fact]
-    public void Constructor_WithNullStringBuilder_ThrowsArgumentNullException()
-    {
-        Assert.Throws<ArgumentNullException>(() => new Taghelpers.HtmlBuilder(null!));
-    }
-
-    // ── OpenTag tests ──────────────────────────────────────────────────
-
-    [Fact]
-    public void OpenTag_AppendsOpenAngleBracketAndTagName()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div")
-            .ToString();
-
-        Assert.Equal("<div", result);
-    }
-
-    [Fact]
-    public void OpenTag_WithCssClass_AppendsClassAttribute()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div", cssClass: "container")
+        html.OpenTag("div")
+            .Attr("class", "container")
+            .Attr("id", "root")
             .CloseStart()
-            .ToString();
+            .CloseTag("div");
 
-        Assert.Equal("<div class=\"container\">", result);
-    }
-
-    [Fact]
-    public void OpenTag_WithId_AppendsIdAttribute()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div", id: "main")
-            .CloseStart()
-            .ToString();
-
-        Assert.Equal("<div id=\"main\">", result);
-    }
-
-    [Fact]
-    public void OpenTag_WithCssClassAndId_AppendsBothAttributes()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div", cssClass: "container", id: "main")
-            .CloseStart()
-            .ToString();
-
-        Assert.Equal("<div class=\"container\" id=\"main\">", result);
-    }
-
-    [Fact]
-    public void OpenTag_WithNullCssClassAndId_AppendsNoAttributes()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div", cssClass: null, id: null)
-            .CloseStart()
-            .ToString();
-
-        Assert.Equal("<div>", result);
-    }
-
-    // ── Tag tests ──────────────────────────────────────────────────────
-
-    [Fact]
-    public void Tag_AppendsCompleteOpeningTag()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .Tag("div")
-            .ToString();
-
-        Assert.Equal("<div>", result);
-    }
-
-    [Fact]
-    public void Tag_WithCssClass_AppendsClassAttributeAndClosesTag()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .Tag("div", cssClass: "container")
-            .ToString();
-
-        Assert.Equal("<div class=\"container\">", result);
-    }
-
-    [Fact]
-    public void Tag_WithCssClassAndId_AppendsBothAttributesAndClosesTag()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .Tag("div", cssClass: "container", id: "main")
-            .ToString();
-
-        Assert.Equal("<div class=\"container\" id=\"main\">", result);
-    }
-
-    // ── Element tests ──────────────────────────────────────────────────
-
-    [Fact]
-    public void Element_AppendsCompleteElementWithEncodedText()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .Element("strong", "A < B & C")
-            .ToString();
-
-        Assert.Equal("<strong>A &lt; B &amp; C</strong>", result);
-    }
-
-    [Fact]
-    public void Element_WithCssClassAndId_AppendsAttributesTextAndClosingTag()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .Element("span", "hello", cssClass: "note", id: "msg")
-            .ToString();
-
-        Assert.Equal("<span class=\"note\" id=\"msg\">hello</span>", result);
-    }
-
-    // ── Attr tests ─────────────────────────────────────────────────────
-
-    [Fact]
-    public void Attr_AppendsEncodedAttribute()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div")
-            .Attr("class", "my-class")
-            .CloseStart()
-            .ToString();
-
-        Assert.Equal("<div class=\"my-class\">", result);
-    }
-
-    [Fact]
-    public void Attr_EncodesSpecialCharactersInValue()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div")
-            .Attr("data-value", "a\"b<c>d&e")
-            .CloseStart()
-            .ToString();
-
-        var encoded = HtmlEncoder.Default.Encode("a\"b<c>d&e");
-        Assert.Equal($"<div data-value=\"{encoded}\">", result);
+        Assert.Equal("<div class=\"container\" id=\"root\"></div>", html.ToHtml());
     }
 
     [Fact]
     public void Attr_MultipleAttributes_AppendsAll()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("input")
-            .Attr("type", "text")
-            .Attr("name", "field1")
-            .Attr("value", "hello")
-            .SelfClose()
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
 
-        Assert.Equal("<input type=\"text\" name=\"field1\" value=\"hello\" />", result);
-    }
+        html.OpenTag("input")
+            .Attr(("type", "hidden"), ("name", "field"), ("value", "42"))
+            .SelfClose();
 
-    [Fact]
-    public void Attr_WithAttributePairs_AppendsAll()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("input")
-            .Attr(["type", "hidden"], ["name", "field1"], ["value", "false"])
-            .SelfClose()
-            .ToString();
-
-        Assert.Equal("<input type=\"hidden\" name=\"field1\" value=\"false\" />", result);
-    }
-
-    [Fact]
-    public void Attr_WithInvalidAttributePair_ThrowsArgumentException()
-    {
-        var ex = Assert.Throws<ArgumentException>(() =>
-            new Taghelpers.HtmlBuilder()
-                .OpenTag("input")
-                .Attr(["type"]));
-
-        Assert.Contains("exactly two values", ex.Message);
-    }
-
-    // ── AttrIf tests ───────────────────────────────────────────────────
-
-    [Fact]
-    public void AttrIf_WhenTrue_AppendsAttribute()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div")
-            .AttrIf(true, "class", "active")
-            .CloseStart()
-            .ToString();
-
-        Assert.Equal("<div class=\"active\">", result);
+        Assert.Equal("<input type=\"hidden\" name=\"field\" value=\"42\" />", html.ToHtml());
     }
 
     [Fact]
     public void AttrIf_WhenFalse_DoesNotAppendAttribute()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div")
-            .AttrIf(false, "class", "active")
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.OpenTag("div")
+            .AttrIf(false, "data-test", "x")
+            .CloseStart();
+
+        Assert.Equal("<div>", html.ToHtml());
+    }
+
+    [Fact]
+    public void BoolAttrIf_Works()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.OpenTag("input")
+            .BoolAttrIf(true, "disabled")
+            .SelfClose();
+
+        Assert.Equal("<input disabled />", html.ToHtml());
+    }
+
+    [Fact]
+    public void CssClass_AppendsConditionalClasses()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.OpenTag("button")
+            .CssClass("btn", (true, "btn-primary"), (false, "btn-disabled"), (true, "active"))
             .CloseStart()
-            .ToString();
+            .CloseTag("button");
 
-        Assert.Equal("<div>", result);
-    }
-
-    // ── BoolAttr tests ─────────────────────────────────────────────────
-
-    [Fact]
-    public void BoolAttr_AppendsBooleanAttribute()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("input")
-            .BoolAttr("disabled")
-            .SelfClose()
-            .ToString();
-
-        Assert.Equal("<input disabled />", result);
+        Assert.Equal("<button class=\"btn btn-primary active\"></button>", html.ToHtml());
     }
 
     [Fact]
-    public void BoolAttrIf_WhenTrue_AppendsAttribute()
+    public void Tag_AppendsCompleteStartTag()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("input")
-            .BoolAttrIf(true, "hidden")
-            .SelfClose()
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
 
-        Assert.Equal("<input hidden />", result);
+        html.Tag("section", cssClass: "card", id: "main");
+
+        Assert.Equal("<section class=\"card\" id=\"main\">", html.ToHtml());
     }
 
     [Fact]
-    public void BoolAttrIf_WhenFalse_DoesNotAppendAttribute()
+    public void Element_EncodesText()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("input")
-            .BoolAttrIf(false, "hidden")
-            .SelfClose()
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
 
-        Assert.Equal("<input />", result);
-    }
+        html.Element("span", "A < B & C");
 
-    // ── CloseStart / SelfClose / CloseTag tests ────────────────────────
-
-    [Fact]
-    public void CloseStart_AppendsClosingAngleBracket()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("span")
-            .CloseStart()
-            .ToString();
-
-        Assert.Equal("<span>", result);
+        Assert.Equal("<span>A &lt; B &amp; C</span>", html.ToHtml());
     }
 
     [Fact]
-    public void SelfClose_AppendsSelfClosingMarkup()
+    public void TextIf_AppendsConditionally()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("br")
-            .SelfClose()
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
 
-        Assert.Equal("<br />", result);
+        html.TextIf(false, "skip").TextIf(true, "ok");
+
+        Assert.Equal("ok", html.ToHtml());
     }
 
     [Fact]
-    public void CloseTag_AppendsFullClosingTag()
+    public void Raw_AppendsUnencodedHtml()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .CloseTag("div")
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
 
-        Assert.Equal("</div>", result);
-    }
+        html.Tag("div").Raw("<em>x</em>").CloseTag("div");
 
-    // ── Text tests ─────────────────────────────────────────────────────
-
-    [Fact]
-    public void Text_AppendsEncodedContent()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("p")
-            .CloseStart()
-            .Text("Hello <world> & \"friends\"")
-            .CloseTag("p")
-            .ToString();
-
-        var encoded = HtmlEncoder.Default.Encode("Hello <world> & \"friends\"");
-        Assert.Equal($"<p>{encoded}</p>", result);
+        Assert.Equal("<div><em>x</em></div>", html.ToHtml());
     }
 
     [Fact]
-    public void Text_WithPlainText_AppendsUnchanged()
+    public void AppendHtml_AppendsIHtmlContent()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("span")
-            .CloseStart()
-            .Text("plain text")
-            .CloseTag("span")
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
 
-        Assert.Equal("<span>plain text</span>", result);
-    }
+        html.Tag("div")
+            .AppendHtml(new HtmlString("<strong>ok</strong>"))
+            .CloseTag("div");
 
-    // ── Raw tests ──────────────────────────────────────────────────────
-
-    [Fact]
-    public void Raw_AppendsWithoutEncoding()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .Raw("<strong>bold</strong>")
-            .ToString();
-
-        Assert.Equal("<strong>bold</strong>", result);
-    }
-
-    [Fact]
-    public void Raw_DoesNotEncodeHtmlEntities()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .Raw("&amp; &lt;")
-            .ToString();
-
-        Assert.Equal("&amp; &lt;", result);
-    }
-
-    // ── AppendHtmlContent tests ────────────────────────────────────────
-
-    [Fact]
-    public void AppendHtmlContent_AppendsRenderedContent()
-    {
-        var htmlContent = new HtmlString("<em>emphasis</em>");
-
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div")
-            .CloseStart()
-            .AppendHtmlContent(htmlContent)
-            .CloseTag("div")
-            .ToString();
-
-        Assert.Equal("<div><em>emphasis</em></div>", result);
-    }
-
-    [Fact]
-    public void AppendHtmlContent_WithEmptyContent_AppendsNothing()
-    {
-        var htmlContent = new HtmlString(string.Empty);
-
-        var result = new Taghelpers.HtmlBuilder()
-            .AppendHtmlContent(htmlContent)
-            .ToString();
-
-        Assert.Equal(string.Empty, result);
-    }
-
-    // ── HiddenInput tests ──────────────────────────────────────────────
-
-    [Fact]
-    public void HiddenInput_GeneratesCorrectMarkup()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .HiddenInput("myField", "myValue")
-            .ToString();
-
-        Assert.Equal("<input type=\"hidden\" name=\"myField\" value=\"myValue\" />", result);
+        Assert.Equal("<div><strong>ok</strong></div>", html.ToHtml());
     }
 
     [Fact]
     public void HiddenInput_EncodesNameAndValue()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .HiddenInput("field<1>", "val\"ue")
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.HiddenInput("field<1>", "val\"ue");
 
         var encodedName = HtmlEncoder.Default.Encode("field<1>");
         var encodedValue = HtmlEncoder.Default.Encode("val\"ue");
-        Assert.Equal($"<input type=\"hidden\" name=\"{encodedName}\" value=\"{encodedValue}\" />", result);
-    }
-
-    // ── Button tests ───────────────────────────────────────────────────
-
-    [Fact]
-    public void Button_GeneratesCorrectMarkup()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .Button("btn btn-primary", "Click Me", "Click this button")
-            .ToString();
-
-        Assert.Equal(
-            "<button type=\"button\" class=\"btn btn-primary\" aria-label=\"Click this button\">Click Me</button>",
-            result);
+        Assert.Equal($"<input type=\"hidden\" name=\"{encodedName}\" value=\"{encodedValue}\" />", html.ToHtml());
     }
 
     [Fact]
-    public void Button_WithDataAttributes_IncludesAll()
+    public void Button_WithClass_RendersExpectedMarkup()
     {
-        var dataAttrs = new Dictionary<string, string>
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.Button("Click", "btn btn-primary");
+
+        Assert.Equal("<button type=\"button\" class=\"btn btn-primary\">Click</button>", html.ToHtml());
+    }
+
+    [Fact]
+    public void Button_WithoutClass_OmitsClassAttribute()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.Button("Click");
+
+        Assert.Equal("<button type=\"button\">Click</button>", html.ToHtml());
+    }
+
+    [Fact]
+    public void Dangerous_AllowsDirectStringBuilderAccess()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.Dangerous(sb => sb.Append("<!-- generated -->"));
+
+        Assert.Equal("<!-- generated -->", html.ToHtml());
+    }
+
+    [Fact]
+    public void Scope_AutoClosesTag()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        using (html.Scope("div", cssClass: "card", id: "host"))
         {
-            { "data-action", "delete" },
-            { "data-id", "42" }
-        };
+            html.Text("Body");
+        }
 
-        var result = new Taghelpers.HtmlBuilder()
-            .Button("btn", "Delete", "Delete item", dataAttrs)
-            .ToString();
-
-        Assert.Equal(
-            "<button type=\"button\" class=\"btn\" aria-label=\"Delete item\" data-action=\"delete\" data-id=\"42\">Delete</button>",
-            result);
+        Assert.Equal("<div class=\"card\" id=\"host\">Body</div>", html.ToHtml());
     }
 
     [Fact]
-    public void Button_WithNullDataAttributes_OmitsThem()
+    public void OpenScope_AllowsAttributesThenAutoClosesTag()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .Button("btn", "OK", "Confirm", dataAttrs: null)
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
 
-        Assert.Equal(
-            "<button type=\"button\" class=\"btn\" aria-label=\"Confirm\">OK</button>",
-            result);
+        using (var scope = html.OpenScope("form", cssClass: "editor", id: "f1"))
+        {
+            scope.Tag.Attr("method", "post").CloseStart();
+            html.Element("label", "Name");
+        }
+
+        Assert.Equal("<form class=\"editor\" id=\"f1\" method=\"post\"><label>Name</label></form>", html.ToHtml());
     }
 
     [Fact]
-    public void Button_EncodesTextContent()
+    public void SelfClose_ClosesVoidElement()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .Button("btn", "<script>alert(1)</script>", "label")
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
 
-        var encodedText = HtmlEncoder.Default.Encode("<script>alert(1)</script>");
-        Assert.Contains(encodedText, result);
-        Assert.DoesNotContain("<script>", result);
-    }
+        html.OpenTag("br").SelfClose();
 
-    // ── Fluent chaining tests ──────────────────────────────────────────
-
-    [Fact]
-    public void FluentChaining_BuildsCompleteElement()
-    {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div", cssClass: "wrapper", id: "root")
-            .CloseStart()
-            .OpenTag("p")
-            .Attr("class", "text")
-            .CloseStart()
-            .Text("Hello World")
-            .CloseTag("p")
-            .CloseTag("div")
-            .ToString();
-
-        Assert.Equal(
-            "<div class=\"wrapper\" id=\"root\"><p class=\"text\">Hello World</p></div>",
-            result);
+        Assert.Equal("<br />", html.ToHtml());
     }
 
     [Fact]
-    public void FluentChaining_ReturnsSameInstance()
+    public void ToString_ReturnsAccumulatedHtml()
     {
-        var builder = new Taghelpers.HtmlBuilder();
+        IHtmlFlow html = HtmlBuilder.Create();
 
-        Assert.Same(builder, builder.OpenTag("div"));
-        Assert.Same(builder, builder.CloseStart());
-        Assert.Same(builder, builder.Attr("a", "b"));
-        Assert.Same(builder, builder.AttrIf(true, "c", "d"));
-        Assert.Same(builder, builder.AttrIf(false, "e", "f"));
-        Assert.Same(builder, builder.BoolAttr("disabled"));
-        Assert.Same(builder, builder.BoolAttrIf(true, "hidden"));
-        Assert.Same(builder, builder.BoolAttrIf(false, "readonly"));
-        Assert.Same(builder, builder.Text("text"));
-        Assert.Same(builder, builder.Raw("raw"));
-        Assert.Same(builder, builder.SelfClose());
-        Assert.Same(builder, builder.CloseTag("div"));
-    }
+        html.Element("span", "hello");
 
-    // ── Length / InnerBuilder tests ─────────────────────────────────────
-
-    [Fact]
-    public void Length_ReflectsAccumulatedContent()
-    {
-        var builder = new Taghelpers.HtmlBuilder();
-        Assert.Equal(0, builder.Length);
-
-        builder.OpenTag("p").CloseStart().Text("hi").CloseTag("p");
-        Assert.Equal("<p>hi</p>".Length, builder.Length);
+        Assert.Equal("<span>hello</span>", html.ToString());
     }
 
     [Fact]
-    public void InnerBuilder_AllowsDirectManipulation()
+    public void WriteTo_WritesAllContent()
     {
-        var builder = new Taghelpers.HtmlBuilder();
-        builder.InnerBuilder.Append("direct");
-        Assert.Equal("direct", builder.ToString());
-    }
+        IHtmlFlow html = HtmlBuilder.Create();
+        html.Element("span", "hello");
 
-    // ── Complex scenario tests ─────────────────────────────────────────
+        using var writer = new StringWriter();
+        ((IHtmlContent)html).WriteTo(writer, HtmlEncoder.Default);
 
-    [Fact]
-    public void ComplexScenario_MultipleHiddenInputs()
-    {
-        var builder = new Taghelpers.HtmlBuilder();
-        builder.HiddenInput("name", "John");
-        builder.HiddenInput("age", "30");
-
-        var result = builder.ToString();
-        Assert.Equal(
-            "<input type=\"hidden\" name=\"name\" value=\"John\" />" +
-            "<input type=\"hidden\" name=\"age\" value=\"30\" />",
-            result);
+        Assert.Equal("<span>hello</span>", writer.ToString());
     }
 
     [Fact]
-    public void ComplexScenario_NestedElements()
+    public void InterfacesReturnSameBuilderInstance()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("ul", cssClass: "list")
-            .CloseStart()
-            .OpenTag("li").CloseStart().Text("Item 1").CloseTag("li")
-            .OpenTag("li").CloseStart().Text("Item 2").CloseTag("li")
-            .CloseTag("ul")
-            .ToString();
+        IHtmlFlow flow = HtmlBuilder.Create();
 
-        Assert.Equal(
-            "<ul class=\"list\"><li>Item 1</li><li>Item 2</li></ul>",
-            result);
+        var tag = flow.OpenTag("div");
+        var sameTag = tag.Attr("class", "x");
+        var backToFlow = tag.CloseStart();
+
+        Assert.Same(tag, sameTag);
+        Assert.Same(flow, backToFlow);
     }
 
     [Fact]
-    public void ComplexScenario_MixedContentAndRaw()
+    public void Builder_CanBeUsedAsIHtmlContentInTagHelperContent()
     {
-        var result = new Taghelpers.HtmlBuilder()
-            .OpenTag("div").CloseStart()
-            .Text("Safe: ")
-            .Raw("<b>trusted</b>")
-            .CloseTag("div")
-            .ToString();
+        IHtmlFlow html = HtmlBuilder.Create();
+        html.Element("strong", "ok");
 
-        Assert.Equal("<div>Safe: <b>trusted</b></div>", result);
+        var content = new DefaultTagHelperContent();
+        content.SetHtmlContent((IHtmlContent)html);
+
+        using var writer = new StringWriter();
+        content.WriteTo(writer, HtmlEncoder.Default);
+
+        Assert.Equal("<strong>ok</strong>", writer.ToString());
     }
 }
