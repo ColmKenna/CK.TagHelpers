@@ -64,26 +64,26 @@ public class TabItemTagHelper : TagHelper
         }
 
         var label = (IHtmlContent)HtmlBuilder.Create()
-            .OpenTag("label")
+            .OpenLabelTag()
             .Attr(
                 ("class", "tab-heading"),
                 ("for", Id))
             .CloseStart()
             .Text(Heading)
-            .CloseTag("label");
+            .CloseTag();
 
         var panel = (IHtmlContent)HtmlBuilder.Create()
-            .OpenTag("div")
+            .OpenDivTag()
             .Attr(
                 ("class", "panel"),
                 ("id", $"{Id}-panel"),
                 ("role", "tabpanel"),
                 ("aria-labelledby", Id))
             .CloseStart()
-            .Tag("div", cssClass: "panel-content")
+            .DivTag(cssClass: "panel-content")
             .AppendHtml(content)
-            .CloseTag("div")
-            .CloseTag("div");
+            .CloseTag()
+            .CloseTag();
 
         if (context.Items.TryGetValue(TabTagHelper.TabContextKey, out var value)
             && value is TabContext tabContext)
@@ -95,7 +95,7 @@ public class TabItemTagHelper : TagHelper
 
         // Fallback: render directly (no parent TabTagHelper context)
         var html = HtmlBuilder.Create();
-        html.OpenTag("input")
+        html.OpenInputTag()
             .Attr(
                 ("class", "tabs-panel-input"),
                 ("name", groupName),

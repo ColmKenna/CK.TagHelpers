@@ -687,7 +687,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
     private async Task RenderItems(IHtmlFlow html, string containerId, string modelExpressionPrefix, string collectionName)
     {
-        html.OpenTag("div")
+        html.OpenDivTag()
             .Attr(
                 ("class", CssClasses.EditArrayItems),
                 ("id", $"{containerId}-items"),
@@ -704,7 +704,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
             var fieldName = GetFieldName(modelExpressionPrefix, collectionName, index);
             var itemId = $"{containerId}-item-{index}";
 
-            var itemTag = html.OpenTag("div")
+            var itemTag = html.OpenDivTag()
                 .Attr(
                     ("class", GetItemCssClass()),
                     ("id", itemId));
@@ -714,7 +714,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
             itemTag.CloseStart();
 
             // Always emit the IsDeleted marker input for consistent JS contract
-            html.OpenTag("input")
+            html.OpenInputTag()
                 .Attr(
                     ("type", "hidden"),
                     ("name", $"{fieldName}.IsDeleted"),
@@ -736,7 +736,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
             ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
 
-            html.CloseTag("div");
+            html.CloseTag();
 
             index++;
         }
@@ -746,7 +746,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
             RenderEmptyPlaceholder(html);
         }
 
-        html.CloseTag("div");
+        html.CloseTag();
     }
 
     private async Task RenderItemDisplayMode(IHtmlFlow html, object item, string itemId, ViewDataDictionary<object> viewData, int displayIndex)
@@ -783,7 +783,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         params ButtonKind[] buttons)
     {
         var fullClass = isHidden ? $"{cssClass} {CssClasses.Hidden}" : cssClass;
-        html.OpenTag("div")
+        html.OpenDivTag()
             .Attr(
                 ("class", fullClass),
                 ("id", sectionId))
@@ -797,13 +797,13 @@ public sealed partial class EditArrayTagHelper : TagHelper
             AppendActionButton(html, button, itemId, false, displayIndex);
         }
 
-        html.CloseTag("div");
+        html.CloseTag();
     }
 
     private async Task RenderTemplateSection(IHtmlFlow html, string containerId, string modelExpressionPrefix, string collectionName)
     {
         var templateId = $"{containerId}-template";
-        html.OpenTag("template")
+        html.OpenTemplateTag()
             .Attr("id", templateId)
             .CloseStart();
 
@@ -834,7 +834,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
             Model = templateModel
         };
 
-        var itemTag = html.OpenTag("div")
+        var itemTag = html.OpenDivTag()
             .Attr("class", GetItemCssClass());
 
         // Add callback data attributes for safe JS invocation (XSS prevention)
@@ -844,7 +844,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         var name = $"{templateFieldName}.IsDeleted";
 
         // IsDeleted marker is a direct child of the item div (consistent with regular items).
-        html.OpenTag("input")
+        html.OpenInputTag()
             .Attr(
                 ("type", "hidden"),
                 ("name", name),
@@ -856,7 +856,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
         if (hasDisplayView)
         {
-            html.OpenTag("div")
+            html.OpenDivTag()
                 .Attr("class", $"{CssClasses.DisplayContainer} {CssClasses.Hidden}")
                 .CloseStart();
             if (templateModel != null)
@@ -867,10 +867,10 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
             AppendActionButton(html, ButtonKind.Edit, null, true);
             AppendActionButton(html, ButtonKind.Delete, null, true);
-            html.CloseTag("div");
+            html.CloseTag();
         }
 
-        html.OpenTag("div")
+        html.OpenDivTag()
             .Attr("class", CssClasses.EditContainer)
             .CloseStart();
 
@@ -889,17 +889,17 @@ public sealed partial class EditArrayTagHelper : TagHelper
         {
             AppendActionButton(html, ButtonKind.Delete, null, true);
         }
-        html.CloseTag("div");
+        html.CloseTag();
 
         AppendReorderButtons(html, containerId, itemId: null, isTemplate: true);
 
-        html.CloseTag("div");
+        html.CloseTag();
         ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
-        html.CloseTag("template");
+        html.CloseTag();
 
         if (ShowAddButton)
         {
-            html.OpenTag("button")
+            html.OpenButtonTag()
                 .Attr(
                     ("type", "button"),
                     ("class", $"{GetButtonCssClass()} {CssClasses.AddButtonModifier}"),
@@ -910,7 +910,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
                     ("data-template-id", templateId))
                 .CloseStart()
                 .Text(AddButtonText)
-                .CloseTag("button");
+                .CloseTag();
         }
     }
 
@@ -921,7 +921,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
             return;
         }
 
-        html.Element("div", EmptyPlaceholder, cssClass: CssClasses.EditArrayPlaceholder);
+        html.DivElement(EmptyPlaceholder, cssClass: CssClasses.EditArrayPlaceholder);
     }
 
     private void AppendReorderButtons(IHtmlFlow html, string containerId, string? itemId, bool isTemplate)
@@ -940,7 +940,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
         
         
-        html.OpenTag("div")
+        html.OpenDivTag()
             .Attr("class", CssClasses.ReorderControls)
             .CloseStart();
 
@@ -964,7 +964,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
             ("item-id", resolvedItemId),
             ("direction", "1"));
 
-        html.CloseTag("div");
+        html.CloseTag();
     }
 
     /// <summary>
@@ -1155,8 +1155,8 @@ public sealed partial class EditArrayTagHelper : TagHelper
             $"{GetButtonCssClass()} {cssModifier}",
             buttonText,
             ariaLabel,
-            ("action", dataAction),
-            ("item-id", isTemplate ? "closest" : itemId ?? string.Empty));
+            ("data-action", dataAction),
+            ("data-item-id", isTemplate ? "closest" : itemId ?? string.Empty));
     }
 
     private static void AppendButton(
@@ -1166,20 +1166,17 @@ public sealed partial class EditArrayTagHelper : TagHelper
         string ariaLabel,
         params (string Key, string Value)[] dataAttrs)
     {
-        var buttonTag = html.OpenTag("button")
+        
+        var buttonTag = html.OpenButtonTag()
             .Attr(
                 ("type", "button"),
                 ("class", cssClass),
-                ("aria-label", ariaLabel));
-
-        foreach (var (key, value) in dataAttrs)
-        {
-            buttonTag.Attr($"data-{key}", value);
-        }
+                ("aria-label", ariaLabel))
+            .Attr(dataAttrs);
 
         buttonTag.CloseStart()
             .Text(text)
-            .CloseTag("button");
+            .CloseTag();
     }
 
     /// <summary>
@@ -1264,13 +1261,13 @@ public sealed partial class EditArrayTagHelper : TagHelper
         output.TagMode = TagMode.StartTagAndEndTag;
 
         IHtmlFlow html = HtmlBuilder.Create();
-        html.Element("strong", "EditArrayTagHelper Configuration Error:");
-        html.Tag("ul");
+        html.StrongElement("EditArrayTagHelper Configuration Error:");
+        html.UlTag();
         foreach (var error in errors)
         {
-            html.Element("li", error);
+            html.LiElement(error);
         }
-        html.CloseTag("ul");
+        html.CloseTag();
 
         output.Content.SetHtmlContent((IHtmlContent)html);
     }

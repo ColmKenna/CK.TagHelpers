@@ -34,7 +34,7 @@ public class HtmlBuilderTests
             .Attr("class", "container")
             .Attr("id", "root")
             .CloseStart()
-            .CloseTag("div");
+            .CloseTag();
 
         Assert.Equal("<div class=\"container\" id=\"root\"></div>", html.ToHtml());
     }
@@ -83,7 +83,7 @@ public class HtmlBuilderTests
         html.OpenTag("button")
             .CssClass("btn", (true, "btn-primary"), (false, "btn-disabled"), (true, "active"))
             .CloseStart()
-            .CloseTag("button");
+            .CloseTag();
 
         Assert.Equal("<button class=\"btn btn-primary active\"></button>", html.ToHtml());
     }
@@ -123,7 +123,7 @@ public class HtmlBuilderTests
     {
         IHtmlFlow html = HtmlBuilder.Create();
 
-        html.Tag("div").Raw("<em>x</em>").CloseTag("div");
+        html.Tag("div").Raw("<em>x</em>").CloseTag();
 
         Assert.Equal("<div><em>x</em></div>", html.ToHtml());
     }
@@ -135,7 +135,7 @@ public class HtmlBuilderTests
 
         html.Tag("div")
             .AppendHtml(new HtmlString("<strong>ok</strong>"))
-            .CloseTag("div");
+            .CloseTag();
 
         Assert.Equal("<div><strong>ok</strong></div>", html.ToHtml());
     }
@@ -267,5 +267,128 @@ public class HtmlBuilderTests
         content.WriteTo(writer, HtmlEncoder.Default);
 
         Assert.Equal("<strong>ok</strong>", writer.ToString());
+    }
+
+    // ─── Tag Stack Tests ──────────────────────────────────────────────
+
+    [Fact]
+    public void CloseTag_Parameterless_PopsAndClosesCorrectTag()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.OpenDivTag()
+            .Attr("class", "outer")
+            .CloseStart()
+            .OpenSpanTag()
+            .CloseStart()
+            .Text("hi")
+            .CloseTag()   // closes span
+            .CloseTag();  // closes div
+
+        Assert.Equal("<div class=\"outer\"><span>hi</span></div>", html.ToHtml());
+    }
+
+    [Fact]
+    public void CloseTag_OnEmptyStack_Throws()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        Assert.Throws<InvalidOperationException>(() => html.CloseTag());
+    }
+
+    [Fact]
+    public void SelfClose_PopsFromStack()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.OpenInputTag()
+            .Attr("type", "text")
+            .SelfClose();
+
+        // Stack should be empty — no exception when building is done
+        Assert.Equal("<input type=\"text\" />", html.ToHtml());
+    }
+
+    [Fact]
+    public void Tag_PushesOntoStack_CloseTag_Pops()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.UlTag()
+            .LiElement("one")
+            .LiElement("two")
+            .CloseTag(); // closes ul
+
+        Assert.Equal("<ul><li>one</li><li>two</li></ul>", html.ToHtml());
+    }
+
+    [Fact]
+    public void Element_DoesNotAffectStack()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.DivTag()
+            .StrongElement("bold")
+            .SpanElement("inline")
+            .CloseTag(); // closes div — Element didn't leave anything on stack
+
+        Assert.Equal("<div><strong>bold</strong><span>inline</span></div>", html.ToHtml());
+    }
+
+    [Fact]
+    public void Scope_PushesAndPopsOnDispose()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        using (html.DivScope(cssClass: "outer"))
+        {
+            using (html.SpanScope(cssClass: "inner"))
+            {
+                html.Text("nested");
+            }
+        }
+
+        Assert.Equal("<div class=\"outer\"><span class=\"inner\">nested</span></div>", html.ToHtml());
+    }
+
+    [Fact]
+    public void OpenScope_PushesAndPopsOnDispose()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        using (var scope = html.OpenDivScope())
+        {
+            scope.Tag.Attr("data-x", "1").CloseStart();
+            html.Text("content");
+        }
+
+        Assert.Equal("<div data-x=\"1\">content</div>", html.ToHtml());
+    }
+
+    [Fact]
+    public void NamedOpenTag_UsesStack()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.OpenButtonTag()
+            .Attr("type", "submit")
+            .CloseStart()
+            .Text("Go")
+            .CloseTag(); // stack knows it's "button"
+
+        Assert.Equal("<button type=\"submit\">Go</button>", html.ToHtml());
+    }
+
+    [Fact]
+    public void VoidElements_PushAndPop()
+    {
+        IHtmlFlow html = HtmlBuilder.Create();
+
+        html.DivTag()
+            .Br()
+            .Hr()
+            .CloseTag(); // div — Br and Hr self-closed, didn't leave stack entries
+
+        Assert.Equal("<div><br /><hr /></div>", html.ToHtml());
     }
 }

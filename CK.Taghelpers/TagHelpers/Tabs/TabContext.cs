@@ -27,7 +27,7 @@ internal sealed class TabItemDescriptor
     public IHtmlContent BuildInput()
     {
         var html = HtmlBuilder.Create();
-        html.OpenTag("input")
+        html.OpenInputTag()
             .Attr(
                 ("class", "tabs-panel-input"),
                 ("name", GroupName),
