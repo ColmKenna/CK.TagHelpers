@@ -1,0 +1,646 @@
+@page "/docs/editarray"
+@model EditArrayDocModel
+@{
+    ViewData["Title"] = "EditArray TagHelper Reference";
+}
+
+<div class="docs-container">
+    <div class="docs-breadcrumb">
+        <a href="/docs">Documentation</a>
+    </div>
+
+    <div class="docs-header">
+        <h1>&lt;edit-array&gt; TagHelper</h1>
+        <p class="subtitle">Dynamically render, edit, and manage collections with add, delete, and reorder capabilities.</p>
+        <div class="metadata">
+            <strong>Target Element:</strong> <code>&lt;edit-array&gt;</code>
+            <br />
+            <strong>Class:</strong> <code>CK.Taghelpers.TagHelpers.EditArray.EditArrayTagHelper</code>
+            <br />
+            <strong>Namespace:</strong> <code>CK.Taghelpers.TagHelpers.EditArray</code>
+        </div>
+    </div>
+
+    <!-- Overview Section -->
+    <div class="docs-section">
+        <h2>Overview</h2>
+        <p>
+            The <code>&lt;edit-array&gt;</code> TagHelper provides a flexible, JavaScript-enhanced framework for managing dynamic 
+            collections in ASP.NET Core applications. It renders a list of items with built-in support for display/edit mode 
+            toggling, inline deletion (with undo), dynamic item addition via a template, and drag-to-reorder functionality. 
+            The component integrates with ASP.NET Core's unobtrusive validation and emits custom events for validation and 
+            callback integration.
+        </p>
+    </div>
+
+    <!-- Getting Started Section -->
+    <div class="docs-section">
+        <h2>Getting Started</h2>
+        <p>Here is the simplest working example with only required attributes:</p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Items" 
+            asp-array-id="myArray" 
+            asp-view-name="ItemEditor" /&gt;</pre>
+        </div>
+        <p>
+            This renders a list of items from <code>Model.Items</code>, with each item rendered using the <code>ItemEditor</code> 
+            partial view. The array ID <code>myArray</code> generates DOM element IDs prefixed with <code>edit-array-</code>.
+        </p>
+    </div>
+
+    <!-- Attribute Reference Section -->
+    <div class="docs-section">
+        <h2>TagHelper Attribute Reference</h2>
+        <p><strong>&lt;edit-array&gt; — EditArrayTagHelper</strong></p>
+        <table class="docs-table">
+            <thead>
+                <tr>
+                    <th>Attribute</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>asp-array-id</code></td>
+                    <td>string</td>
+                    <td>—</td>
+                    <td>
+                        <span class="badge badge-required">Required</span>
+                        Unique identifier for the container. Used to generate all child element IDs. The final DOM ID is prefixed 
+                        with "edit-array-" (e.g., id="edit-array-myArray").
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-items</code></td>
+                    <td>IEnumerable&lt;object&gt;</td>
+                    <td>—</td>
+                    <td>
+                        <span class="badge badge-required">Required</span>
+                        The collection of items to render. Must not be null; use an empty collection if there are no initial items.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-view-name</code></td>
+                    <td>string</td>
+                    <td>—</td>
+                    <td>
+                        <span class="badge badge-required">Required</span>
+                        Name of the partial view to render each item in edit mode. Can be a path like "~/Views/Shared/_Editor.cshtml" 
+                        or a view name like "_PersonEditor".
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-for</code></td>
+                    <td>ModelExpression</td>
+                    <td>null</td>
+                    <td>
+                        <span class="badge badge-optional">Optional</span>
+                        Model expression for the collection property. Used for proper field name generation during model binding 
+                        (e.g., "Person.Addresses[0].Street").
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-display-mode</code></td>
+                    <td>bool</td>
+                    <td>false</td>
+                    <td>
+                        When true, items render with both display and edit views. Users can toggle between modes with Edit/Done buttons.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-display-view-name</code></td>
+                    <td>string</td>
+                    <td>null</td>
+                    <td>
+                        Name of the partial view to render each item in display mode. Required when <code>asp-display-mode="true"</code>.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-template</code></td>
+                    <td>bool</td>
+                    <td>false</td>
+                    <td>
+                        When true, renders an HTML &lt;template&gt; element containing a blueprint for new items. 
+                        Used with <code>asp-add-button="true"</code> to enable dynamic item addition.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-add-button</code></td>
+                    <td>bool</td>
+                    <td>false</td>
+                    <td>
+                        When true, renders an "Add New Item" button. Requires <code>asp-template="true"</code>.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-enable-reordering</code></td>
+                    <td>bool</td>
+                    <td>false</td>
+                    <td>
+                        When true, each item displays "Move Up" and "Move Down" buttons for reordering.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-max-items</code></td>
+                    <td>int?</td>
+                    <td>null</td>
+                    <td>
+                        Maximum number of items allowed in the collection. The Add button is disabled when this limit is reached.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-empty-placeholder</code></td>
+                    <td>string</td>
+                    <td>null</td>
+                    <td>
+                        Text to display when the collection is empty. Rendered in a div with class "edit-array-placeholder".
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-container-class</code></td>
+                    <td>string</td>
+                    <td>edit-array-container</td>
+                    <td>
+                        CSS class(es) to apply to the outer container element.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-item-class</code></td>
+                    <td>string</td>
+                    <td>edit-array-item</td>
+                    <td>
+                        CSS class(es) to apply to each item wrapper element.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-button-class</code></td>
+                    <td>string</td>
+                    <td>btn</td>
+                    <td>
+                        Base CSS class for all buttons (Edit, Delete, Done, Cancel, Add). Button-specific classes 
+                        (e.g., "btn-primary", "btn-danger") are appended to this.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-reorder-button-class</code></td>
+                    <td>string</td>
+                    <td>btn btn-outline-secondary</td>
+                    <td>
+                        CSS class(es) for the Move Up/Down buttons. Only used when <code>asp-enable-reordering="true"</code>.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-on-update</code></td>
+                    <td>string</td>
+                    <td>null</td>
+                    <td>
+                        JavaScript function name to invoke after an item transitions from edit to display mode. 
+                        Receives the item ID as a parameter. Function cannot be canceled at this stage.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-on-done</code></td>
+                    <td>string</td>
+                    <td>null</td>
+                    <td>
+                        JavaScript function name to invoke when "Done" is clicked, before any transition. 
+                        Return false to cancel the transition.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-on-delete</code></td>
+                    <td>string</td>
+                    <td>null</td>
+                    <td>
+                        JavaScript function name to invoke after an item is marked for deletion. 
+                        Receives the item ID as a parameter.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>asp-edit-text</code></td>
+                    <td>string</td>
+                    <td>Edit</td>
+                    <td>Text displayed on the Edit button (display mode only).</td>
+                </tr>
+                <tr>
+                    <td><code>asp-done-text</code></td>
+                    <td>string</td>
+                    <td>Done</td>
+                    <td>Text displayed on the Done button (edit mode only).</td>
+                </tr>
+                <tr>
+                    <td><code>asp-cancel-text</code></td>
+                    <td>string</td>
+                    <td>Cancel</td>
+                    <td>Text displayed on the Cancel button (edit mode only).</td>
+                </tr>
+                <tr>
+                    <td><code>asp-delete-text</code></td>
+                    <td>string</td>
+                    <td>Delete</td>
+                    <td>Text displayed on the Delete button (display mode only).</td>
+                </tr>
+                <tr>
+                    <td><code>asp-undelete-text</code></td>
+                    <td>string</td>
+                    <td>Undelete</td>
+                    <td>Text displayed on the Undelete button when an item is marked for deletion.</td>
+                </tr>
+                <tr>
+                    <td><code>asp-add-text</code></td>
+                    <td>string</td>
+                    <td>Add New Item</td>
+                    <td>Text displayed on the Add New Item button (when <code>asp-add-button="true"</code>).</td>
+                </tr>
+                <tr>
+                    <td><code>asp-move-up-text</code></td>
+                    <td>string</td>
+                    <td>Move Up</td>
+                    <td>Text for the Move Up button (when <code>asp-enable-reordering="true"</code>).</td>
+                </tr>
+                <tr>
+                    <td><code>asp-move-down-text</code></td>
+                    <td>string</td>
+                    <td>Move Down</td>
+                    <td>Text for the Move Down button (when <code>asp-enable-reordering="true"</code>).</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Configuration Section -->
+    <div class="docs-section">
+        <h2>Configuration and Usage Guidance</h2>
+
+        <h3>Display Mode with Edit Toggle</h3>
+        <p>
+            Enable display mode to show items in a read-friendly format by default. Users click Edit to enter edit mode 
+            and Done to return to display mode.
+        </p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Addresses" 
+            asp-array-id="addresses" 
+            asp-view-name="AddressEditor"
+            asp-display-view-name="AddressDisplay"
+            asp-display-mode="true" /&gt;</pre>
+        </div>
+        <div class="note">
+            <strong>Note:</strong> Both <code>asp-view-name</code> and <code>asp-display-view-name</code> must point to valid partial views. 
+            The display view is typically read-only HTML (no form controls), while the editor view contains input fields.
+        </div>
+
+        <h3>Dynamic Item Addition with Template</h3>
+        <p>
+            Use <code>asp-template="true"</code> and <code>asp-add-button="true"</code> to allow users to dynamically add new items. 
+            The template must use the placeholder index <code>[__index__]</code> in field names.
+        </p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Phones" 
+            asp-array-id="phones" 
+            asp-view-name="PhoneEditor"
+            asp-template="true" 
+            asp-add-button="true" /&gt;</pre>
+        </div>
+        <div class="warning">
+            <strong>Important:</strong> The template partial view must contain form inputs with names like 
+            <code>Phones[__index__].Number</code>. The framework replaces <code>__index__</code> with actual indices when items are added.
+        </div>
+
+        <h3>Item Reordering</h3>
+        <p>
+            Enable reordering with Move Up/Down buttons to let users change the order of items in the collection.
+        </p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Steps" 
+            asp-array-id="steps" 
+            asp-view-name="StepEditor"
+            asp-enable-reordering="true" 
+            asp-reorder-button-class="btn btn-sm btn-outline-secondary" /&gt;</pre>
+        </div>
+
+        <h3>Maximum Items Constraint</h3>
+        <p>
+            Set a maximum item limit to prevent unbounded collection growth. The Add button automatically disables 
+            when the limit is reached.
+        </p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Contacts" 
+            asp-array-id="contacts" 
+            asp-view-name="ContactEditor"
+            asp-template="true"
+            asp-add-button="true"
+            asp-max-items="10" /&gt;</pre>
+        </div>
+
+        <h3>Custom Button Text and Styling</h3>
+        <p>
+            Override default button labels and CSS classes to match your application's design language.
+        </p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Items" 
+            asp-array-id="testItems" 
+            asp-view-name="ItemEditor"
+            asp-display-mode="true"
+            asp-display-view-name="ItemDisplay"
+            asp-button-class="btn btn-sm"
+            asp-edit-text="Modify"
+            asp-done-text="Save"
+            asp-delete-text="Remove" /&gt;</pre>
+        </div>
+
+        <h3>Validation Integration</h3>
+        <p>
+            The TagHelper integrates with ASP.NET Core's unobtrusive validation. When new items are added dynamically, 
+            validation is automatically re-parsed for the new inputs.
+        </p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Addresses" 
+            asp-for="@Model.Addresses"
+            asp-array-id="addresses" 
+            asp-view-name="AddressEditor"
+            asp-template="true"
+            asp-add-button="true" /&gt;</pre>
+        </div>
+        <p>
+            Use <code>asp-on-done</code> to validate before transitioning from edit to display mode, 
+            or listen to the <code>editarray:edit-saving</code> event for custom validation.
+        </p>
+
+        <h3>JavaScript Callbacks</h3>
+        <p>
+            Wire up callbacks to respond to user actions. Callbacks are passed the item's DOM ID.
+        </p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Items" 
+            asp-array-id="items" 
+            asp-view-name="ItemEditor"
+            asp-display-mode="true"
+            asp-display-view-name="ItemDisplay"
+            asp-on-done="validateBeforeSave"
+            asp-on-update="syncItemWithServer"
+            asp-on-delete="handleItemDeleted" /&gt;
+
+&lt;script&gt;
+function validateBeforeSave(itemId) {
+    // Return false to cancel the edit→display transition
+    return confirm('Save changes?');
+}
+
+function syncItemWithServer(itemId) {
+    // Called after edit→display, after form is updated
+    console.log('Item ' + itemId + ' updated');
+}
+
+function handleItemDeleted(itemId) {
+    // Called after item is marked for deletion
+    console.log('Item ' + itemId + ' marked for deletion');
+}
+&lt;/script&gt;</pre>
+        </div>
+
+        <h3>Empty Collection Placeholder</h3>
+        <p>
+            Show a helpful message when the collection is empty.
+        </p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Attachments" 
+            asp-array-id="attachments" 
+            asp-view-name="AttachmentEditor"
+            asp-template="true"
+            asp-add-button="true"
+            asp-empty-placeholder="No attachments. Click 'Add New Item' to upload one." /&gt;</pre>
+        </div>
+
+        <h3>Customizing Container and Item Styling</h3>
+        <p>
+            Apply custom CSS classes to the container and each item for responsive layouts or themed styling.
+        </p>
+        <div class="code-block">
+            <pre>&lt;edit-array asp-items="Model.Items" 
+            asp-array-id="items" 
+            asp-view-name="ItemEditor"
+            asp-container-class="edit-array-container custom-theme"
+            asp-item-class="edit-array-item mb-3 p-4 border-left" /&gt;</pre>
+        </div>
+    </div>
+
+    <!-- JavaScript API Section -->
+    <div class="docs-section">
+        <h2>JavaScript API Reference</h2>
+        <p>
+            The EditArray component exposes several global functions for programmatic control. These are called 
+            after the container ID elements are rendered.
+        </p>
+
+        <h3>Methods</h3>
+        <table class="docs-table">
+            <thead>
+                <tr>
+                    <th>Function</th>
+                    <th>Parameters</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>addNewItem(containerId, templateId)</code></td>
+                    <td>containerId (string), templateId (string)</td>
+                    <td>
+                        Clones the template, replaces index tokens, and appends a new item to the collection. 
+                        Emits <code>editarray:item-added</code> event.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>toggleEditMode(itemId)</code></td>
+                    <td>itemId (string)</td>
+                    <td>
+                        Switches an item between display and edit modes. If transitioning from edit→display, 
+                        invokes <code>asp-on-done</code> callback and fires <code>editarray:edit-saving</code> event. 
+                        Return false from callback to cancel.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>markForDeletion(itemId)</code></td>
+                    <td>itemId (string)</td>
+                    <td>
+                        Toggles the deleted state of an item. Applies the "deleted" CSS class and flips 
+                        the delete button to "Undelete". Invokes <code>asp-on-delete</code> callback.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>moveItem(itemId, direction)</code></td>
+                    <td>itemId (string), direction ("up" | "down")</td>
+                    <td>
+                        Reorders the item up or down in the collection (only available when 
+                        <code>asp-enable-reordering="true"</code>).
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>showEditArray(containerId)</code></td>
+                    <td>containerId (string)</td>
+                    <td>
+                        Creates and initializes the EditArray instance for the given container. 
+                        Automatically called by the TagHelper but exposed for manual initialization.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Events</h3>
+        <table class="docs-table">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Detail Property</th>
+                    <th>Cancelable?</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>editarray:init</code></td>
+                    <td>{ containerId }</td>
+                    <td>No</td>
+                    <td>Fired when the EditArray instance initializes.</td>
+                </tr>
+                <tr>
+                    <td><code>editarray:item-added</code></td>
+                    <td>{ containerId, itemId, container }</td>
+                    <td>No</td>
+                    <td>Fired after a new item is successfully added to the collection.</td>
+                </tr>
+                <tr>
+                    <td><code>editarray:edit-saving</code></td>
+                    <td>{ itemId, editContainer }</td>
+                    <td>Yes</td>
+                    <td>
+                        Fired before transitioning from edit to display mode. Call 
+                        <code>event.preventDefault()</code> to cancel the transition (e.g., for validation).
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>editarray:edit-entered</code></td>
+                    <td>{ itemId, editContainer }</td>
+                    <td>No</td>
+                    <td>Fired after an item enters edit mode.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Custom Event Usage Example</h3>
+        <div class="code-block">
+            <pre>&lt;script&gt;
+// Listen for the edit-saving event to perform custom validation
+document.addEventListener('editarray:edit-saving', function(event) {
+    const itemId = event.detail.itemId;
+    const editContainer = event.detail.editContainer;
+    
+    // Get form data and validate
+    const input = editContainer.querySelector('input[name="Email"]');
+    if (input && !isValidEmail(input.value)) {
+        alert('Invalid email address');
+        event.preventDefault(); // Cancel the transition
+    }
+});
+
+// Listen for item-added event
+document.addEventListener('editarray:item-added', function(event) {
+    console.log('New item added:', event.detail.itemId);
+});
+&lt;/script&gt;</pre>
+        </div>
+
+        <h3>CSS Custom Properties</h3>
+        <table class="docs-table">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>--ea-deleted-opacity</code></td>
+                    <td>0.5</td>
+                    <td>Opacity applied to items marked for deletion.</td>
+                </tr>
+                <tr>
+                    <td><code>--ea-deleted-bg</code></td>
+                    <td>#f8d7da</td>
+                    <td>Background color for deleted items.</td>
+                </tr>
+                <tr>
+                    <td><code>--ea-placeholder-color</code></td>
+                    <td>#6c757d</td>
+                    <td>Text color for the empty-state placeholder.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Theming Examples</h3>
+        <div class="code-block">
+            <pre>&lt;style&gt;
+:root {
+    --ea-deleted-opacity: 0.3;
+    --ea-deleted-bg: #ffe6e6;
+    --ea-placeholder-color: #999999;
+}
+
+.edit-array-item {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-left: 4px solid #007bff;
+}
+
+.edit-array-item.deleted {
+    border-left-color: #dc3545;
+}
+&lt;/style&gt;</pre>
+        </div>
+    </div>
+
+    <!-- Notes and Limitations Section -->
+    <div class="docs-section">
+        <h2>Notes and Known Limitations</h2>
+        <ul>
+            <li>
+                <strong>DOM ID Format:</strong> The array ID is automatically prefixed with "edit-array-" in the final DOM. 
+                For example, <code>asp-array-id="myArray"</code> produces <code>id="edit-array-myArray"</code>.
+            </li>
+            <li>
+                <strong>Template Index Tokens:</strong> When using <code>asp-template="true"</code>, all form input names 
+                in the template must use <code>[__index__]</code> as a placeholder. This is replaced with the actual index 
+                when items are added.
+            </li>
+            <li>
+                <strong>Validation Re-parsing:</strong> After a new item is added dynamically, the component automatically 
+                calls jQuery unobtrusive validation's parser if available. Ensure validation scripts are loaded before using 
+                the dynamic add feature.
+            </li>
+            <li>
+                <strong>Shadow DOM Limitation:</strong> The component does not use Shadow DOM, so all styles are subject to 
+                the page's global CSS. Use specific selectors to avoid style conflicts.
+            </li>
+            <li>
+                <strong>Display/Edit Containers Required:</strong> When <code>asp-display-mode="true"</code>, both the display 
+                and edit partial views must render `.display-container` and `.edit-container` divs for toggling to work.
+            </li>
+            <li>
+                <strong>Deletion Is Marked, Not Removed:</strong> Items are marked for deletion (hidden visually) but remain in 
+                the DOM. You must handle actual removal in your form submission handler on the server.
+            </li>
+            <li>
+                <strong>Browser Support:</strong> Requires ES6 JavaScript support. The component uses <code>const</code>, 
+                arrow functions, template literals, and <code>classList</code>. Works in all modern browsers (IE 11 not supported).
+            </li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    @import url('_docs.css');
+</style>
