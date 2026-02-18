@@ -125,7 +125,7 @@
     <section class="example-section" id="callbacks">
         <h2>Callback hooks</h2>
         <p class="example-description">
-            Use asp-on-update and asp-on-delete to call safe, named JavaScript functions.
+            Use asp-on-update and asp-on-delete with <code>editArrayCallbacks</code> to register named callbacks via the companion library.
         </p>
 
         <div class="example-container row g-3">
@@ -143,15 +143,16 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-callbacks\"\n            asp-items=\"Model.CallbackMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-on-update=\"handleMemberUpdated\"\n            asp-on-delete=\"handleMemberDeleted\"&gt;\n&lt;/edit-array&gt;\n&lt;div class=\"alert alert-info mt-2\" id=\"callback-status\"&gt;Waiting for an update or delete action.&lt;/div&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-callbacks\"\n            asp-on-update=\"handleMemberUpdated\"\n            asp-on-delete=\"handleMemberDeleted\" ...&gt;\n&lt;/edit-array&gt;\n&lt;div class=\"alert alert-info mt-2\" id=\"callback-status\"&gt;...&lt;/div&gt;")</code></pre>
+                <pre class="mt-2"><code class="language-javascript">@Html.Raw("editArrayCallbacks.register('handleMemberUpdated',\n    editArrayCallbacks.statusUpdater({\n        elementId: 'callback-status',\n        message: (itemId) => 'Updated item: ' + itemId\n    })\n);\n\neditArrayCallbacks.register('handleMemberDeleted',\n    editArrayCallbacks.statusUpdater({\n        elementId: 'callback-status',\n        message: (itemId) => 'Toggled delete for: ' + itemId\n    })\n);")</code></pre>
             </div>
         </div>
     </section>
 
     <section class="example-section" id="done-hook">
-        <h2>Done hook with external validation guard</h2>
+        <h2>Done hook with validation guard</h2>
         <p class="example-description">
-            Plug an external function into asp-on-done to block closing when client-side validation spans contain errors. This keeps the validation logic outside the TagHelper.
+            Use the built-in <code>editArrayCallbacks.validationGuard()</code> to block closing when validation errors exist. No hand-written guard function needed.
         </p>
 
         <div class="example-container row g-3">
@@ -170,12 +171,12 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;form id=\"done-hook-form\" novalidate&gt;\n    &lt;edit-array asp-array-id=\"attr-done-hook\"\n                asp-items=\"Model.DoneHookMembers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-on-done=\"guardDoneAction\"&gt;\n    &lt;/edit-array&gt;\n&lt;/form&gt;\n&lt;div class=\"alert alert-warning mt-2\" id=\"done-hook-status\"&gt;Attempt an edit, then click Done.&lt;/div&gt;")</code></pre>
-                <pre class="mt-2"><code class="language-javascript">@Html.Raw("function guardDoneAction(itemId) {\n    const editScope = document.getElementById(`${itemId}-edit`);\n    const form = editScope ? editScope.closest('form') : null;\n    if (form && typeof $ === 'function' && $.validator && $.validator.unobtrusive) {\n        $.validator.unobtrusive.parse(editScope);\n        const validator = $(form).data('validator') || $(form).validate();\n        const inputs = $(editScope).find(':input');\n        const isValid = inputs.toArray().every(input => validator.element(input));\n        updateDoneHookStatus(isValid);\n        return isValid;\n    }\n\n    // Fallback: inspect validation spans if unobtrusive scripts are missing\n    const spans = editScope ? editScope.querySelectorAll('span[data-valmsg-for]') : [];\n    const hasErrors = Array.from(spans).some(s => (s.textContent && s.textContent.trim()) || s.classList.contains('field-validation-error'));\n    updateDoneHookStatus(!hasErrors);\n    return !hasErrors;\n}\n\nfunction updateDoneHookStatus(isValid) {\n    const status = document.getElementById('done-hook-status');\n    if (!status) return;\n    status.textContent = isValid\n        ? 'Allowed: Done action proceeded.'\n        : 'Blocked: resolve validation errors before closing.';\n    status.className = isValid ? 'alert alert-success mt-2' : 'alert alert-danger mt-2';\n}")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;form id=\"done-hook-form\" novalidate&gt;\n    &lt;edit-array asp-array-id=\"attr-done-hook\"\n                asp-on-done=\"guardDoneAction\" ...&gt;\n    &lt;/edit-array&gt;\n&lt;/form&gt;\n&lt;div class=\"alert alert-warning mt-2\" id=\"done-hook-status\"&gt;...&lt;/div&gt;")</code></pre>
+                <pre class="mt-2"><code class="language-javascript">@Html.Raw("editArrayCallbacks.register('guardDoneAction',\n    editArrayCallbacks.validationGuard({\n        statusElementId: 'done-hook-status',\n        validMessage: 'Allowed: Done action proceeded.',\n        invalidMessage: 'Blocked: resolve validation errors before closing.',\n        validClass: 'alert alert-success mt-2',\n        invalidClass: 'alert alert-danger mt-2'\n    })\n);")</code></pre>
             </div>
         </div>
         <div class="example-notes">
-            <strong>Note:</strong> The guard lives entirely in your page script. Returning <code>false</code> keeps the edit container open and prevents the internal Done toggle.
+            <strong>Note:</strong> The <code>validationGuard</code> factory handles both jQuery unobtrusive validation and plain validation-span fallback. Returning <code>false</code> keeps the edit container open.
         </div>
     </section>
 
@@ -207,46 +208,31 @@
 
 @section Scripts {
     <script>
-        function handleMemberUpdated(itemId) {
-            const status = document.getElementById('callback-status');
-            if (status) {
-                status.textContent = 'Updated item: ' + itemId;
-            }
-        }
+        // Callback hooks section: use editArrayCallbacks to register named callbacks
+        editArrayCallbacks.register('handleMemberUpdated',
+            editArrayCallbacks.statusUpdater({
+                elementId: 'callback-status',
+                message: (itemId) => 'Updated item: ' + itemId
+            })
+        );
 
-        function handleMemberDeleted(itemId) {
-            const status = document.getElementById('callback-status');
-            if (status) {
-                status.textContent = 'Toggled delete for: ' + itemId;
-            }
-        }
+        editArrayCallbacks.register('handleMemberDeleted',
+            editArrayCallbacks.statusUpdater({
+                elementId: 'callback-status',
+                message: (itemId) => 'Toggled delete for: ' + itemId
+            })
+        );
 
-        function guardDoneAction(itemId) {
-            const editScope = document.getElementById(`${itemId}-edit`);
-            const form = editScope ? editScope.closest('form') : null;
-            if (form && typeof $ === 'function' && $.validator && $.validator.unobtrusive) {
-                $.validator.unobtrusive.parse(editScope);
-                const validator = $(form).data('validator') || $(form).validate();
-                const inputs = $(editScope).find(':input');
-                const isValid = inputs.toArray().every(input => validator.element(input));
-                updateDoneHookStatus(isValid);
-                return isValid;
-            }
-
-            const spans = editScope ? editScope.querySelectorAll('span[data-valmsg-for]') : [];
-            const hasErrors = Array.from(spans).some(s => (s.textContent && s.textContent.trim()) || s.classList.contains('field-validation-error'));
-            updateDoneHookStatus(!hasErrors);
-            return !hasErrors;
-        }
-
-        function updateDoneHookStatus(isValid) {
-            const status = document.getElementById('done-hook-status');
-            if (!status) return;
-            status.textContent = isValid
-                ? 'Allowed: Done action proceeded.'
-                : 'Blocked: resolve validation errors before closing.';
-            status.className = isValid ? 'alert alert-success mt-2' : 'alert alert-danger mt-2';
-        }
+        // Done hook section: use the built-in validation guard
+        editArrayCallbacks.register('guardDoneAction',
+            editArrayCallbacks.validationGuard({
+                statusElementId: 'done-hook-status',
+                validMessage: 'Allowed: Done action proceeded.',
+                invalidMessage: 'Blocked: resolve validation errors before closing.',
+                validClass: 'alert alert-success mt-2',
+                invalidClass: 'alert alert-danger mt-2'
+            })
+        );
     </script>
     <partial name="_ValidationScriptsPartial" />
 }

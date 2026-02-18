@@ -144,59 +144,7 @@
 
 @section Scripts {
     <script>
-        // Callback for Example 1: Member updated
-        function onMemberUpdated(itemId) {
-            console.log('Member updated:', itemId);
-
-            // Example: Show a toast notification
-            showNotification('Member changes saved!', 'success');
-        }
-
-        // Callback for Example 1: Member deleted
-        function onMemberDeleted(itemId) {
-            const item = document.getElementById(itemId);
-            const isDeleted = item.getAttribute('data-deleted') === 'true';
-
-            console.log('Member delete toggled:', itemId, 'Deleted:', isDeleted);
-
-            if (isDeleted) {
-                showNotification('Member marked for deletion', 'warning');
-            } else {
-                showNotification('Member restored', 'info');
-            }
-        }
-
-        // Callback for Example 5: Item saved
-        function onItemSaved(itemId) {
-            console.log('Item saved:', itemId);
-
-            // Example: You could trigger an AJAX call to save the item
-            // fetch('/api/items/save', { method: 'POST', body: ... });
-
-            showNotification('Item saved successfully!', 'success');
-        }
-
-        // Callback for Example 5: Item delete toggled
-        function onItemDeleteToggled(itemId) {
-            const item = document.getElementById(itemId);
-            const isDeleted = item.getAttribute('data-deleted') === 'true';
-
-            console.log('Item delete toggled:', itemId, 'Deleted:', isDeleted);
-
-            if (isDeleted) {
-                // Example: Confirm deletion
-                if (!confirm('Are you sure you want to delete this item?')) {
-                    // If user cancels, toggle it back
-                    markForDeletion(itemId);
-                } else {
-                    showNotification('Item will be deleted on submit', 'warning');
-                }
-            } else {
-                showNotification('Item deletion cancelled', 'info');
-            }
-        }
-
-        // Helper function to show notifications
+        // Helper function to show notifications (used by callbacks below)
         function showNotification(message, type) {
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
@@ -206,12 +154,58 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             `;
             document.body.appendChild(alertDiv);
-
-            // Auto-dismiss after 3 seconds
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 3000);
+            setTimeout(() => { alertDiv.remove(); }, 3000);
         }
+
+        // Example 1: Member callbacks using editArrayCallbacks
+        editArrayCallbacks.register('onMemberUpdated',
+            editArrayCallbacks.notifier({
+                message: 'Member changes saved!',
+                level: 'success',
+                toast: showNotification
+            })
+        );
+
+        editArrayCallbacks.register('onMemberDeleted',
+            editArrayCallbacks.compose(
+                editArrayCallbacks.notifier({ prefix: 'Members', message: (id) => 'Delete toggled: ' + id }),
+                function (itemId) {
+                    const item = document.getElementById(itemId);
+                    const isDeleted = item.getAttribute('data-deleted') === 'true';
+                    if (isDeleted) {
+                        showNotification('Member marked for deletion', 'warning');
+                    } else {
+                        showNotification('Member restored', 'info');
+                    }
+                }
+            )
+        );
+
+        // Example 5: Item callbacks using editArrayCallbacks
+        editArrayCallbacks.register('onItemSaved',
+            editArrayCallbacks.notifier({
+                message: 'Item saved successfully!',
+                level: 'success',
+                toast: showNotification
+            })
+        );
+
+        editArrayCallbacks.register('onItemDeleteToggled', function (itemId) {
+            const item = document.getElementById(itemId);
+            const isDeleted = item.getAttribute('data-deleted') === 'true';
+
+            console.log('[EditArray] Item delete toggled (item: ' + itemId + ')');
+
+            if (isDeleted) {
+                if (!confirm('Are you sure you want to delete this item?')) {
+                    markForDeletion(itemId);
+                } else {
+                    showNotification('Item will be deleted on submit', 'warning');
+                }
+            } else {
+                showNotification('Item deletion cancelled', 'info');
+            }
+        });
 
         // Form submit handler - log what would be submitted
         document.querySelector('form').addEventListener('submit', function(e) {
@@ -224,7 +218,6 @@
                 console.log(`  ${key}: ${value}`);
             }
 
-            // Actually submit the form (comment out to prevent actual submission)
             this.submit();
         });
     </script>
