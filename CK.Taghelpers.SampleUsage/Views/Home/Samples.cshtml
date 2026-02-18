@@ -23,7 +23,7 @@
             <h2>Example 1: Full-Featured List (Display Mode + Add + Reorder + Callbacks)</h2>
             <p class="text-muted">
                 This example demonstrates all features: display/edit mode toggle, add new items,
-                reordering, delete/undelete, and custom callbacks.
+                cancel/revert while editing, reordering, delete/undelete, and custom callbacks.
             </p>
 
             <edit-array
@@ -40,6 +40,7 @@
                 asp-edit-text="Edit"
                 asp-delete-text="Delete"
                 asp-done-text="Done"
+                asp-cancel-text="Cancel"
                 asp-move-up-text="↑"
                 asp-move-down-text="↓"
                 asp-on-update="onMemberUpdated"
@@ -71,7 +72,8 @@
         <div class="mb-5">
             <h2>Example 3: Custom Styling</h2>
             <p class="text-muted">
-                Demonstrates custom CSS classes for container, items, and buttons.
+                Demonstrates custom CSS classes for container, items, and buttons,
+                including a custom cancel button label.
             </p>
 
             <edit-array
@@ -86,7 +88,8 @@
                 asp-container-class="border rounded p-3 bg-light"
                 asp-item-class="mb-2"
                 asp-button-class="btn"
-                asp-add-text="+ Add Person">
+                asp-add-text="+ Add Person"
+                asp-cancel-text="Discard Changes">
             </edit-array>
         </div>
 
@@ -108,7 +111,8 @@
                 asp-template="true"
                 asp-add-button="true"
                 asp-empty-placeholder="No team members yet. Click 'Add New Member' to get started!"
-                asp-add-text="Add New Member">
+                asp-add-text="Add New Member"
+                asp-cancel-text="Cancel Edit">
             </edit-array>
         </div>
 
@@ -118,6 +122,7 @@
             <h2>Example 5: With Callbacks</h2>
             <p class="text-muted">
                 Demonstrates JavaScript callbacks that fire after update and delete actions.
+                Includes cancel-to-revert in edit mode.
                 Open the browser console to see callback messages.
             </p>
 
@@ -128,6 +133,7 @@
                 asp-view-name="~/Views/Shared/PersonEditors/_PersonEditor.cshtml"
                 asp-display-view-name="~/Views/Shared/PersonEditors/_PersonDisplay.cshtml"
                 asp-display-mode="true"
+                asp-cancel-text="Revert"
                 asp-on-update="onItemSaved"
                 asp-on-delete="onItemDeleteToggled">
             </edit-array>

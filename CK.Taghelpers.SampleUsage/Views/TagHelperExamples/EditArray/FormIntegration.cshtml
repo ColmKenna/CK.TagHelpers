@@ -44,6 +44,7 @@
                                 asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                                 asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
                                 asp-display-mode="true"
+                                asp-cancel-text="Cancel"
                                 asp-template="true"
                                 asp-add-button="true">
                     </edit-array>
@@ -53,6 +54,7 @@
                                 asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                                 asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
                                 asp-display-mode="true"
+                                asp-cancel-text="Cancel"
                                 asp-template="true"
                                 asp-add-button="true"
                                 asp-add-text="Add designer">
@@ -63,6 +65,7 @@
                                 asp-view-name="~/Views/TagHelperExamples/EditArray/_AddressEditor.cshtml"
                                 asp-display-view-name="~/Views/TagHelperExamples/EditArray/_AddressDisplay.cshtml"
                                 asp-display-mode="true"
+                                asp-cancel-text="Cancel"
                                 asp-template="true"
                                 asp-add-button="true"
                                 asp-add-text="Add office">
@@ -70,7 +73,7 @@
                 </div>
                 <div class="example-source col-lg-6">
                     <h3 class="h6">Source</h3>
-                    <pre><code class="language-cshtml">@Html.Raw("&lt;form asp-controller=\"TagHelperExamples\"\n      asp-action=\"FormIntegration\"\n      asp-route-source=\"form-integration\"\n      method=\"post\"&gt;\n    &lt;edit-array asp-array-id=\"form-engineers\"\n                asp-for=\"Engineers\"\n                asp-items=\"Model.Engineers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-template=\"true\"\n                asp-add-button=\"true\"&gt;\n    &lt;/edit-array&gt;\n    &lt;edit-array asp-array-id=\"form-designers\"\n                asp-for=\"Designers\"\n                asp-items=\"Model.Designers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-template=\"true\"\n                asp-add-button=\"true\"\n                asp-add-text=\"Add designer\"&gt;\n    &lt;/edit-array&gt;\n    &lt;edit-array asp-array-id=\"form-offices\"\n                asp-for=\"Offices\"\n                asp-items=\"Model.Offices\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_AddressEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_AddressDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-template=\"true\"\n                asp-add-button=\"true\"\n                asp-add-text=\"Add office\"&gt;\n    &lt;/edit-array&gt;\n&lt;/form&gt;")</code></pre>
+                    <pre><code class="language-cshtml">@Html.Raw("&lt;form asp-controller=\"TagHelperExamples\"\n      asp-action=\"FormIntegration\"\n      asp-route-source=\"form-integration\"\n      method=\"post\"&gt;\n    &lt;edit-array asp-array-id=\"form-engineers\"\n                asp-for=\"Engineers\"\n                asp-items=\"Model.Engineers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-cancel-text=\"Cancel\"\n                asp-template=\"true\"\n                asp-add-button=\"true\"&gt;\n    &lt;/edit-array&gt;\n    &lt;edit-array asp-array-id=\"form-designers\"\n                asp-for=\"Designers\"\n                asp-items=\"Model.Designers\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-cancel-text=\"Cancel\"\n                asp-template=\"true\"\n                asp-add-button=\"true\"\n                asp-add-text=\"Add designer\"&gt;\n    &lt;/edit-array&gt;\n    &lt;edit-array asp-array-id=\"form-offices\"\n                asp-for=\"Offices\"\n                asp-items=\"Model.Offices\"\n                asp-view-name=\"~/Views/TagHelperExamples/EditArray/_AddressEditor.cshtml\"\n                asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_AddressDisplay.cshtml\"\n                asp-display-mode=\"true\"\n                asp-cancel-text=\"Cancel\"\n                asp-template=\"true\"\n                asp-add-button=\"true\"\n                asp-add-text=\"Add office\"&gt;\n    &lt;/edit-array&gt;\n&lt;/form&gt;")</code></pre>
                 </div>
             </div>
         </section>

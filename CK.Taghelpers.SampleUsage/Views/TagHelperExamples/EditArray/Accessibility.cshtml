@@ -28,6 +28,7 @@
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
                             asp-display-mode="true"
+                            asp-cancel-text="Cancel"
                             asp-template="true"
                             asp-add-button="true"
                             asp-enable-reordering="true">
@@ -35,13 +36,13 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"accessibility\"\n            asp-items=\"Model.AccessibleMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-enable-reordering=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"accessibility\"\n            asp-items=\"Model.AccessibleMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-cancel-text=\"Cancel\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-enable-reordering=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
 
         <div class="example-notes">
             <strong>Note:</strong> Expected tab order is edit/delete buttons first, then reorder buttons.
-            Screen readers announce the button aria-labels (for example, "Edit item edit-array-accessibility-item-0").
+            Screen readers announce the button aria-labels (for example, "Edit item 1" and "Cancel editing item 1").
         </div>
     </section>
 </div>

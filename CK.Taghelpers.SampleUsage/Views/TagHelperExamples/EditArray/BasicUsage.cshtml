@@ -50,13 +50,14 @@
                             asp-items="Model.DisplayModeMembers"
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
-                            asp-display-mode="true">
+                            asp-display-mode="true"
+                            asp-cancel-text="Cancel">
                 </edit-array>
             </div>
 
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"basic-display\"\n            asp-items=\"Model.DisplayModeMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"basic-display\"\n            asp-items=\"Model.DisplayModeMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-cancel-text=\"Cancel\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>

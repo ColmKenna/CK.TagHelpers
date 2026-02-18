@@ -33,6 +33,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
     private const string DeleteButtonTextAttributeName = "asp-delete-text";
     private const string UndeleteButtonTextAttributeName = "asp-undelete-text";
     private const string DoneButtonTextAttributeName = "asp-done-text";
+    private const string CancelButtonTextAttributeName = "asp-cancel-text";
     private const string AddButtonTextAttributeName = "asp-add-text";
     private const string ContainerCssClassDefault = "edit-array-container";
     private const string ItemCssClassDefault = "edit-array-item";
@@ -57,18 +58,21 @@ public sealed partial class EditArrayTagHelper : TagHelper
         public const string ButtonPrimary = "btn-primary";
         public const string ButtonDanger = "btn-danger";
         public const string ButtonSuccess = "btn-success";
+        public const string ButtonSecondary = "btn-secondary";
         public const string EditItemButton = "edit-item-btn";
         public const string DeleteItemButton = "delete-item-btn";
         public const string DoneEditButton = "done-edit-btn";
+        public const string CancelEditButton = "cancel-edit-btn";
         public const string MarginTop2 = "mt-2";
         public const string EditButtonModifier = ButtonSmall + " " + ButtonPrimary + " " + EditItemButton + " " + MarginTop2;
         public const string DeleteButtonModifier = ButtonSmall + " " + ButtonDanger + " " + DeleteItemButton + " " + MarginTop2;
         public const string DoneButtonModifier = ButtonSmall + " " + ButtonSuccess + " " + DoneEditButton + " " + MarginTop2;
+        public const string CancelButtonModifier = ButtonSmall + " " + ButtonSecondary + " " + CancelEditButton + " " + MarginTop2;
         public const string AddButtonModifier = ButtonPrimary + " " + MarginTop2;
         public const string ErrorPanel = EditArrayError + " " + Alert + " " + AlertDanger;
     }
 
-    private enum ButtonKind { Edit, Delete, Done }
+    private enum ButtonKind { Edit, Delete, Done, Cancel }
 #endregion
 
 
@@ -538,6 +542,24 @@ public sealed partial class EditArrayTagHelper : TagHelper
     public string DoneButtonText { get; set; } = "Done";
 
     /// <summary>
+    /// Gets or sets the text displayed on the "Cancel" button.
+    /// </summary>
+    /// <value>
+    /// The button text. Default is "Cancel".
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// This property is used when <see cref="DisplayMode"/> is <c>true</c>. The Cancel button appears
+    /// in the edit container and allows users to abandon in-progress edits.
+    /// </para>
+    /// <para>
+    /// The value is HTML-encoded before output to prevent XSS attacks.
+    /// </para>
+    /// </remarks>
+    [HtmlAttributeName(CancelButtonTextAttributeName)]
+    public string CancelButtonText { get; set; } = "Cancel";
+
+    /// <summary>
     /// Gets or sets the text displayed on the "Add New Item" button.
     /// </summary>
     /// <value>
@@ -740,9 +762,18 @@ public sealed partial class EditArrayTagHelper : TagHelper
         }
 
         var editHidden = hasDisplayView && DisplayMode;
-        await AppendItemSection(html, CssClasses.EditContainer, $"{itemId}-edit",
-            editHidden, ViewName, item, viewData, itemId, displayIndex,
-            hasDisplayView ? ButtonKind.Done : ButtonKind.Delete);
+        if (hasDisplayView)
+        {
+            await AppendItemSection(html, CssClasses.EditContainer, $"{itemId}-edit",
+                editHidden, ViewName, item, viewData, itemId, displayIndex,
+                ButtonKind.Done, ButtonKind.Cancel);
+        }
+        else
+        {
+            await AppendItemSection(html, CssClasses.EditContainer, $"{itemId}-edit",
+                editHidden, ViewName, item, viewData, itemId, displayIndex,
+                ButtonKind.Delete);
+        }
     }
 
     private async Task AppendItemSection(
@@ -852,6 +883,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         if (hasDisplayView)
         {
             AppendActionButton(html, ButtonKind.Done, null, true);
+            AppendActionButton(html, ButtonKind.Cancel, null, true);
         }
         else
         {
@@ -1114,6 +1146,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
             ButtonKind.Edit => (CssClasses.EditButtonModifier, EditButtonText, $"Edit item{indexSuffix}", "edit"),
             ButtonKind.Delete => (CssClasses.DeleteButtonModifier, DeleteButtonText, $"Delete item{indexSuffix}", "delete"),
             ButtonKind.Done => (CssClasses.DoneButtonModifier, DoneButtonText, $"Done editing item{indexSuffix}", "done"),
+            ButtonKind.Cancel => (CssClasses.CancelButtonModifier, CancelButtonText, $"Cancel editing item{indexSuffix}", "cancel"),
             _ => throw new ArgumentOutOfRangeException(nameof(buttonKind), buttonKind, "Unknown button kind")
         };
 

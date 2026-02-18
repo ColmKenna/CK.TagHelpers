@@ -38,6 +38,7 @@
                                 asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                                 asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
                                 asp-display-mode="true"
+                                asp-cancel-text="Cancel"
                                 asp-template="true"
                                 asp-add-button="true"
                                 asp-on-done="guardValidation">
@@ -45,7 +46,7 @@
                 </div>
                 <div class="example-source col-lg-6">
                     <h3 class="h6">Source</h3>
-                    <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"validation-members\"\n            asp-for=\"RequiredMembers\"\n            asp-items=\"Model.RequiredMembers\"\n            asp-view-name=\".../_PersonEditor.cshtml\"\n            asp-display-view-name=\".../_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-on-done=\"guardValidation\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                    <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"validation-members\"\n            asp-for=\"RequiredMembers\"\n            asp-items=\"Model.RequiredMembers\"\n            asp-view-name=\".../_PersonEditor.cshtml\"\n            asp-display-view-name=\".../_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-cancel-text=\"Cancel\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-on-done=\"guardValidation\"&gt;\n&lt;/edit-array&gt;")</code></pre>
                     <pre><code class="language-csharp">@Html.Raw("public class EditArrayValidationViewModel\n{\n    public List&lt;EditArrayPersonViewModel&gt; RequiredMembers { get; set; } = new();\n}\n")</code></pre>
                 </div>
             </div>
@@ -71,6 +72,7 @@
                                 asp-view-name="~/Views/TagHelperExamples/EditArray/_AddressEditor.cshtml"
                                 asp-display-view-name="~/Views/TagHelperExamples/EditArray/_AddressDisplay.cshtml"
                                 asp-display-mode="true"
+                                asp-cancel-text="Cancel"
                                 asp-template="true"
                                 asp-add-button="true"
                                 asp-add-text="Add address"
@@ -79,7 +81,7 @@
                 </div>
                 <div class="example-source col-lg-6">
                     <h3 class="h6">Source</h3>
-                    <pre><code class="language-cshtml">@Html.Raw("&lt;input asp-for=\"Profile.ManagerName\" class=\"form-control\" /&gt;\n&lt;edit-array asp-array-id=\"validation-addresses\"\n            asp-for=\"Profile.Addresses\"\n            asp-items=\"Model.Profile.Addresses\"\n            asp-view-name=\".../_AddressEditor.cshtml\"\n            asp-display-view-name=\".../_AddressDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-add-text=\"Add address\"\n            asp-on-done=\"guardValidation\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                    <pre><code class="language-cshtml">@Html.Raw("&lt;input asp-for=\"Profile.ManagerName\" class=\"form-control\" /&gt;\n&lt;edit-array asp-array-id=\"validation-addresses\"\n            asp-for=\"Profile.Addresses\"\n            asp-items=\"Model.Profile.Addresses\"\n            asp-view-name=\".../_AddressEditor.cshtml\"\n            asp-display-view-name=\".../_AddressDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-cancel-text=\"Cancel\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-add-text=\"Add address\"\n            asp-on-done=\"guardValidation\"&gt;\n&lt;/edit-array&gt;")</code></pre>
                     <pre><code class="language-csharp">@Html.Raw("public class EditArrayProfileViewModel\n{\n    public string? ManagerName { get; set; }\n    public List&lt;EditArrayAddressViewModel&gt; Addresses { get; set; } = new();\n}\n")</code></pre>
                 </div>
             </div>

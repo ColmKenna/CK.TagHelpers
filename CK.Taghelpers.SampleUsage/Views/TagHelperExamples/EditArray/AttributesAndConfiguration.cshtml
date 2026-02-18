@@ -29,6 +29,7 @@
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
                             asp-display-mode="true"
+                            asp-cancel-text="Cancel"
                             asp-template="true"
                             asp-add-button="true"
                             asp-max-items="3"
@@ -37,7 +38,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-template\"\n            asp-items=\"Model.TemplateMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-max-items=\"3\"\n            asp-add-text=\"Add teammate\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-template\"\n            asp-items=\"Model.TemplateMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-cancel-text=\"Cancel\"\n            asp-template=\"true\"\n            asp-add-button=\"true\"\n            asp-max-items=\"3\"\n            asp-add-text=\"Add teammate\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -56,6 +57,7 @@
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
                             asp-display-mode="true"
+                            asp-cancel-text="Discard"
                             asp-container-class="border border-warning rounded p-3 bg-light"
                             asp-item-class="border rounded p-2 mb-2"
                             asp-button-class="btn btn-outline-primary">
@@ -63,7 +65,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-styles\"\n            asp-items=\"Model.StyledMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-container-class=\"border border-warning rounded p-3 bg-light\"\n            asp-item-class=\"border rounded p-2 mb-2\"\n            asp-button-class=\"btn btn-outline-primary\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-styles\"\n            asp-items=\"Model.StyledMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-cancel-text=\"Discard\"\n            asp-container-class=\"border border-warning rounded p-3 bg-light\"\n            asp-item-class=\"border rounded p-2 mb-2\"\n            asp-button-class=\"btn btn-outline-primary\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -82,6 +84,7 @@
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
                             asp-display-mode="true"
+                            asp-cancel-text="Cancel"
                             asp-enable-reordering="true"
                             asp-reorder-button-class="btn btn-outline-dark btn-sm"
                             asp-move-up-text="Up"
@@ -90,7 +93,7 @@
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-reorder\"\n            asp-items=\"Model.ReorderMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-enable-reordering=\"true\"\n            asp-reorder-button-class=\"btn btn-outline-dark btn-sm\"\n            asp-move-up-text=\"Up\"\n            asp-move-down-text=\"Down\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-reorder\"\n            asp-items=\"Model.ReorderMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-cancel-text=\"Cancel\"\n            asp-enable-reordering=\"true\"\n            asp-reorder-button-class=\"btn btn-outline-dark btn-sm\"\n            asp-move-up-text=\"Up\"\n            asp-move-down-text=\"Down\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -98,7 +101,7 @@
     <section class="example-section" id="custom-button-text">
         <h2>Custom button text</h2>
         <p class="example-description">
-            Replace the default labels for edit, delete, undelete, and done actions.
+            Replace the default labels for edit, delete, undelete, done, and cancel actions.
         </p>
 
         <div class="example-container row g-3">
@@ -112,12 +115,13 @@
                             asp-edit-text="Open"
                             asp-delete-text="Remove"
                             asp-undelete-text="Restore"
-                            asp-done-text="Close">
+                            asp-done-text="Close"
+                            asp-cancel-text="Abort">
                 </edit-array>
             </div>
             <div class="example-source col-lg-6">
                 <h3 class="h6">Source</h3>
-                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-button-text\"\n            asp-items=\"Model.ButtonTextMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-edit-text=\"Open\"\n            asp-delete-text=\"Remove\"\n            asp-undelete-text=\"Restore\"\n            asp-done-text=\"Close\"&gt;\n&lt;/edit-array&gt;")</code></pre>
+                <pre><code class="language-cshtml">@Html.Raw("&lt;edit-array asp-array-id=\"attr-button-text\"\n            asp-items=\"Model.ButtonTextMembers\"\n            asp-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml\"\n            asp-display-view-name=\"~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml\"\n            asp-display-mode=\"true\"\n            asp-edit-text=\"Open\"\n            asp-delete-text=\"Remove\"\n            asp-undelete-text=\"Restore\"\n            asp-done-text=\"Close\"\n            asp-cancel-text=\"Abort\"&gt;\n&lt;/edit-array&gt;")</code></pre>
             </div>
         </div>
     </section>
@@ -136,6 +140,7 @@
                             asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                             asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
                             asp-display-mode="true"
+                            asp-cancel-text="Cancel"
                             asp-on-update="handleMemberUpdated"
                             asp-on-delete="handleMemberDeleted">
                 </edit-array>
@@ -164,6 +169,7 @@
                                 asp-view-name="~/Views/TagHelperExamples/EditArray/_PersonEditor.cshtml"
                                 asp-display-view-name="~/Views/TagHelperExamples/EditArray/_PersonDisplay.cshtml"
                                 asp-display-mode="true"
+                                asp-cancel-text="Cancel"
                                 asp-on-done="guardDoneAction">
                     </edit-array>
                 </form>

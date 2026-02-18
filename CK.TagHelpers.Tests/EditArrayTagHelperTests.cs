@@ -427,8 +427,10 @@ public class EditArrayTagHelperTests
         // Check toggle buttons (use data attributes for event delegation, not inline onclick)
         Assert.Contains("data-action=\"edit\"", content);
         Assert.Contains("data-action=\"done\"", content);
+        Assert.Contains("data-action=\"cancel\"", content);
         Assert.Contains("Edit", content); // Edit button text
         Assert.Contains("Done", content); // Done button text
+        Assert.Contains("Cancel", content); // Cancel button text
     }
 
     [Fact]
@@ -453,9 +455,11 @@ public class EditArrayTagHelperTests
         Assert.Contains("aria-label=\"Edit item 1\"", content);
         Assert.Contains("aria-label=\"Delete item 1\"", content);
         Assert.Contains("aria-label=\"Done editing item 1\"", content);
+        Assert.Contains("aria-label=\"Cancel editing item 1\"", content);
         Assert.Contains("aria-label=\"Edit item 2\"", content);
         Assert.Contains("aria-label=\"Delete item 2\"", content);
         Assert.Contains("aria-label=\"Done editing item 2\"", content);
+        Assert.Contains("aria-label=\"Cancel editing item 2\"", content);
 
         // Ensure item IDs are no longer surfaced in button aria labels.
         Assert.DoesNotContain("aria-label=\"Edit item edit-array-test-array-item-0\"", content);
@@ -553,6 +557,7 @@ public class EditArrayTagHelperTests
         Assert.Contains("data-action=\"edit\" data-item-id=\"closest\"", templateContent);
         Assert.Contains("data-action=\"delete\" data-item-id=\"closest\"", templateContent);
         Assert.Contains("data-action=\"done\" data-item-id=\"closest\"", templateContent);
+        Assert.Contains("data-action=\"cancel\" data-item-id=\"closest\"", templateContent);
     }
 
     [Fact]
@@ -584,6 +589,7 @@ public class EditArrayTagHelperTests
         Assert.Contains("data-action=\"delete\"", templateContent);
         Assert.DoesNotContain("data-action=\"edit\"", templateContent);
         Assert.DoesNotContain("data-action=\"done\"", templateContent);
+        Assert.DoesNotContain("data-action=\"cancel\"", templateContent);
 
         _htmlHelperMock.Verify(h => h.PartialAsync("_Display", It.IsAny<object>(), It.IsAny<ViewDataDictionary>()), Times.Never);
     }

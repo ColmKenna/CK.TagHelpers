@@ -48,9 +48,10 @@ function setupFixture(options = {}) {
                             <label for="Input___index__">Name</label>
                             <input type="text" id="Input___index__" name="Input[__index__]" data-id="input-__index__" data-display-for="Input___index__" value="" />
                             <span data-valmsg-for="Input[__index__]"></span>
+                            <button type="button" class="done-item-btn" data-action="done" data-item-id="closest">Done</button>
+                            <button type="button" class="cancel-item-btn" data-action="cancel" data-item-id="closest">Cancel</button>
                         </div>
                         <button type="button" class="edit-item-btn" data-action="edit" data-item-id="closest">Edit</button>
-                        <button type="button" class="done-item-btn" data-action="done" data-item-id="closest">Done</button>
                         <button type="button" class="delete-item-btn" data-action="delete" data-item-id="closest">Delete</button>
                         <button type="button" class="move-up-btn" data-action="move" data-container-id="test-container" data-item-id="closest" data-direction="-1">Up</button>
                         <button type="button" class="move-down-btn" data-action="move" data-container-id="test-container" data-item-id="closest" data-direction="1">Down</button>
@@ -107,7 +108,7 @@ describe('editArray.js', () => {
             expect(item.querySelector('.display-container').classList.contains('ea-hidden')).toBe(true);
             expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(false);
             expect(item.querySelector('input[data-new-item-marker="true"]')).toBeTruthy();
-            expect(item.querySelector('button[data-cancel="cancel"]')).toBeTruthy();
+            expect(item.querySelector('button[data-action="cancel"]')).toBeTruthy();
             expect(item.firstElementChild?.hasAttribute('data-is-deleted-marker')).toBe(true);
             expect(addButton.disabled).toBe(true);
             expect(placeholder.classList.contains('ea-hidden')).toBe(true);
@@ -180,7 +181,7 @@ describe('editArray.js', () => {
             expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(true);
             expect(item.querySelector('[data-display-for="Input_0"]').textContent).toBe('Alice');
             expect(window.onUpdateCallback).toHaveBeenCalledWith('test-container-item-0');
-            expect(item.querySelector('button[data-cancel]')).toBeFalsy();
+            expect(item.querySelector('#test-container-item-0-edit button[data-action="cancel"]')).toBeTruthy();
             expect(item.querySelector('input[data-new-item-marker]')).toBeFalsy();
             expect(document.getElementById('test-container-add').disabled).toBe(false);
         });
@@ -265,6 +266,28 @@ describe('editArray.js', () => {
             expect(item.querySelector('.edit-container').classList.contains('ea-hidden')).toBe(false);
             expect(eventSpy).toHaveBeenCalledTimes(1);
             expect(eventSpy.mock.calls[0][0].detail.itemId).toBe('test-container-item-0');
+        });
+
+        it('reverts row values and returns to display mode when cancel action is invoked', () => {
+            // Arrange
+            const item = addItemAndGet('0');
+            const input = item.querySelector('input[type="text"]');
+            input.value = 'Alice';
+            toggleEditMode(item.id); // Save initial value to display mode
+
+            toggleEditMode(item.id); // Enter edit mode
+            input.value = 'Bob';
+
+            const cancelButton = item.querySelector('#test-container-item-0-edit button[data-action="cancel"]');
+
+            // Act
+            handleEditArrayAction({ target: cancelButton });
+
+            // Assert
+            expect(item.querySelector('.display-container').classList.contains(HIDDEN_CLASS)).toBe(false);
+            expect(item.querySelector('.edit-container').classList.contains(HIDDEN_CLASS)).toBe(true);
+            expect(input.value).toBe('Alice');
+            expect(item.querySelector('[data-display-for="Input_0"]').textContent).toBe('Alice');
         });
     });
 
@@ -838,6 +861,19 @@ describe('editArray.js', () => {
             expect(document.getElementById('test-container-item-0')).toBeNull();
         });
 
+        it('dispatches cancel action for unsaved rows and removes the item', () => {
+            // Arrange
+            addItemAndGet('0');
+            const item = document.getElementById('test-container-item-0');
+            const cancelButton = item.querySelector('#test-container-item-0-edit button[data-action="cancel"]');
+
+            // Act
+            handleEditArrayAction({ target: cancelButton });
+
+            // Assert
+            expect(document.getElementById('test-container-item-0')).toBeNull();
+        });
+
         it('dispatches move action for button with data-action="move"', () => {
             // Arrange
             setupFixture({ reorderEnabled: true });
@@ -904,19 +940,21 @@ describe('editArray.js', () => {
             expect(item1.firstElementChild.value).toBe('false');
         });
 
-        it('cancel button is rendered only in edit mode and removed on save', () => {
+        it('cancel button is rendered in the edit section and remains available after save', () => {
             // Arrange
             addItemAndGet('0');
             const item = document.getElementById('test-container-item-0');
+            const editContainer = item.querySelector('#test-container-item-0-edit');
 
             // Assert - cancel visible during new-item edit
-            expect(item.querySelector('button[data-cancel="cancel"]')).toBeTruthy();
+            expect(editContainer.querySelector('button[data-action="cancel"]')).toBeTruthy();
 
             // Act - save
             toggleEditMode('test-container-item-0');
 
-            // Assert - cancel removed after save
-            expect(item.querySelector('button[data-cancel]')).toBeNull();
+            // Assert - cancel still exists for subsequent edit sessions
+            expect(editContainer.querySelector('button[data-action="cancel"]')).toBeTruthy();
+            expect(editContainer.classList.contains('ea-hidden')).toBe(true);
         });
 
         it('new-item hidden marker is rendered during add and removed on save', () => {

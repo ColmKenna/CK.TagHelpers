@@ -25,6 +25,70 @@ const SELECTOR_CONTAINER = '.edit-array-container';
 function showElement(el) { el.classList.remove(HIDDEN_CLASS); }
 function hideElement(el) { el.classList.add(HIDDEN_CLASS); }
 
+function captureEditSnapshot(item, editContainer) {
+    const controls = Array.from(editContainer.querySelectorAll('input, select, textarea'));
+    const snapshot = controls.map(control => {
+        const isCheckable = control.type === 'checkbox' || control.type === 'radio';
+        const isMultiSelect = control.tagName === 'SELECT' && control.multiple;
+        const state = {};
+
+        if (isCheckable) {
+            state.checked = control.checked;
+        } else if (isMultiSelect) {
+            state.selectedValues = Array.from(control.selectedOptions).map(option => option.value);
+        } else {
+            state.value = control.value;
+        }
+
+        return state;
+    });
+
+    item.dataset.editSnapshot = JSON.stringify(snapshot);
+}
+
+function restoreEditSnapshot(item, editContainer) {
+    const snapshotRaw = item.dataset.editSnapshot;
+    if (!snapshotRaw) return;
+
+    let snapshot;
+    try {
+        snapshot = JSON.parse(snapshotRaw);
+    } catch {
+        delete item.dataset.editSnapshot;
+        return;
+    }
+
+    const controls = Array.from(editContainer.querySelectorAll('input, select, textarea'));
+    snapshot.forEach((state, index) => {
+        const control = controls[index];
+        if (!control) return;
+
+        const isCheckable = control.type === 'checkbox' || control.type === 'radio';
+        const isMultiSelect = control.tagName === 'SELECT' && control.multiple;
+
+        if (isCheckable && typeof state.checked === 'boolean') {
+            control.checked = state.checked;
+            return;
+        }
+
+        if (isMultiSelect && Array.isArray(state.selectedValues)) {
+            const selected = new Set(state.selectedValues);
+            Array.from(control.options).forEach(option => {
+                option.selected = selected.has(option.value);
+            });
+            return;
+        }
+
+        if (typeof state.value === 'string') {
+            control.value = state.value;
+        }
+    });
+}
+
+function clearEditSnapshot(item) {
+    delete item.dataset.editSnapshot;
+}
+
 /**
  * Replace '__index__' tokens in cloned template elements
  * @param {DocumentFragment} clone - The cloned template fragment
@@ -141,21 +205,6 @@ function addNewItem(containerId, templateId) {
         addButton.disabled = true;
     }
 
-    // add a cancel button to the new item
-    const cancelButton = document.createElement('button');
-    cancelButton.type = 'button';
-    cancelButton.textContent = 'Cancel';
-    cancelButton.className = 'btn btn-secondary';
-
-    cancelButton.addEventListener('click', () => markForDeletion(itemId));
-    cancelButton.setAttribute('data-new-item-marker', 'true');
-    cancelButton.setAttribute('data-cancel', `cancel`);
-
-    const editContainer = itemDiv.querySelector('.edit-container');
-    if (editContainer) {
-        editContainer.appendChild(cancelButton);
-    }
-
     // Notify listeners that a new item was added (e.g. for validation wiring)
     document.dispatchEvent(new CustomEvent('editarray:item-added', {
         detail: { containerId, itemId: itemDiv?.id, container }
@@ -210,6 +259,7 @@ function toggleEditMode(itemId) {
             // Switch from edit to display
             showElement(displayContainer);
             hideElement(editContainer);
+            clearEditSnapshot(item);
 
             // Safely invoke OnUpdate callback if defined (XSS prevention: validate function exists)
             const onUpdate = item.dataset.onUpdate;
@@ -217,6 +267,8 @@ function toggleEditMode(itemId) {
                 window[onUpdate](itemId);
             }
         } else {
+            captureEditSnapshot(item, editContainer);
+
             // Switch from display to edit
             hideElement(displayContainer);
             showElement(editContainer);
@@ -227,6 +279,7 @@ function toggleEditMode(itemId) {
             }));
         }
     }
+
     // re-enable the add button
     if (containerId) {
         const addButton = document.getElementById(containerId + SUFFIX_ADD);
@@ -236,15 +289,40 @@ function toggleEditMode(itemId) {
         }
     }
 
-    const cancelButton = item.querySelector('button[data-cancel]');
-    if (cancelButton) {
-        cancelButton.remove();
-    }
-
     // remove the hidden input for new items if it exists
     const hiddenInput = item.querySelector('input[data-new-item-marker]');
     if (hiddenInput) {
         hiddenInput.remove();
+    }
+}
+
+function cancelEdit(itemId) {
+    const item = document.getElementById(itemId);
+    if (!item) return;
+
+    const containerId = getContainerIdFromItemId(itemId);
+    const newItemInput = item.querySelector('input[data-new-item-marker]');
+    if (newItemInput) {
+        removeUnsavedItem(itemId, containerId);
+        return;
+    }
+
+    const displayContainer = document.getElementById(`${itemId}${SUFFIX_DISPLAY}`);
+    const editContainer = document.getElementById(`${itemId}${SUFFIX_EDIT}`);
+    if (!displayContainer || !editContainer) return;
+
+    restoreEditSnapshot(item, editContainer);
+    clearEditSnapshot(item);
+
+    showElement(displayContainer);
+    hideElement(editContainer);
+
+    if (containerId) {
+        const addButton = document.getElementById(containerId + SUFFIX_ADD);
+        if (addButton) {
+            addButton.disabled = false;
+            syncAddButtonState(containerId);
+        }
     }
 }
 
@@ -574,6 +652,11 @@ function handleEditArrayAction(event) {
                 markForDeletion(itemId);
             }
             break;
+        case 'cancel':
+            if (itemId) {
+                cancelEdit(itemId);
+            }
+            break;
         case 'move':
             if (containerId && itemId && direction !== 0) {
                 moveItem(containerId, itemId, direction);
@@ -637,6 +720,7 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         addNewItem,
         toggleEditMode,
+        cancelEdit,
         markForDeletion,
         removeUnsavedItem,
         updateDisplayFromForm,
@@ -662,4 +746,3 @@ if (typeof module !== 'undefined' && module.exports) {
         SELECTOR_CONTAINER
     };
 }
-
