@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace CK.Taghelpers.TagHelpers.Tabs;
@@ -26,7 +26,7 @@ public class TabItemTagHelper : TagHelper
     /// <summary>When true, this tab is selected by default.</summary>
     [HtmlAttributeName("selected")]
     public bool Selected { get; set; }
-    
+
     /// <summary>Required. The text displayed in the tab heading.</summary>
     [HtmlAttributeName("heading")]
     public string? Heading { get; set; }
@@ -63,48 +63,55 @@ public class TabItemTagHelper : TagHelper
             groupName = groupNameString;
         }
 
-        var input = new TagBuilder("input");
-        input.TagRenderMode = TagRenderMode.SelfClosing;
-        input.AddCssClass("tabs-panel-input");
-        input.Attributes["name"] = groupName;
-        input.Attributes["type"] = "radio";
-        input.Attributes["id"] = Id;
-        input.Attributes["role"] = "tab";
-        input.Attributes["aria-controls"] = $"{Id}-panel";
-        if (Selected)
-        {
-            input.Attributes["checked"] = "checked";
-        }
+        var label = (IHtmlContent)HtmlBuilder.Create()
+            .OpenTag("label")
+            .Attr(
+                ("class", "tab-heading"),
+                ("for", Id))
+            .CloseStart()
+            .Text(Heading)
+            .CloseTag("label");
 
-        var label = new TagBuilder("label");
-        label.AddCssClass("tab-heading");
-        label.Attributes["for"] = Id;
-        label.InnerHtml.Append(Heading);
-
-        var panel = new TagBuilder("div");
-        panel.AddCssClass("panel");
-        panel.Attributes["id"] = $"{Id}-panel";
-        panel.Attributes["role"] = "tabpanel";
-        panel.Attributes["aria-labelledby"] = Id;
-        var panelContent = new TagBuilder("div");
-        panelContent.AddCssClass("panel-content");
-        panelContent.InnerHtml.AppendHtml(content);
-        panel.InnerHtml.AppendHtml(panelContent);
+        var panel = (IHtmlContent)HtmlBuilder.Create()
+            .OpenTag("div")
+            .Attr(
+                ("class", "panel"),
+                ("id", $"{Id}-panel"),
+                ("role", "tabpanel"),
+                ("aria-labelledby", Id))
+            .CloseStart()
+            .Tag("div", cssClass: "panel-content")
+            .AppendHtml(content)
+            .CloseTag("div")
+            .CloseTag("div");
 
         if (context.Items.TryGetValue(TabTagHelper.TabContextKey, out var value)
             && value is TabContext tabContext)
         {
-            tabContext.Items.Add(new TabItemDescriptor(input, label, panel, Selected));
+            tabContext.Items.Add(new TabItemDescriptor(Id, groupName, label, panel, Selected));
             output.SuppressOutput();
             return;
         }
 
-        output.TagName = null; // Remove the original <tab-item> tag
-        output.Content.SetHtmlContent(input);
-        output.Content.AppendHtml(label);
-        output.Content.AppendHtml(panel);
+        // Fallback: render directly (no parent TabTagHelper context)
+        var html = HtmlBuilder.Create();
+        html.OpenTag("input")
+            .Attr(
+                ("class", "tabs-panel-input"),
+                ("name", groupName),
+                ("type", "radio"),
+                ("id", Id),
+                ("role", "tab"),
+                ("aria-controls", $"{Id}-panel"))
+            .AttrIf(Selected, "checked", "checked")
+            .SelfClose();
+        html.AppendHtml(label);
+        html.AppendHtml(panel);
+
+        output.TagName = null;
+        output.Content.SetHtmlContent((IHtmlContent)html);
     }
-    
+
     private string GenerateIdFromHeading(string heading)
     {
         // Remove invalid characters, convert to lowercase, and replace spaces with hyphens

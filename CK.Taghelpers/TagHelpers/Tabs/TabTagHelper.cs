@@ -62,16 +62,7 @@ public class TabTagHelper : TagHelper
         var content = new DefaultTagHelperContent();
         foreach (var item in tabContext.Items)
         {
-            if (item.Selected)
-            {
-                item.Input.Attributes["checked"] = "checked";
-            }
-            else
-            {
-                item.Input.Attributes.Remove("checked");
-            }
-
-            content.AppendHtml(item.Input);
+            content.AppendHtml(item.BuildInput());
             content.AppendHtml(item.Label);
             content.AppendHtml(item.Panel);
         }
