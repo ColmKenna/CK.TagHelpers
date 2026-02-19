@@ -208,9 +208,9 @@ public class FlipCardFaceTagHelperTests
     }
 
     [Fact]
-    public async Task ProcessAsync_WithWhitespaceTitle_UsesWhitespaceAsTitle()
+    public async Task ProcessAsync_WithWhitespaceTitle_UsesDefaultTitle()
     {
-        // Arrange - whitespace is not considered "empty" by string.IsNullOrEmpty
+        // Arrange - whitespace-only titles fall back to the default ("Front")
         var items = new Dictionary<object, object>();
         var cardContext = CreateFlipCardContextAndAddToItems(items);
         var tagHelper = CreateTagHelper(title: "   ");
@@ -221,7 +221,7 @@ public class FlipCardFaceTagHelperTests
         await tagHelper.ProcessAsync(context, output);
 
         // Assert
-        Assert.Equal("   ", cardContext.FrontTitle);
+        Assert.Equal("Front", cardContext.FrontTitle);
     }
 
     #endregion
@@ -556,12 +556,24 @@ public class FlipCardFaceTagHelperTests
     /// </summary>
     private static FlipCardTagHelper CreateFlipCardTagHelper(
         bool showButtons = true,
-        string buttonText = "Flip")
+        string buttonText = "Flip",
+        FlipDirection flipDirection = FlipDirection.Horizontal,
+        bool? autoHeight = null,
+        string? cssClass = null,
+        string? buttonCssClass = null,
+        string? frontButtonText = null,
+        string? backButtonText = null)
     {
         return new FlipCardTagHelper
         {
             ShowButtons = showButtons,
-            ButtonText = buttonText
+            ButtonText = buttonText,
+            FlipDirection = flipDirection,
+            AutoHeight = autoHeight,
+            CssClass = cssClass,
+            ButtonCssClass = buttonCssClass,
+            FrontButtonText = frontButtonText,
+            BackButtonText = backButtonText,
         };
     }
 
@@ -678,6 +690,252 @@ public class FlipCardFaceTagHelperTests
         Assert.DoesNotContain("data-flip-card-button", outputHtml);
         // But should still have back panel
         Assert.Contains("card-back", outputHtml);
+    }
+
+    #endregion
+
+    #region FlipCardTagHelper Direction Tests
+
+    [Fact]
+    public async Task FlipCardTagHelper_DefaultDirection_AddsFlipHorizontalClass()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper(flipDirection: FlipDirection.Horizontal);
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        Assert.Contains("flip-horizontal", output.Content.GetContent());
+        Assert.DoesNotContain("flip-vertical", output.Content.GetContent());
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithVerticalDirection_AddsFlipVerticalClass()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper(flipDirection: FlipDirection.Vertical);
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        Assert.Contains("flip-vertical", output.Content.GetContent());
+        Assert.DoesNotContain("flip-horizontal", output.Content.GetContent());
+    }
+
+    #endregion
+
+    #region FlipCardTagHelper CssClass Tests
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithCssClass_AppendsToContainerClass()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper(cssClass: "my-custom-class");
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        var containerClass = output.Attributes["class"]?.Value?.ToString();
+        Assert.NotNull(containerClass);
+        Assert.Contains("card-container", containerClass);
+        Assert.Contains("flip-card", containerClass);
+        Assert.Contains("my-custom-class", containerClass);
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithNoCssClass_UsesDefaultContainerClass()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper();
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        var containerClass = output.Attributes["class"]?.Value?.ToString();
+        Assert.Equal("card-container flip-card", containerClass);
+    }
+
+    #endregion
+
+    #region FlipCardTagHelper AutoHeight Tests
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithAutoHeightTrue_AddsAutoHeightClass()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper(autoHeight: true);
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        Assert.Contains("auto-height", output.Content.GetContent());
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithAutoHeightFalse_DoesNotAddAutoHeightClass()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper(autoHeight: false);
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        Assert.DoesNotContain("auto-height", output.Content.GetContent());
+    }
+
+    #endregion
+
+    #region FlipCardTagHelper ButtonCssClass Tests
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithCustomButtonClass_UsesCustomButtonClass()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper(buttonCssClass: "btn-primary");
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        var html = output.Content.GetContent();
+        Assert.Contains("rotate-button btn-primary", html);
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithSpecialCharsInButtonClass_HtmlEncodesInOutput()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper(buttonCssClass: "btn\" onclick=\"evil()\"");
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        var html = output.Content.GetContent();
+        Assert.DoesNotContain("onclick=\"evil()\"", html);
+        Assert.Contains("&quot;", html);
+    }
+
+    #endregion
+
+    #region FlipCardTagHelper Button Text Tests
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithButtonText_UsesTextForBothButtons()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper(buttonText: "Turn Over");
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        var html = output.Content.GetContent();
+        Assert.Equal(2, System.Text.RegularExpressions.Regex.Matches(html, "Turn Over").Count);
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithFrontAndBackButtonText_UsesSeparateTexts()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper(
+            frontButtonText: "See Back",
+            backButtonText: "See Front");
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        var html = output.Content.GetContent();
+        Assert.Contains("See Back", html);
+        Assert.Contains("See Front", html);
+        Assert.DoesNotContain("Flip", html);
+    }
+
+    #endregion
+
+    #region FlipCardTagHelper ARIA Tests
+
+    [Fact]
+    public async Task FlipCardTagHelper_FrontPanel_HasAriaHiddenFalse()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper();
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        var html = output.Content.GetContent();
+        Assert.Contains(@"class=""card-front"" aria-hidden=""false""", html);
+    }
+
+    [Fact]
+    public async Task FlipCardTagHelper_BackPanel_HasAriaHiddenTrue()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper();
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"));
+
+        await tagHelper.ProcessAsync(context, output);
+
+        var html = output.Content.GetContent();
+        Assert.Contains(@"class=""card-back"" aria-hidden=""true""", html);
+    }
+
+    #endregion
+
+    #region FlipCardTagHelper HTML Encoding Tests
+
+    [Fact]
+    public async Task FlipCardTagHelper_WithSpecialCharsInTitle_HtmlEncodesInOutput()
+    {
+        var items = new Dictionary<object, object>();
+        var tagHelper = CreateFlipCardTagHelper();
+        var context = CreateContext(tagName: "flip-card", items: items);
+        var output = CreateFlipCardOutput(items,
+            frontContent: new HtmlString("<p>Front</p>"),
+            backContent: new HtmlString("<p>Back</p>"),
+            frontTitle: "<script>alert('xss')</script>",
+            backTitle: "Back & Beyond");
+
+        await tagHelper.ProcessAsync(context, output);
+
+        var html = output.Content.GetContent();
+        Assert.DoesNotContain("<script>", html);
+        Assert.Contains("&lt;script&gt;", html);
+        Assert.Contains("Back &amp; Beyond", html);
     }
 
     #endregion
