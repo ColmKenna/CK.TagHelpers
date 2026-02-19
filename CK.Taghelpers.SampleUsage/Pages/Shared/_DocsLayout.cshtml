@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CK TagHelpers Docs</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        /* CK.TagHelpers Documentation Styles */
+        .docs-container { max-width: 900px; margin: 0 auto; }
+        .docs-breadcrumb { font-size: 0.875rem; margin-bottom: 1.5rem; color: #6c757d; }
+        .docs-breadcrumb a { color: #0d6efd; text-decoration: none; }
+        .docs-breadcrumb a:hover { text-decoration: underline; }
+        .docs-header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #dee2e6; }
+        .docs-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .docs-subtitle { font-size: 1.1rem; color: #6c757d; margin-bottom: 1rem; }
+        .docs-meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.875rem; }
+        .docs-meta-label { font-weight: 600; }
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875em; background: #f6f8fa;
+            padding: 0.15em 0.35em; border-radius: 3px; border: 1px solid #e0e0e0;
+        }
+        .docs-section { margin-bottom: 2.5rem; }
+        .docs-section h2 {
+            font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem;
+            padding-bottom: 0.35rem; border-bottom: 1px solid #dee2e6;
+        }
+        .docs-section h3 { font-size: 1.15rem; font-weight: 600; margin: 1.25rem 0 0.75rem; }
+        .docs-section h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: #495057; }
+        .docs-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .docs-table thead th {
+            background: #343a40; color: #fff;
+            padding: 0.6rem 0.75rem; text-align: left; font-weight: 600;
+        }
+        .docs-table tbody tr:nth-child(even) { background: #f8f9fa; }
+        .docs-table tbody td {
+            padding: 0.5rem 0.75rem; border-bottom: 1px solid #dee2e6; vertical-align: top;
+        }
+        .docs-table tbody tr:last-child td { border-bottom: none; }
+        .badge-required {
+            display: inline-block; font-size: 0.7em; font-weight: 700;
+            padding: 0.15em 0.45em; border-radius: 3px;
+            background: #dc3545; color: #fff;
+            text-transform: uppercase; letter-spacing: 0.03em;
+            vertical-align: middle; margin-left: 0.35rem;
+        }
+        pre {
+            background: #f6f8fa; border: 1px solid #e0e0e0; border-radius: 4px;
+            padding: 1rem 1.25rem; overflow-x: auto;
+            font-size: 0.85rem; line-height: 1.6; margin-bottom: 1rem;
+        }
+        pre code { background: none; border: none; padding: 0; font-size: inherit; }
+        .docs-note, .docs-warning {
+            padding: 0.75rem 1rem; border-left: 4px solid;
+            border-radius: 0 4px 4px 0; margin-bottom: 1rem; font-size: 0.9rem;
+        }
+        .docs-note { border-color: #ffc107; background: #fff8e1; }
+        .docs-warning { border-color: #dc3545; background: #ffeef0; }
+        .docs-note strong, .docs-warning strong { display: block; margin-bottom: 0.25rem; }
+        .docs-card-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.5rem; margin-top: 1.5rem;
+        }
+        .docs-card {
+            border: 1px solid #dee2e6; border-radius: 6px;
+            padding: 1.25rem; transition: box-shadow 0.15s;
+        }
+        .docs-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .docs-card h3 { font-size: 1.1rem; margin-bottom: 0.25rem; }
+        .docs-card h3 a { text-decoration: none; color: #0d6efd; }
+        .docs-card h3 a:hover { text-decoration: underline; }
+        .docs-card .docs-card-tag { font-size: 0.8rem; color: #6c757d; margin-bottom: 0.5rem; }
+        .docs-card p { font-size: 0.9rem; color: #495057; margin-bottom: 0; }
+        @@media (max-width: 768px) {
+            .docs-table { display: block; overflow-x: auto; }
+            .docs-card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">CK.Taghelpers.SampleUsage</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Tabs</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Home" asp-action="Tabs">Demo</a></li>
+                                <li><a class="dropdown-item" asp-controller="TabExamples" asp-action="Index">Examples</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">FlipCard</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Home" asp-action="FlipCard">Demo</a></li>
+                                <li><a class="dropdown-item" asp-controller="FlipCardExamples" asp-action="Index">Examples</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">EditArray</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Home" asp-action="Samples">Demo</a></li>
+                                <li><a class="dropdown-item" asp-controller="TagHelperExamples" asp-action="Index">Examples</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold" asp-page="/Docs/Index">Docs</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - CK.Taghelpers.SampleUsage
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

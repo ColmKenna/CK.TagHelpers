@@ -1,62 +1,77 @@
-@page "/docs/tabs"
-@model TabsDocModel
+@page
+@model TabsModel
 @{
-    ViewData["Title"] = "Tabs TagHelper Reference";
+    ViewData["Title"] = "Tabs TagHelper";
 }
 
 <div class="docs-container">
-    <div class="docs-breadcrumb">
-        <a href="/docs">Documentation</a>
-    </div>
+
+    <nav class="docs-breadcrumb">
+        <a asp-page="/Docs/Index">TagHelper Reference</a> &rsaquo; Tabs
+    </nav>
 
     <div class="docs-header">
-        <h1>&lt;tab&gt; TagHelper</h1>
-        <p class="subtitle">A CSS-only tabbed interface component with no JavaScript dependencies.</p>
-        <div class="metadata">
-            <strong>Target Elements:</strong> <code>&lt;tab&gt;</code>, <code>&lt;tab-item&gt;</code>
-            <br />
-            <strong>Classes:</strong> <code>TabTagHelper</code>, <code>TabItemTagHelper</code>
-            <br />
-            <strong>Namespace:</strong> <code>CK.Taghelpers.TagHelpers.Tabs</code>
+        <h1>Tabs TagHelper</h1>
+        <p class="docs-subtitle">Renders a pure CSS tab container. No JavaScript required.</p>
+        <div class="docs-meta">
+            <div><span class="docs-meta-label">Elements:</span> <code>&lt;tab&gt;</code>, <code>&lt;tab-item&gt;</code></div>
+            <div><span class="docs-meta-label">Classes:</span> <code>TabTagHelper</code>, <code>TabItemTagHelper</code></div>
+            <div><span class="docs-meta-label">Namespace:</span> <code>CK.Taghelpers.TagHelpers.Tabs</code></div>
+        </div>
+        <div class="docs-meta mt-2">
+            <div><span class="docs-meta-label">CSS:</span> <code>_content/CK.Taghelpers/css/tabs.css</code></div>
+            <div><span class="docs-meta-label">JS:</span> None required</div>
         </div>
     </div>
 
-    <!-- Overview Section -->
+    <!-- 2. Overview -->
     <div class="docs-section">
         <h2>Overview</h2>
         <p>
-            The <code>&lt;tab&gt;</code> and <code>&lt;tab-item&gt;</code> TagHelpers provide a lightweight, CSS-only tabbed 
-            interface. No JavaScript is required—tab switching is handled entirely with CSS radio inputs and the :checked selector. 
-            The component automatically selects the first tab if none are marked as selected, generates unique IDs for each tab, 
-            and includes full ARIA attributes for accessibility.
+            The Tabs TagHelper pair renders a fully functional tab interface using only CSS — no JavaScript
+            is needed. Each tab is backed by a hidden radio <code>&lt;input&gt;</code>; CSS sibling selectors
+            show the panel whose radio is checked. This approach is keyboard-navigable and works without
+            JavaScript enabled.
+        </p>
+        <p>
+            Use <code>&lt;tab&gt;</code> as the outer container and add one or more <code>&lt;tab-item&gt;</code>
+            children, each with a required <code>heading</code> attribute. If no item specifies
+            <code>selected="true"</code>, the first tab is automatically selected on render. Tab IDs are
+            generated from the heading text but can be overridden explicitly.
         </p>
     </div>
 
-    <!-- Getting Started Section -->
+    <!-- 3. Getting Started -->
     <div class="docs-section">
         <h2>Getting Started</h2>
-        <p>Here is the simplest working example:</p>
-        <div class="code-block">
-            <pre>&lt;tab&gt;
-    &lt;tab-item heading="Tab 1"&gt;
-        Content for tab 1
+        <p>Include the CSS, then add a <code>&lt;tab&gt;</code> with at least one <code>&lt;tab-item&gt;</code>:</p>
+<pre><code class="language-cshtml">&lt;!-- In _Layout.cshtml or this page --&gt;
+&lt;link rel="stylesheet" href="~/_content/CK.Taghelpers/css/tabs.css" /&gt;
+
+&lt;tab&gt;
+    &lt;tab-item heading="First Tab"&gt;
+        &lt;p&gt;Content for the first tab.&lt;/p&gt;
     &lt;/tab-item&gt;
-    &lt;tab-item heading="Tab 2"&gt;
-        Content for tab 2
+    &lt;tab-item heading="Second Tab"&gt;
+        &lt;p&gt;Content for the second tab.&lt;/p&gt;
     &lt;/tab-item&gt;
-&lt;/tab&gt;</pre>
-        </div>
-        <p>
-            This renders a tabbed interface with two tabs. The first tab is selected by default. 
-            Each <code>&lt;tab-item&gt;</code> requires a <code>heading</code> attribute displayed as the tab label.
-        </p>
+&lt;/tab&gt;</code></pre>
+        <p>The <code>@@addTagHelper *, CK.Taghelpers</code> directive must appear in <code>_ViewImports.cshtml</code> (or the current page) for the tag helpers to activate.</p>
     </div>
 
-    <!-- Attribute Reference Section -->
+    <!-- 4. Attribute Reference -->
     <div class="docs-section">
-        <h2>TagHelper Attribute Reference</h2>
+        <h2>Attribute Reference</h2>
 
-        <p><strong>&lt;tab&gt; — TabTagHelper</strong></p>
+        <h3><code>&lt;tab&gt;</code> — TabTagHelper</h3>
+        <p>
+            The <code>&lt;tab&gt;</code> element accepts no custom attributes. It renders as a
+            <code>&lt;div class="tabs"&gt;</code>. Any <code>class</code> attribute you add is merged:
+            if your value already includes <code>tabs</code> it is not duplicated; otherwise <code>tabs</code>
+            is prepended.
+        </p>
+
+        <h3><code>&lt;tab-item&gt;</code> — TabItemTagHelper</h3>
         <table class="docs-table">
             <thead>
                 <tr>
@@ -68,393 +83,155 @@
             </thead>
             <tbody>
                 <tr>
-                    <td><code>class</code></td>
-                    <td>string</td>
-                    <td>null</td>
                     <td>
-                        Additional CSS classes to apply to the tab container. The class "tabs" is always applied. 
-                        If this attribute includes "tabs", it is not duplicated.
+                        <code>heading</code>
+                        <span class="badge-required">Required</span>
                     </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="note">
-            <strong>Note:</strong> The <code>&lt;tab&gt;</code> element is transformed into a <code>&lt;div class="tabs"&gt;</code> 
-            in the rendered HTML.
-        </div>
-
-        <p style="margin-top: 2rem"><strong>&lt;tab-item&gt; — TabItemTagHelper</strong></p>
-        <table class="docs-table">
-            <thead>
-                <tr>
-                    <th>Attribute</th>
-                    <th>Type</th>
-                    <th>Default</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>heading</code></td>
-                    <td>string</td>
+                    <td><code>string</code></td>
                     <td>—</td>
                     <td>
-                        <span class="badge badge-required">Required</span>
-                        Text displayed in the tab label. This is the clickable heading shown in the tab bar.
-                    </td>
-                </tr>
-                <tr>
-                    <td><code>id</code></td>
-                    <td>string</td>
-                    <td>null</td>
-                    <td>
-                        Optional unique identifier for the tab. If not provided, an ID is auto-generated from the heading 
-                        (lowercase, spaces replaced with hyphens). If the auto-generated ID conflicts with an existing ID, 
-                        a numeric suffix is appended.
+                        The text displayed in the tab's clickable label. Also used to auto-generate the tab's
+                        <code>id</code> when no <code>id</code> attribute is provided (lowercase, spaces
+                        replaced by hyphens, non-alphanumeric characters removed). If <code>heading</code>
+                        is missing or empty, the item renders an HTML comment and is excluded from the tab set.
                     </td>
                 </tr>
                 <tr>
                     <td><code>selected</code></td>
-                    <td>bool</td>
-                    <td>false</td>
+                    <td><code>bool</code></td>
+                    <td><code>false</code></td>
                     <td>
-                        When true, this tab is selected by default. If multiple tabs have <code>selected="true"</code>, 
-                        only the first is honored. If no tab is marked selected, the first tab is automatically selected.
+                        When <code>true</code>, this tab is shown on initial render. If multiple items set
+                        <code>selected="true"</code>, the first one wins. If no item sets it, the first tab
+                        in the list is selected automatically.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>id</code></td>
+                    <td><code>string?</code></td>
+                    <td>—</td>
+                    <td>
+                        Explicit identifier for the tab. If provided, it is used as-is (after de-duplication).
+                        If omitted, an ID is generated from the <code>heading</code> text. If the heading
+                        yields an empty string after sanitisation, a unique fallback ID is generated.
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Configuration Section -->
+    <!-- 5. Configuration -->
     <div class="docs-section">
         <h2>Configuration and Usage Guidance</h2>
 
-        <h3>Basic Tab Set</h3>
+        <h3>Selecting a tab by default</h3>
+        <p>Set <code>selected="true"</code> on the tab-item you want shown on first render:</p>
+<pre><code class="language-cshtml">&lt;tab&gt;
+    &lt;tab-item heading="Overview"&gt;...&lt;/tab-item&gt;
+    &lt;tab-item heading="Details" selected="true"&gt;...&lt;/tab-item&gt;
+    &lt;tab-item heading="History"&gt;...&lt;/tab-item&gt;
+&lt;/tab&gt;</code></pre>
+
+        <h3>Server-side dynamic selection</h3>
+        <p>Bind <code>selected</code> to a server-side condition to choose the active tab based on model state:</p>
+<pre><code class="language-cshtml">&lt;tab&gt;
+    &lt;tab-item heading="Edit" selected="@@(Model.IsEditing)"&gt;
+        @@* Edit form *@@
+    &lt;/tab-item&gt;
+    &lt;tab-item heading="Preview" selected="@@(!Model.IsEditing)"&gt;
+        @@* Preview content *@@
+    &lt;/tab-item&gt;
+&lt;/tab&gt;</code></pre>
+
+        <h3>Explicit tab IDs</h3>
         <p>
-            A simple tab container with multiple items. The first tab is selected by default if no 
-            <code>selected="true"</code> is specified.
+            Provide explicit IDs when you need to reference tabs from external links or JavaScript
+            (for example, to open a tab programmatically via CSS class manipulation):
         </p>
-        <div class="code-block">
-            <pre>&lt;tab&gt;
-    &lt;tab-item heading="Overview"&gt;
-        &lt;p&gt;Overview content here...&lt;/p&gt;
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="Details"&gt;
-        &lt;p&gt;Detailed information...&lt;/p&gt;
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="Settings"&gt;
-        &lt;p&gt;Configuration options...&lt;/p&gt;
-    &lt;/tab-item&gt;
-&lt;/tab&gt;</pre>
-        </div>
-
-        <h3>Pre-Selected Tab</h3>
+<pre><code class="language-cshtml">&lt;tab&gt;
+    &lt;tab-item id="tab-overview" heading="Overview"&gt;...&lt;/tab-item&gt;
+    &lt;tab-item id="tab-details" heading="Details"&gt;...&lt;/tab-item&gt;
+&lt;/tab&gt;</code></pre>
         <p>
-            Mark a specific tab as selected to display it by default.
+            The generated radio input will have <code>id="tab-overview"</code>, and the panel will have
+            <code>id="tab-overview-panel"</code>.
         </p>
-        <div class="code-block">
-            <pre>&lt;tab&gt;
-    &lt;tab-item heading="Tab 1"&gt;
-        Content for tab 1
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="Tab 2" selected="true"&gt;
-        This tab is shown by default
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="Tab 3"&gt;
-        Content for tab 3
-    &lt;/tab-item&gt;
-&lt;/tab&gt;</pre>
-        </div>
 
-        <h3>Custom Tab IDs</h3>
+        <h3>Duplicate headings</h3>
         <p>
-            Provide explicit IDs for tabs to link to them via URL fragments or for styling purposes.
+            If two tab items would produce the same auto-generated ID (e.g. two tabs both headed
+            <em>Overview</em>), the TagHelper appends a numeric suffix (<code>-1</code>, <code>-2</code>,
+            etc.) to ensure uniqueness:
         </p>
-        <div class="code-block">
-            <pre>&lt;tab&gt;
-    &lt;tab-item heading="Home" id="home-tab"&gt;
-        Home content
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="About" id="about-tab"&gt;
-        About content
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="Contact" id="contact-tab"&gt;
-        Contact content
-    &lt;/tab-item&gt;
-&lt;/tab&gt;</pre>
-        </div>
+<pre><code class="language-cshtml">&lt;tab&gt;
+    &lt;tab-item heading="Overview"&gt;...&lt;/tab-item&gt;  @* id="overview" *@
+    &lt;tab-item heading="Overview"&gt;...&lt;/tab-item&gt;  @* id="overview-1" *@
+&lt;/tab&gt;</code></pre>
 
-        <h3>Auto-Generated IDs from Headings</h3>
+        <h3>Adding extra CSS classes</h3>
+        <p>Additional CSS classes can be applied to the tab container:</p>
+<pre><code class="language-cshtml">&lt;tab class="my-custom-tabs"&gt;
+    ...
+&lt;/tab&gt;</code></pre>
+        <p>Renders as <code>&lt;div class="tabs my-custom-tabs"&gt;</code>.</p>
+
+        <h3>Accessibility</h3>
+        <p>The following ARIA and semantic attributes are generated automatically:</p>
+        <ul>
+            <li>Each hidden radio input has <code>role="tab"</code> and <code>aria-controls="{id}-panel"</code>.</li>
+            <li>Each panel has <code>role="tabpanel"</code> and <code>aria-labelledby="{id}"</code>.</li>
+            <li>All inputs share a unique <code>name</code> (per tab container) so the radio group is correctly scoped.</li>
+            <li>
+                Keyboard navigation: focus moves to the tab labels (the <code>&lt;label&gt;</code> elements
+                linked to the radio inputs). Arrow keys cycle through the radio group in most browsers when
+                any radio is focused.
+            </li>
+        </ul>
+
+        <h3>Multiple tab containers on a page</h3>
         <p>
-            If no ID is provided, one is automatically generated from the heading text (lowercase, hyphens for spaces).
+            Each <code>&lt;tab&gt;</code> generates a unique radio group name (<code>tabs-{uniqueId}</code>)
+            so multiple tab containers on the same page do not interfere with each other.
         </p>
-        <div class="code-block">
-            <pre>&lt;tab&gt;
-    &lt;tab-item heading="Getting Started"&gt;
-        &lt;!-- Auto ID: "getting-started" --&gt;
-        Content...
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="API Reference"&gt;
-        &lt;!-- Auto ID: "api-reference" --&gt;
-        Content...
-    &lt;/tab-item&gt;
-&lt;/tab&gt;</pre>
-        </div>
 
-        <h3>Custom Styling</h3>
-        <p>
-            Add custom classes to the tab container for theme-specific styling.
-        </p>
-        <div class="code-block">
-            <pre>&lt;tab class="custom-tabs mt-4 mb-4"&gt;
-    &lt;tab-item heading="Tab 1"&gt;
-        Content...
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="Tab 2"&gt;
-        Content...
-    &lt;/tab-item&gt;
-&lt;/tab&gt;
-
-&lt;style&gt;
-.custom-tabs .tab-heading {
-    background-color: #f0f0f0;
-    padding: 15px 25px;
-    font-size: 16px;
-}
-
-.custom-tabs .tabs-panel-input:checked + .tab-heading {
-    background-color: #007bff;
-    color: white;
-}
-
-.custom-tabs .panel {
-    height: auto;
-}
-
-.custom-tabs .panel-content {
-    padding: 30px;
-}
-&lt;/style&gt;</pre>
-        </div>
-
-        <h3>Complex Content in Tabs</h3>
-        <p>
-            Tabs can contain complex HTML, including forms, nested components, and images.
-        </p>
-        <div class="code-block">
-            <pre>&lt;tab&gt;
-    &lt;tab-item heading="Form"&gt;
-        &lt;form method="post"&gt;
-            &lt;div class="mb-3"&gt;
-                &lt;label for="name" class="form-label"&gt;Name&lt;/label&gt;
-                &lt;input type="text" id="name" name="name" class="form-control" /&gt;
-            &lt;/div&gt;
-            &lt;button type="submit" class="btn btn-primary"&gt;Submit&lt;/button&gt;
-        &lt;/form&gt;
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="Image"&gt;
-        &lt;img src="/images/photo.jpg" alt="Description" style="max-width: 100%;" /&gt;
-    &lt;/tab-item&gt;
-    &lt;tab-item heading="Nested Component"&gt;
-        &lt;partial name="_NestedComponent" /&gt;
-    &lt;/tab-item&gt;
-&lt;/tab&gt;</pre>
-        </div>
-
-        <h3>Responsive Tabs</h3>
-        <p>
-            The default CSS provides responsive behavior: tabs stack vertically on small screens and horizontally on larger screens.
-        </p>
-        <div class="code-block">
-            <pre>&lt;tab class="responsive-tabs"&gt;
-    &lt;tab-item heading="Mobile Tab"&gt;&lt;/tab-item&gt;
-    &lt;tab-item heading="Desktop Tab"&gt;&lt;/tab-item&gt;
-&lt;/tab&gt;
-
-&lt;style&gt;
-/* Default (mobile): tabs stack vertically */
-.responsive-tabs .tab-heading {
-    width: 100%;
-}
-
-/* Desktop: tabs display horizontally */
-@@media (min-width: 768px) {
-    .responsive-tabs .tab-heading {
-        width: auto;
-        border-bottom: none;
-        border-radius: 1px 1px 0 0;
-    }
-}
-&lt;/style&gt;</pre>
-        </div>
+        <h3>Tabs inside loops</h3>
+<pre><code class="language-cshtml">@@foreach (var section in Model.Sections)
+{
+    &lt;h2&gt;@@section.Name&lt;/h2&gt;
+    &lt;tab&gt;
+        @@foreach (var tab in section.Tabs)
+        {
+            &lt;tab-item heading="@@tab.Title"&gt;
+                &lt;p&gt;@@tab.Content&lt;/p&gt;
+            &lt;/tab-item&gt;
+        }
+    &lt;/tab&gt;
+}</code></pre>
     </div>
 
-    <!-- CSS and Styling Section -->
-    <div class="docs-section">
-        <h2>CSS Reference and Theming</h2>
-
-        <h3>CSS Class Structure</h3>
-        <p>
-            Understanding the rendered HTML structure helps with custom styling.
-        </p>
-        <div class="code-block">
-            <pre>&lt;div class="tabs"&gt;
-    &lt;!-- Radio input (hidden) --&gt;
-    &lt;input class="tabs-panel-input" type="radio" name="..." id="..." /&gt;
-    
-    &lt;!-- Tab heading (clickable) --&gt;
-    &lt;label class="tab-heading" for="..."&gt;Tab Label&lt;/label&gt;
-    
-    &lt;!-- Tab content panel --&gt;
-    &lt;div class="panel"&gt;
-        &lt;div class="panel-content"&gt;
-            Tab content here...
-        &lt;/div&gt;
-    &lt;/div&gt;
-    
-    &lt;!-- Repeat for each tab --&gt;
-&lt;/div&gt;</pre>
-        </div>
-
-        <h3>CSS Custom Properties (Customizable Variables)</h3>
-        <p>
-            The default tab styles use fixed colors, but you can override them with custom CSS.
-        </p>
-        <div class="code-block">
-            <pre>&lt;style&gt;
-/* Override default tab colors */
-.custom-tabs .tab-heading {
-    background-color: #e8e8e8;
-    color: #333;
-}
-
-.custom-tabs .tabs-panel-input:checked + .tab-heading {
-    background-color: #0066cc;
-    color: white;
-    border-bottom: 3px solid #0066cc;
-}
-
-.custom-tabs .tabs-panel-input:focus + .tab-heading {
-    outline: 2px solid #0066cc;
-    outline-offset: -2px;
-}
-
-.custom-tabs .panel-content {
-    background-color: #f9f9f9;
-}
-&lt;/style&gt;</pre>
-        </div>
-
-        <h3>Tab Heading Styles</h3>
-        <table class="docs-table">
-            <thead>
-                <tr>
-                    <th>Selector</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>.tabs .tab-heading</code></td>
-                    <td>Base styles for tab labels (padding, font-size, cursor, etc.).</td>
-                </tr>
-                <tr>
-                    <td><code>.tabs .tab-heading:hover</code></td>
-                    <td>Hover state for tab labels.</td>
-                </tr>
-                <tr>
-                    <td><code>.tabs .tabs-panel-input:checked + .tab-heading</code></td>
-                    <td>Active tab heading (when selected).</td>
-                </tr>
-                <tr>
-                    <td><code>.tabs .tabs-panel-input:focus + .tab-heading</code></td>
-                    <td>Focused tab heading (keyboard navigation).</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h3>Panel Styles</h3>
-        <table class="docs-table">
-            <thead>
-                <tr>
-                    <th>Selector</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>.tabs .panel</code></td>
-                    <td>Base styles for tab panels (display: none by default).</td>
-                </tr>
-                <tr>
-                    <td><code>.tabs .tabs-panel-input:checked + .tab-heading + .panel</code></td>
-                    <td>
-                        Shows the panel when its corresponding radio input is checked 
-                        (<code>display: block</code>).
-                    </td>
-                </tr>
-                <tr>
-                    <td><code>.tabs .panel-content</code></td>
-                    <td>Inner wrapper for tab content (padding, overflow handling).</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h3>Accessibility Features</h3>
-        <p>
-            The component includes ARIA attributes for screen reader support.
-        </p>
-        <div class="code-block">
-            <pre>&lt;input ... role="tab" aria-controls="tab-name-panel" /&gt;
-&lt;div class="panel" id="tab-name-panel" role="tabpanel" aria-labelledby="tab-name"&gt;
-    Content...
-&lt;/div&gt;</pre>
-        </div>
-    </div>
-
-    <!-- Notes and Limitations Section -->
+    <!-- 7. Notes -->
     <div class="docs-section">
         <h2>Notes and Known Limitations</h2>
         <ul>
             <li>
-                <strong>CSS-Only:</strong> No JavaScript is required or used by the component. Tab switching relies entirely on 
-                CSS :checked selector with radio inputs. This makes the component lightweight but means tab state is not persisted 
-                across page reloads (unless you implement custom JavaScript).
+                <strong>No JavaScript.</strong> The tab state is maintained entirely by CSS radio-input
+                state. There is no JS API and no custom events fired on tab change.
             </li>
             <li>
-                <strong>Automatic Tab Selection:</strong> If no tab is marked <code>selected="true"</code>, the first tab is 
-                automatically selected by the C# code during rendering. This ensures at least one tab is always visible.
+                <strong>Panel height is fixed at 450px.</strong> The <code>.panel</code> class in
+                <code>tabs.css</code> sets <code>height: 450px</code>. Override this with a custom CSS
+                class on the <code>&lt;tab&gt;</code> element if your content requires a different height.
             </li>
             <li>
-                <strong>ID Collisions:</strong> If two tabs have the same heading (and thus auto-generated IDs), the component 
-                appends numeric suffixes to make IDs unique (e.g., "getting-started" and "getting-started-1"). Explicit IDs are 
-                recommended to avoid this.
+                <strong>Missing heading.</strong> A <code>&lt;tab-item&gt;</code> without a
+                <code>heading</code> attribute renders an HTML comment (<code>&lt;!-- TabItemTagHelper:
+                Missing required 'heading' attribute --&gt;</code>) and is excluded from the tab set.
             </li>
             <li>
-                <strong>Radio Input Uniqueness:</strong> All radio inputs in a tab group share the same <code>name</code> attribute, 
-                which is auto-generated using the container's unique ID. Only one tab can be selected at a time (radio button behavior).
-            </li>
-            <li>
-                <strong>Fixed Panel Height:</strong> The default CSS sets a fixed height (450px) for the panel area. Content exceeding 
-                this height will scroll. Override <code>.tabs .panel { height: auto; }</code> in your CSS if you prefer dynamic height.
-            </li>
-            <li>
-                <strong>No URL Fragment Navigation:</strong> The component does not automatically navigate to tabs via URL fragments 
-                (e.g., #my-tab). You must implement custom JavaScript if this feature is needed.
-            </li>
-            <li>
-                <strong>Heading Required:</strong> Each <code>&lt;tab-item&gt;</code> requires a <code>heading</code> attribute. 
-                If omitted, a comment is rendered instead and the tab does not appear in the UI.
-            </li>
-            <li>
-                <strong>Shadow DOM Not Used:</strong> The component renders into the light DOM, so all CSS is subject to global styles. 
-                Use specific selectors to avoid style conflicts.
+                <strong>Responsive layout.</strong> Below 600 px, tab headings stack vertically (accordion-
+                style). Above 600 px, they render horizontally across the top with the panel below.
             </li>
         </ul>
     </div>
-</div>
 
-<style>
-    @import url('_docs.css');
-</style>
+</div>

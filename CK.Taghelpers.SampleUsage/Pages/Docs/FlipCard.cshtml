@@ -1,58 +1,72 @@
-@page "/docs/flipcard"
-@model FlipCardDocModel
+@page
+@model FlipCardModel
 @{
-    ViewData["Title"] = "FlipCard TagHelper Reference";
+    ViewData["Title"] = "FlipCard TagHelper";
 }
 
 <div class="docs-container">
-    <div class="docs-breadcrumb">
-        <a href="/docs">Documentation</a>
-    </div>
+
+    <nav class="docs-breadcrumb">
+        <a asp-page="/Docs/Index">TagHelper Reference</a> &rsaquo; FlipCard
+    </nav>
 
     <div class="docs-header">
-        <h1>&lt;flip-card&gt; TagHelper</h1>
-        <p class="subtitle">A 3D card component that flips between front and back content with smooth CSS transforms.</p>
-        <div class="metadata">
-            <strong>Target Elements:</strong> <code>&lt;flip-card&gt;</code>, <code>&lt;card-front&gt;</code>, <code>&lt;card-back&gt;</code>
-            <br />
-            <strong>Classes:</strong> <code>FlipCardTagHelper</code>, <code>FlipCardFaceTagHelper</code>
-            <br />
-            <strong>Namespace:</strong> <code>CK.Taghelpers.TagHelpers.FlipCard</code>
+        <h1>FlipCard TagHelper</h1>
+        <p class="docs-subtitle">Renders a 3D flip card with distinct front and back faces, toggled by a button click.</p>
+        <div class="docs-meta">
+            <div><span class="docs-meta-label">Elements:</span> <code>&lt;flip-card&gt;</code>, <code>&lt;card-front&gt;</code>, <code>&lt;card-back&gt;</code></div>
+            <div><span class="docs-meta-label">Classes:</span> <code>FlipCardTagHelper</code>, <code>FlipCardFaceTagHelper</code></div>
+            <div><span class="docs-meta-label">Namespace:</span> <code>CK.Taghelpers.TagHelpers.FlipCard</code></div>
+        </div>
+        <div class="docs-meta mt-2">
+            <div><span class="docs-meta-label">CSS:</span> <code>_content/CK.Taghelpers/css/flip-card.css</code></div>
+            <div><span class="docs-meta-label">JS:</span> <code>_content/CK.Taghelpers/js/flip-card.js</code></div>
         </div>
     </div>
 
-    <!-- Overview Section -->
+    <!-- 2. Overview -->
     <div class="docs-section">
         <h2>Overview</h2>
         <p>
-            The <code>&lt;flip-card&gt;</code> TagHelper creates an interactive 3D card component using CSS 3D transforms. 
-            Cards can flip horizontally or vertically to reveal back-side content. The component supports automatic height 
-            equalization between faces, customizable button text and styling, and optional flip buttons. Each card requires 
-            at least a front face; a back face is optional. If no back face is provided, flip buttons are hidden.
+            The FlipCard TagHelper renders a CSS 3D flip card with two faces: a front and an optional back.
+            Place <code>&lt;card-front&gt;</code> and <code>&lt;card-back&gt;</code> child elements inside
+            <code>&lt;flip-card&gt;</code> to define each face's header title and body content. The card rotates
+            on button click using a CSS 3D transform; the companion JavaScript module manages ARIA state
+            (<code>aria-hidden</code>, <code>aria-pressed</code>) and optional auto-height equalization so both faces
+            occupy the same space.
+        </p>
+        <p>
+            Use this component when two related views share the same screen real estate — for example, a question
+            and its answer, a product overview and detailed specifications, or a summary card with a detail panel.
+            If no <code>&lt;card-back&gt;</code> is provided the flip buttons are suppressed and the card acts as a
+            plain framed panel.
         </p>
     </div>
 
-    <!-- Getting Started Section -->
+    <!-- 3. Getting Started -->
     <div class="docs-section">
         <h2>Getting Started</h2>
-        <p>Here is the simplest working example:</p>
-        <div class="code-block">
-            <pre>&lt;flip-card&gt;
-    &lt;card-front&gt;Front content here&lt;/card-front&gt;
-    &lt;card-back&gt;Back content here&lt;/card-back&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
-        <p>
-            This renders a card with front and back faces. A button on each face allows users to flip the card 
-            by 180 degrees around the Y-axis (horizontal flip). Add titles using the <code>title</code> attribute on each face.
-        </p>
+        <p>Include the CSS and JS assets, then add <code>&lt;flip-card&gt;</code> with at least a front face:</p>
+<pre><code class="language-cshtml">&lt;!-- In _Layout.cshtml or this page --&gt;
+&lt;link rel="stylesheet" href="~/_content/CK.Taghelpers/css/flip-card.css" /&gt;
+&lt;script src="~/_content/CK.Taghelpers/js/flip-card.js"&gt;&lt;/script&gt;
+
+&lt;flip-card&gt;
+    &lt;card-front title="Hello"&gt;
+        &lt;p&gt;This is the front content.&lt;/p&gt;
+    &lt;/card-front&gt;
+    &lt;card-back title="World"&gt;
+        &lt;p&gt;This is the back content.&lt;/p&gt;
+    &lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+        <p>The <code>@@addTagHelper *, CK.Taghelpers</code> directive must appear in <code>_ViewImports.cshtml</code> (or the current page) for the tag helpers to activate.</p>
     </div>
 
-    <!-- Attribute Reference Section -->
+    <!-- 4. Attribute Reference -->
     <div class="docs-section">
-        <h2>TagHelper Attribute Reference</h2>
+        <h2>Attribute Reference</h2>
 
-        <p><strong>&lt;flip-card&gt; — FlipCardTagHelper</strong></p>
+        <h3><code>&lt;flip-card&gt;</code> — FlipCardTagHelper</h3>
         <table class="docs-table">
             <thead>
                 <tr>
@@ -65,87 +79,70 @@
             <tbody>
                 <tr>
                     <td><code>flip-direction</code></td>
-                    <td>FlipDirection enum</td>
-                    <td>Horizontal</td>
-                    <td>
-                        Direction of the flip animation: <code>Horizontal</code> (rotateY) or <code>Vertical</code> (rotateX).
-                        See enum values below.
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="4">
-                        <strong>Enum: FlipDirection</strong>
-                        <ul style="margin: 0.5rem 0 0 2rem;">
-                            <li><code>Horizontal</code> — Flip around the Y-axis (180° rotateY)</li>
-                            <li><code>Vertical</code> — Flip around the X-axis (180° rotateX)</li>
-                        </ul>
-                    </td>
+                    <td><code>FlipDirection</code></td>
+                    <td><code>Horizontal</code></td>
+                    <td>The axis on which the card rotates. See enum values below.</td>
                 </tr>
                 <tr>
                     <td><code>auto-height</code></td>
-                    <td>bool?</td>
-                    <td>null (false)</td>
+                    <td><code>bool?</code></td>
+                    <td>—</td>
                     <td>
-                        When true, the card's height dynamically adjusts to fit the taller of the two faces. 
-                        Prevents clipping when front and back content heights differ.
+                        When <code>true</code>, JavaScript equalizes the height of both faces so the card always
+                        shows the taller face's height. Requires <code>flip-card.js</code> to be loaded.
+                        Equalization runs on DOMContentLoaded and on window resize (debounced 100 ms).
                     </td>
                 </tr>
                 <tr>
                     <td><code>button-text</code></td>
-                    <td>string</td>
-                    <td>Flip</td>
-                    <td>
-                        Default text displayed on flip buttons. Overridden by <code>front-button-text</code> or 
-                        <code>back-button-text</code> if specified.
-                    </td>
+                    <td><code>string</code></td>
+                    <td><code>"Flip"</code></td>
+                    <td>Default label for both flip buttons. Overridden individually by <code>front-button-text</code> and <code>back-button-text</code>.</td>
                 </tr>
                 <tr>
                     <td><code>front-button-text</code></td>
-                    <td>string</td>
-                    <td>null</td>
-                    <td>
-                        Text for the flip button on the front face. If not specified, 
-                        <code>button-text</code> is used.
-                    </td>
+                    <td><code>string?</code></td>
+                    <td>—</td>
+                    <td>Text for the flip button on the front face. Falls back to <code>button-text</code> when not set.</td>
                 </tr>
                 <tr>
                     <td><code>back-button-text</code></td>
-                    <td>string</td>
-                    <td>null</td>
-                    <td>
-                        Text for the flip button on the back face. If not specified, 
-                        <code>button-text</code> is used.
-                    </td>
-                </tr>
-                <tr>
-                    <td><code>show-buttons</code></td>
-                    <td>bool</td>
-                    <td>true</td>
-                    <td>
-                        When false, flip buttons are hidden. Only flip cards programmatically via JavaScript. 
-                        Buttons are automatically hidden if no back face exists.
-                    </td>
+                    <td><code>string?</code></td>
+                    <td>—</td>
+                    <td>Text for the flip button on the back face. Falls back to <code>button-text</code> when not set.</td>
                 </tr>
                 <tr>
                     <td><code>button-class</code></td>
-                    <td>string</td>
-                    <td>null</td>
-                    <td>
-                        Additional CSS classes to apply to flip buttons. The base class "rotate-button" is always applied.
-                    </td>
+                    <td><code>string?</code></td>
+                    <td>—</td>
+                    <td>Additional CSS class(es) appended to the built-in <code>rotate-button</code> class on each flip button.</td>
+                </tr>
+                <tr>
+                    <td><code>show-buttons</code></td>
+                    <td><code>bool</code></td>
+                    <td><code>true</code></td>
+                    <td>Whether to render flip buttons. Set to <code>false</code> to display the card without buttons (e.g. flip programmatically).</td>
                 </tr>
                 <tr>
                     <td><code>class</code></td>
-                    <td>string</td>
-                    <td>null</td>
-                    <td>
-                        CSS classes to apply to the outer card container (in addition to "card-container flip-card").
-                    </td>
+                    <td><code>string?</code></td>
+                    <td>—</td>
+                    <td>Additional CSS class(es) applied to the outer <code>card-container flip-card</code> wrapper element.</td>
                 </tr>
             </tbody>
         </table>
 
-        <p style="margin-top: 2rem"><strong>&lt;card-front&gt; and &lt;card-back&gt; — FlipCardFaceTagHelper</strong></p>
+        <h4>FlipDirection enum values</h4>
+        <table class="docs-table">
+            <thead><tr><th>Value</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>Horizontal</code></td><td>Card rotates around the Y axis (left-right flip).</td></tr>
+                <tr><td><code>Vertical</code></td><td>Card rotates around the X axis (top-bottom flip).</td></tr>
+            </tbody>
+        </table>
+
+        <h3><code>&lt;card-front&gt;</code> / <code>&lt;card-back&gt;</code> — FlipCardFaceTagHelper</h3>
+        <p>Both child elements share the same TagHelper class and the same attribute.</p>
         <table class="docs-table">
             <thead>
                 <tr>
@@ -158,338 +155,180 @@
             <tbody>
                 <tr>
                     <td><code>title</code></td>
-                    <td>string</td>
-                    <td>Front / Back</td>
-                    <td>
-                        Title text displayed in the card face header (h2 element). If not specified, 
-                        defaults to "Front" for card-front and "Back" for card-back.
-                    </td>
+                    <td><code>string</code></td>
+                    <td><code>"Front"</code> / <code>"Back"</code></td>
+                    <td>Text displayed in the card face's header <code>&lt;h2&gt;</code>. Defaults to <code>"Front"</code> for <code>&lt;card-front&gt;</code> and <code>"Back"</code> for <code>&lt;card-back&gt;</code> when not supplied or empty.</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Configuration Section -->
+    <!-- 5. Configuration -->
     <div class="docs-section">
         <h2>Configuration and Usage Guidance</h2>
 
-        <h3>Basic Horizontal Flip</h3>
+        <h3>Vertical flip direction</h3>
+        <p>Use <code>flip-direction="Vertical"</code> to rotate the card around the horizontal axis instead:</p>
+<pre><code class="language-cshtml">&lt;flip-card flip-direction="Vertical"&gt;
+    &lt;card-front title="Question"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Answer"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+
+        <h3>Custom button text</h3>
+        <p>Use different labels for the front and back buttons:</p>
+<pre><code class="language-cshtml">&lt;flip-card front-button-text="See Details" back-button-text="Go Back"&gt;
+    &lt;card-front title="Overview"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Details"&gt;...&lt;/card-back&gt;
+&lt;/flip-card&gt;</code></pre>
+
+        <h3>Auto-height equalization</h3>
         <p>
-            The default configuration flips the card around the Y-axis (left/right rotation).
+            When front and back faces have different content heights, set <code>auto-height="true"</code>.
+            The JavaScript module measures both faces after load and sets the card's height to the larger value:
         </p>
-        <div class="code-block">
-            <pre>&lt;flip-card&gt;
-    &lt;card-front title="Question"&gt;
-        What is 2 + 2?
-    &lt;/card-front&gt;
-    &lt;card-back title="Answer"&gt;
-        4
+<pre><code class="language-cshtml">&lt;flip-card auto-height="true"&gt;
+    &lt;card-front title="Short"&gt;&lt;p&gt;Brief content.&lt;/p&gt;&lt;/card-front&gt;
+    &lt;card-back title="Long"&gt;
+        &lt;p&gt;Much more content here that would otherwise overflow...&lt;/p&gt;
     &lt;/card-back&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
+&lt;/flip-card&gt;</code></pre>
 
-        <h3>Vertical Flip</h3>
+        <h3>Front-only card (no flip)</h3>
         <p>
-            Flip around the X-axis (top/bottom rotation) for a different visual effect.
+            Omit <code>&lt;card-back&gt;</code> entirely to render a simple framed panel. The TagHelper
+            suppresses the flip buttons automatically when there is no back content:
         </p>
-        <div class="code-block">
-            <pre>&lt;flip-card flip-direction="Vertical"&gt;
-    &lt;card-front&gt;Front content&lt;/card-front&gt;
-    &lt;card-back&gt;Back content&lt;/card-back&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
-
-        <h3>Auto Height Adjustment</h3>
-        <p>
-            When front and back content have different heights, enable auto-height to prevent content clipping.
-        </p>
-        <div class="code-block">
-            <pre>&lt;flip-card auto-height="true"&gt;
-    &lt;card-front&gt;
-        Short content
+<pre><code class="language-cshtml">&lt;flip-card&gt;
+    &lt;card-front title="Notice"&gt;
+        &lt;p&gt;This card has no back face.&lt;/p&gt;
     &lt;/card-front&gt;
-    &lt;card-back&gt;
-        Much longer content that extends beyond the front face...
-    &lt;/card-back&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
+&lt;/flip-card&gt;</code></pre>
 
-        <h3>Custom Button Text</h3>
-        <p>
-            Customize the button text for each face.
-        </p>
-        <div class="code-block">
-            <pre>&lt;flip-card button-text="Reveal"
-           front-button-text="See Answer"
-           back-button-text="Back to Question"&gt;
-    &lt;card-front&gt;Question&lt;/card-front&gt;
-    &lt;card-back&gt;Answer&lt;/card-back&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
-
-        <h3>Hiding Buttons and Programmatic Flip</h3>
-        <p>
-            Hide the buttons and flip the card via JavaScript.
-        </p>
-        <div class="code-block">
-            <pre>&lt;flip-card show-buttons="false" id="myCard"&gt;
-    &lt;card-front&gt;Front&lt;/card-front&gt;
-    &lt;card-back&gt;Back&lt;/card-back&gt;
+        <h3>Hiding buttons while keeping flip capability</h3>
+        <p>Set <code>show-buttons="false"</code> to render the card without buttons. You can then trigger the flip programmatically via JavaScript:</p>
+<pre><code class="language-cshtml">&lt;flip-card show-buttons="false" class="my-card"&gt;
+    &lt;card-front title="Front"&gt;...&lt;/card-front&gt;
+    &lt;card-back title="Back"&gt;...&lt;/card-back&gt;
 &lt;/flip-card&gt;
 
 &lt;script&gt;
-// Flip the card programmatically
-document.getElementById('myCard').querySelector('.card').classList.toggle('is-flipped');
-&lt;/script&gt;</pre>
-        </div>
+    // Flip the card by toggling the is-flipped class
+    document.querySelector('.my-card .card').classList.toggle('is-flipped');
+&lt;/script&gt;</code></pre>
 
-        <h3>Front-Only Card (No Back Face)</h3>
-        <p>
-            A card with only a front face is rendered normally. Flip buttons are hidden automatically.
-        </p>
-        <div class="code-block">
-            <pre>&lt;flip-card&gt;
-    &lt;card-front title="Information"&gt;
-        This card has no back side.
-    &lt;/card-front&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
-
-        <h3>Styling with CSS Custom Properties</h3>
-        <p>
-            The component exposes CSS custom properties for theming the card appearance.
-        </p>
-        <div class="code-block">
-            <pre>&lt;style&gt;
-.flip-card .card {
+        <h3>Appearance and theming</h3>
+        <p>All visual aspects of the card are controlled via CSS custom properties. Apply them to a wrapper element or directly to the component:</p>
+<pre><code class="language-css">.my-themed-card {
     --flip-card-width: 400px;
     --flip-card-height: 250px;
-    --flip-card-transition-duration: 0.8s;
-    --border-width: 2px;
-    --border-color: #333;
-    --border-radius: 12px;
-    --bg: #f0f0f0;
-    --color: #333;
-    --shadow: 0 8px 16px rgba(0,0,0,0.2);
-    --padding: 20px;
-    --header-bg: #e0e0e0;
-    --font-size: 1.1rem;
-    --font-weight: 700;
-}
-&lt;/style&gt;
+    --bg: #1e293b;
+    --color: #f1f5f9;
+    --border-color: #334155;
+    --header-bg: #0f172a;
+    --button-bg: #334155;
+    --button-color: #f1f5f9;
+    --flip-card-transition-duration: 0.4s;
+}</code></pre>
 
-&lt;flip-card class="my-themed-card"&gt;
-    &lt;card-front&gt;Front&lt;/card-front&gt;
-    &lt;card-back&gt;Back&lt;/card-back&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
-
-        <h3>Button Styling</h3>
-        <p>
-            Add custom classes to the flip buttons.
-        </p>
-        <div class="code-block">
-            <pre>&lt;flip-card button-class="btn btn-primary btn-sm"&gt;
-    &lt;card-front&gt;Front&lt;/card-front&gt;
-    &lt;card-back&gt;Back&lt;/card-back&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
-
-        <h3>Container Classes</h3>
-        <p>
-            Add custom classes to the outer card container.
-        </p>
-        <div class="code-block">
-            <pre>&lt;flip-card class="shadow-lg rounded-lg"&gt;
-    &lt;card-front&gt;Front&lt;/card-front&gt;
-    &lt;card-back&gt;Back&lt;/card-back&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
+        <h3>Accessibility</h3>
+        <p>The TagHelper generates the following ARIA attributes automatically:</p>
+        <ul>
+            <li>The front face has <code>aria-hidden="false"</code> initially; the back face has <code>aria-hidden="true"</code>.</li>
+            <li>On flip, these values are toggled by the JavaScript module so screen readers present only the visible face.</li>
+            <li>Each flip button has <code>aria-pressed="false"</code> initially; this is updated to <code>"true"</code> when the card is flipped.</li>
+            <li>The <code>@@media (prefers-reduced-motion: reduce)</code> rule in <code>flip-card.css</code> disables the CSS transition for users who prefer reduced motion.</li>
+        </ul>
     </div>
 
-    <!-- JavaScript API Section -->
+    <!-- 6. JavaScript API -->
     <div class="docs-section">
-        <h2>JavaScript API Reference</h2>
+        <h2>JavaScript API</h2>
+        <p>The <code>flip-card.js</code> module is an IIFE that exposes a global <code>window.FlipCard</code> namespace. It initialises automatically on <code>DOMContentLoaded</code>.</p>
 
-        <h3>Flipping Programmatically</h3>
-        <p>
-            Flip a card using JavaScript by toggling the <code>is-flipped</code> class on the inner <code>.card</code> element.
-        </p>
-        <div class="code-block">
-            <pre>&lt;flip-card id="myCard"&gt;
-    &lt;card-front&gt;Front&lt;/card-front&gt;
-    &lt;card-back&gt;Back&lt;/card-back&gt;
-&lt;/flip-card&gt;
-
-&lt;script&gt;
-const card = document.getElementById('myCard').querySelector('.card');
-card.classList.toggle('is-flipped');  // Flip
-card.classList.add('is-flipped');     // Flip to back
-card.classList.remove('is-flipped');  // Flip to front
-&lt;/script&gt;</pre>
-        </div>
-
-        <h3>ARIA Attributes</h3>
-        <p>
-            The component automatically updates <code>aria-hidden</code> attributes on the front and back faces 
-            to reflect which side is visible. Screen readers will announce only the visible face.
-        </p>
-        <div class="code-block">
-            <pre>&lt;div class="card-front" aria-hidden="false"&gt;...&lt;/div&gt;
-&lt;div class="card-back" aria-hidden="true"&gt;...&lt;/div&gt;
-
-// When flipped:
-&lt;div class="card-front" aria-hidden="true"&gt;...&lt;/div&gt;
-&lt;div class="card-back" aria-hidden="false"&gt;...&lt;/div&gt;</pre>
-        </div>
-
-        <h3>CSS Custom Properties Reference</h3>
+        <h3>Methods</h3>
         <table class="docs-table">
             <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Default</th>
-                    <th>Description</th>
-                </tr>
+                <tr><th>Method</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
             </thead>
             <tbody>
                 <tr>
-                    <td><code>--flip-card-width</code></td>
-                    <td>300px</td>
-                    <td>Width of the card.</td>
+                    <td><code>FlipCard.initialize()</code></td>
+                    <td>—</td>
+                    <td><code>void</code></td>
+                    <td>Wires flip-button click handlers and runs height equalization. Call this after dynamically inserting a flip card into the DOM.</td>
                 </tr>
                 <tr>
-                    <td><code>--flip-card-height</code></td>
-                    <td>300px</td>
-                    <td>Height of the card (or base height for auto-height mode).</td>
-                </tr>
-                <tr>
-                    <td><code>--flip-card-transition-duration</code></td>
-                    <td>0.6s</td>
-                    <td>Duration of the flip animation.</td>
-                </tr>
-                <tr>
-                    <td><code>--flip-card-header-height</code></td>
-                    <td>40px</td>
-                    <td>Height of the card header (containing title and button).</td>
-                </tr>
-                <tr>
-                    <td><code>--border-width</code></td>
-                    <td>1px</td>
-                    <td>Border width for card faces.</td>
-                </tr>
-                <tr>
-                    <td><code>--border-color</code></td>
-                    <td>#ccc</td>
-                    <td>Border color for card faces.</td>
-                </tr>
-                <tr>
-                    <td><code>--border-radius</code></td>
-                    <td>10px</td>
-                    <td>Border radius for card corners.</td>
-                </tr>
-                <tr>
-                    <td><code>--bg</code></td>
-                    <td>#fff</td>
-                    <td>Background color for card faces.</td>
-                </tr>
-                <tr>
-                    <td><code>--color</code></td>
-                    <td>inherit</td>
-                    <td>Text color for card content.</td>
-                </tr>
-                <tr>
-                    <td><code>--shadow</code></td>
-                    <td>0 4px 8px rgba(0,0,0,0.1)</td>
-                    <td>Shadow effect on card faces.</td>
-                </tr>
-                <tr>
-                    <td><code>--padding</code></td>
-                    <td>10px</td>
-                    <td>Padding inside card headers and content areas.</td>
-                </tr>
-                <tr>
-                    <td><code>--header-bg</code></td>
-                    <td>transparent</td>
-                    <td>Background color for card headers.</td>
-                </tr>
-                <tr>
-                    <td><code>--font-size</code></td>
-                    <td>1rem</td>
-                    <td>Font size for card titles.</td>
-                </tr>
-                <tr>
-                    <td><code>--font-weight</code></td>
-                    <td>600</td>
-                    <td>Font weight for card titles.</td>
+                    <td><code>FlipCard.equalizeHeights()</code></td>
+                    <td>—</td>
+                    <td><code>void</code></td>
+                    <td>Recalculates and equalizes the heights of all <code>.auto-height</code> cards on the page. Called automatically on window resize (100 ms debounce).</td>
                 </tr>
             </tbody>
         </table>
 
-        <h3>Complete Theming Example</h3>
-        <div class="code-block">
-            <pre>&lt;style&gt;
-.custom-flip-card .card {
-    --flip-card-width: 350px;
-    --flip-card-height: 200px;
-    --flip-card-transition-duration: 1s;
-    --border-width: 3px;
-    --border-color: #0066cc;
-    --border-radius: 20px;
-    --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --color: white;
-    --shadow: 0 10px 30px rgba(0,0,0,0.3);
-    --padding: 30px;
-    --header-bg: rgba(0,0,0,0.1);
-    --font-size: 1.3rem;
-    --font-weight: 800;
-}
-&lt;/style&gt;
+        <p>Example — reinitialise after injecting a card via AJAX:</p>
+<pre><code class="language-javascript">// After inserting new flip-card markup into the DOM:
+FlipCard.initialize();</code></pre>
 
-&lt;flip-card class="custom-flip-card"&gt;
-    &lt;card-front title="Hello"&gt;This is a styled card&lt;/card-front&gt;
-    &lt;card-back title="World"&gt;With a custom theme&lt;/card-back&gt;
-&lt;/flip-card&gt;</pre>
-        </div>
+        <h3>CSS Custom Properties</h3>
+        <table class="docs-table">
+            <thead>
+                <tr><th>Property</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>--flip-card-width</code></td><td><code>300px</code></td><td>Width of the card.</td></tr>
+                <tr><td><code>--flip-card-height</code></td><td><code>300px</code></td><td>Height of the card. Used as the minimum height in auto-height mode.</td></tr>
+                <tr><td><code>--flip-card-transition-duration</code></td><td><code>0.6s</code></td><td>Duration of the flip animation.</td></tr>
+                <tr><td><code>--flip-card-header-height</code></td><td><code>40px</code></td><td>Minimum height of each face's header row.</td></tr>
+                <tr><td><code>--border-width</code></td><td><code>1px</code></td><td>Border width for the card faces and buttons.</td></tr>
+                <tr><td><code>--border-color</code></td><td><code>#ccc</code></td><td>Border colour for the card faces and buttons.</td></tr>
+                <tr><td><code>--border-radius</code></td><td><code>10px</code></td><td>Corner radius for the card faces.</td></tr>
+                <tr><td><code>--shadow</code></td><td><code>0 4px 8px rgba(0,0,0,0.1)</code></td><td>Box shadow applied to each face.</td></tr>
+                <tr><td><code>--bg</code></td><td><code>#fff</code></td><td>Background colour of the card faces.</td></tr>
+                <tr><td><code>--color</code></td><td><code>inherit</code></td><td>Text colour of the card faces.</td></tr>
+                <tr><td><code>--header-bg</code></td><td><code>transparent</code></td><td>Background colour of the header strip on each face.</td></tr>
+                <tr><td><code>--padding</code></td><td><code>10px</code></td><td>Padding inside headers and content areas.</td></tr>
+                <tr><td><code>--font-size</code></td><td><code>1rem</code></td><td>Font size of the header <code>&lt;h2&gt;</code> text.</td></tr>
+                <tr><td><code>--font-weight</code></td><td><code>600</code></td><td>Font weight of the header text.</td></tr>
+                <tr><td><code>--button-bg</code></td><td><code>#fff</code></td><td>Background colour of the flip buttons.</td></tr>
+                <tr><td><code>--button-color</code></td><td><code>inherit</code></td><td>Text colour of the flip buttons.</td></tr>
+                <tr><td><code>--button-bg-hover</code></td><td><code>#f0f0f0</code></td><td>Background colour of the flip buttons on hover.</td></tr>
+                <tr><td><code>--focus-color</code></td><td><code>#0066cc</code></td><td>Colour of the focus outline on the flip buttons.</td></tr>
+            </tbody>
+        </table>
     </div>
 
-    <!-- Notes and Limitations Section -->
+    <!-- 7. Notes -->
     <div class="docs-section">
         <h2>Notes and Known Limitations</h2>
         <ul>
             <li>
-                <strong>3D Transform Support:</strong> Requires browser support for CSS 3D transforms (transform-style: preserve-3d, 
-                rotateX, rotateY). All modern browsers support this; IE 11 has limited support.
+                <strong>No back face = no buttons.</strong> The TagHelper checks at render time whether
+                <code>&lt;card-back&gt;</code> content exists. If none is provided, flip buttons are not
+                rendered on either face, regardless of the <code>show-buttons</code> attribute.
             </li>
             <li>
-                <strong>Backface Visibility:</strong> The component uses <code>backface-visibility: hidden</code> to hide the unused 
-                face during a flip. This is well-supported but may have performance implications on older mobile devices.
+                <strong>Auto-height requires JavaScript.</strong> The <code>auto-height</code> attribute
+                adds the <code>auto-height</code> CSS class but height equalization only happens when
+                <code>flip-card.js</code> runs. Without the script the card uses <code>--flip-card-height</code>
+                as a fixed height.
             </li>
             <li>
-                <strong>Auto Height:</strong> When <code>auto-height="true"</code>, the component measures both faces and sets the 
-                height to the maximum. This is calculated once at render time, not dynamically on window resize. If content size changes, 
-                recalculate manually or reload the page.
+                <strong>Reduced motion.</strong> The <code>@@media (prefers-reduced-motion: reduce)</code>
+                rule sets <code>transition: none</code> on the card, disabling the flip animation for users
+                who have enabled this OS-level preference. The flip still occurs visually but is instantaneous.
             </li>
             <li>
-                <strong>No Back Face = No Buttons:</strong> If only a front face is provided, flip buttons are automatically hidden 
-                because there is no content to reveal.
+                <strong>CSS assets are not in the default layout.</strong> The sample project's
+                <code>_Layout.cshtml</code> does not include <code>flip-card.css</code> or <code>flip-card.js</code>
+                by default. Add them to the layout or include them per-page in a <code>@@section Scripts</code> block.
             </li>
             <li>
-                <strong>Perspective Context:</strong> 3D effects depend on the card being in a container with <code>perspective</code> 
-                CSS property. The component applies this automatically. Nested perspective values can affect the visual outcome.
-            </li>
-            <li>
-                <strong>Pointer Events on Deleted Face:</strong> Although CSS handles visibility, the hidden face still occupies 
-                DOM space. The component uses <code>backface-visibility: hidden</code> to prevent interaction.
-            </li>
-            <li>
-                <strong>Accessibility:</strong> Card faces must contain semantic HTML (headings, paragraphs, lists) for proper 
-                accessibility. The title attribute is rendered as an <code>&lt;h2&gt;</code> heading.
+                <strong><code>ButtonCssClass</code> is HTML-encoded.</strong> The <code>button-class</code>
+                attribute value is passed through <code>HtmlEncoder.Default.Encode()</code> before being
+                placed in the class attribute, preventing CSS injection.
             </li>
         </ul>
     </div>
-</div>
 
-<style>
-    @import url('_docs.css');
-</style>
+</div>

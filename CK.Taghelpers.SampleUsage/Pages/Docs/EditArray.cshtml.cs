@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CK.Taghelpers.SampleUsage.Pages.Docs;
 
-public class EditArrayDocModel : PageModel
+public class EditArrayModel : PageModel
 {
-    public void OnGet()
-    {
-    }
+    public void OnGet() { }
 }

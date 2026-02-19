@@ -10,4 +10,8 @@
     <ProjectReference Include="..\CK.Taghelpers\CK.Taghelpers.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\Docs\" />
+  </ItemGroup>
+
 </Project>

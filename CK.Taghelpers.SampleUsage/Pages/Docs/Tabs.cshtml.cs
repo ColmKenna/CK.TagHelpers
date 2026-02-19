@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CK.Taghelpers.SampleUsage.Pages.Docs;
 
-public class TabsDocModel : PageModel
+public class TabsModel : PageModel
 {
-    public void OnGet()
-    {
-    }
+    public void OnGet() { }
 }

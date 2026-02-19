@@ -1,92 +1,40 @@
-@page "/docs"
-@model DocsIndexModel
+@page
+@model IndexModel
 @{
-    ViewData["Title"] = "TagHelper Reference Documentation";
+    ViewData["Title"] = "TagHelper Reference";
 }
 
 <div class="docs-container">
     <div class="docs-header">
-        <h1>TagHelper Reference Documentation</h1>
-        <p class="subtitle">
-            Professional API reference and usage guides for CK.Taghelpers components. 
-            Select a component below to view detailed documentation, attribute references, 
-            configuration guidance, and JavaScript API documentation.
-        </p>
+        <h1>CK TagHelpers Reference</h1>
+        <p class="docs-subtitle">API reference and usage guides for CK.Taghelpers components.</p>
     </div>
 
-    <div class="docs-section">
-        <h2>Form Controls</h2>
-        <div class="docs-grid">
-            <div class="docs-card">
-                <h3><a href="/docs/editarray">EditArray</a></h3>
-                <div class="tag-element">
-                    <code>&lt;edit-array&gt;</code>
-                </div>
-                <p class="description">
-                    Dynamically render, edit, and manage collections with add, delete, reorder, 
-                    and validation capabilities. Supports display/edit mode toggling and inline 
-                    item deletion with undo.
-                </p>
-                <a href="/docs/editarray">View Documentation →</a>
-            </div>
+    <p>
+        Select a component below to view its full attribute reference, configuration guidance,
+        JavaScript API, and usage examples.
+    </p>
 
-            <div class="docs-card">
-                <h3><a href="/docs/tabs">Tabs</a></h3>
-                <div class="tag-element">
-                    <code>&lt;tab&gt;</code> / <code>&lt;tab-item&gt;</code>
-                </div>
-                <p class="description">
-                    A CSS-only tabbed interface component with no JavaScript dependencies. 
-                    Features automatic tab selection, ARIA accessibility attributes, 
-                    and responsive behavior.
-                </p>
-                <a href="/docs/tabs">View Documentation →</a>
-            </div>
+    <h2 class="mt-4 mb-1" style="font-size:1.1rem;font-weight:600;color:#495057;text-transform:uppercase;letter-spacing:.05em;">Layout &amp; Presentation</h2>
+    <div class="docs-card-grid">
+        <div class="docs-card">
+            <h3><a asp-page="/Docs/FlipCard">FlipCard</a></h3>
+            <div class="docs-card-tag"><code>&lt;flip-card&gt;</code>, <code>&lt;card-front&gt;</code>, <code>&lt;card-back&gt;</code></div>
+            <p>A 3D flip card with front and back faces, triggered by a button click. Supports horizontal and vertical flip directions, auto-height equalization, and full CSS theming.</p>
+        </div>
+        <div class="docs-card">
+            <h3><a asp-page="/Docs/Tabs">Tabs</a></h3>
+            <div class="docs-card-tag"><code>&lt;tab&gt;</code>, <code>&lt;tab-item&gt;</code></div>
+            <p>A pure CSS tab container. No JavaScript required. Renders accessible radio-button tabs with automatic ID generation and first-tab default selection.</p>
         </div>
     </div>
 
-    <div class="docs-section">
-        <h2>Visual Components</h2>
-        <div class="docs-grid">
-            <div class="docs-card">
-                <h3><a href="/docs/flipcard">FlipCard</a></h3>
-                <div class="tag-element">
-                    <code>&lt;flip-card&gt;</code> / <code>&lt;card-front&gt;</code> / <code>&lt;card-back&gt;</code>
-                </div>
-                <p class="description">
-                    A 3D card component that flips between front and back content using CSS transforms. 
-                    Customizable flip direction, button text, and styling. Includes ARIA accessibility attributes.
-                </p>
-                <a href="/docs/flipcard">View Documentation →</a>
-            </div>
+    <h2 class="mt-4 mb-1" style="font-size:1.1rem;font-weight:600;color:#495057;text-transform:uppercase;letter-spacing:.05em;">Form Controls</h2>
+    <div class="docs-card-grid">
+        <div class="docs-card">
+            <h3><a asp-page="/Docs/EditArray">EditArray</a></h3>
+            <div class="docs-card-tag"><code>&lt;edit-array&gt;</code></div>
+            <p>A dynamic collection editor that renders list items with inline edit, delete, reorder, and add-new capabilities. Integrates with ASP.NET Core model binding and jQuery unobtrusive validation.</p>
         </div>
-    </div>
-
-    <div class="docs-section">
-        <h2>Documentation Format</h2>
-        <p>
-            Each TagHelper documentation page includes:
-        </p>
-        <ul>
-            <li><strong>Overview:</strong> What the component does and when to use it</li>
-            <li><strong>Getting Started:</strong> A minimal, working example</li>
-            <li><strong>Attribute Reference:</strong> A complete table of all TagHelper properties</li>
-            <li><strong>Configuration Guidance:</strong> Common usage patterns and code examples</li>
-            <li><strong>JavaScript API Reference:</strong> Methods, events, and CSS custom properties (where applicable)</li>
-            <li><strong>Notes and Limitations:</strong> Important caveats and browser compatibility</li>
-        </ul>
-    </div>
-
-    <div class="docs-section">
-        <h2>Quick Links</h2>
-        <ul>
-            <li><a href="/docs/editarray">EditArray Reference</a></li>
-            <li><a href="/docs/tabs">Tabs Reference</a></li>
-            <li><a href="/docs/flipcard">FlipCard Reference</a></li>
-        </ul>
     </div>
 </div>
-
-<style>
-    @import url('_docs.css');
-</style>
