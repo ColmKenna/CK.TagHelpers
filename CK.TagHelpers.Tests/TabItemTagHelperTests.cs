@@ -179,8 +179,9 @@ public class TabItemTagHelperTests
             Heading = "First",
             Selected = false
         };
+        // Updated to use GroupNameKey constant (RED: fails until constant is added)
         var context = CreateContext(
-            items: new Dictionary<object, object> { { typeof(TabTagHelper), groupName } });
+            items: new Dictionary<object, object> { { TabTagHelper.GroupNameKey, groupName } });
         var output = CreateOutput(childContent: "Body");
 
         // Act
@@ -335,6 +336,56 @@ public class TabItemTagHelperTests
         Assert.Contains("id=\"my-tab\"", firstRendered);
         Assert.Contains("id=\"my-tab-1\"", secondRendered);
     }
+
+    // --- Code-review fixes (RED phase) ---
+
+    [Fact]
+    public async Task Should_RenderAriaSelectedTrue_When_SelectedIsTrue()
+    {
+        // Arrange
+        var tagHelper = new TabItemTagHelper { Id = "tab-1", Heading = "First", Selected = true };
+        var context = CreateContext();
+        var output = CreateOutput(childContent: "Body");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert – currently FAILS: aria-selected not rendered
+        Assert.Contains("aria-selected=\"true\"", output.Content.GetContent());
+    }
+
+    [Fact]
+    public async Task Should_RenderAriaSelectedFalse_When_SelectedIsFalse()
+    {
+        // Arrange
+        var tagHelper = new TabItemTagHelper { Id = "tab-1", Heading = "First", Selected = false };
+        var context = CreateContext();
+        var output = CreateOutput(childContent: "Body");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert – currently FAILS: aria-selected not rendered
+        Assert.Contains("aria-selected=\"false\"", output.Content.GetContent());
+    }
+
+    [Fact]
+    public async Task Should_TrimHeading_When_HeadingHasLeadingOrTrailingSpaces()
+    {
+        // Arrange
+        var tagHelper = new TabItemTagHelper { Heading = " My Tab ", Selected = false };
+        var context = CreateContext();
+        var output = CreateOutput(childContent: "Body");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert – currently FAILS: produces "-my-tab-" because spaces become hyphens before trim
+        Assert.Equal("my-tab", tagHelper.Id);
+        Assert.Contains("id=\"my-tab\"", output.Content.GetContent());
+    }
+
+    // --- end code-review fixes ---
 
     private static TagHelperContext CreateContext(
         string tagName = "tab-item",

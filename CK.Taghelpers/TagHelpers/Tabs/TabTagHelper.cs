@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace CK.Taghelpers.TagHelpers.Tabs;
@@ -10,31 +11,36 @@ namespace CK.Taghelpers.TagHelpers.Tabs;
 /// </summary>
 /// <remarks>
 /// Each <c>&lt;tab-item&gt;</c> requires a <c>heading</c> attribute. The container renders as a
-/// <c>&lt;div class="tabs"&gt;</c> with radio inputs for state management.
+/// <c>&lt;div class="tabs" role="tablist"&gt;</c> with radio inputs for state management.
 /// </remarks>
 [HtmlTargetElement("tab")]
 public class TabTagHelper : TagHelper
 {
     internal static readonly string UsedIdsKey = "TabTagHelper.UsedIds";
     internal static readonly string TabContextKey = "TabTagHelper.TabContext";
+    internal static readonly string GroupNameKey = "TabTagHelper.GroupName";
 
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         context.Items[UsedIdsKey] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         var groupName = $"tabs-{context.UniqueId}";
-        context.Items[typeof(TabTagHelper)] = groupName;
+        context.Items[GroupNameKey] = groupName;
         var tabContext = new TabContext();
         context.Items[TabContextKey] = tabContext;
 
         output.TagName = "div";
         output.TagMode = TagMode.StartTagAndEndTag;
+        output.Attributes.SetAttribute("role", "tablist");
+
         var existingClass = output.Attributes["class"]?.Value?.ToString();
         var mergedClass = string.IsNullOrWhiteSpace(existingClass)
             ? "tabs"
-            : existingClass.Contains("tabs", StringComparison.OrdinalIgnoreCase)
-                ? existingClass
-                : $"tabs {existingClass}";
+            : existingClass
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Any(c => string.Equals(c, "tabs", StringComparison.OrdinalIgnoreCase))
+                    ? existingClass
+                    : $"tabs {existingClass}";
         output.Attributes.SetAttribute("class", mergedClass);
 
         var childContent = await output.GetChildContentAsync();

@@ -34,7 +34,8 @@ internal sealed class TabItemDescriptor
                 ("type", "radio"),
                 ("id", Id),
                 ("role", "tab"),
-                ("aria-controls", $"{Id}-panel"))
+                ("aria-controls", $"{Id}-panel"),
+                ("aria-selected", Selected ? "true" : "false"))
             .AttrIf(Selected, "checked", "checked")
             .SelfClose();
         return (IHtmlContent)html;

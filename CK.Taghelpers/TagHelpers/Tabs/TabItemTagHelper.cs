@@ -10,14 +10,14 @@ namespace CK.Taghelpers.TagHelpers.Tabs;
 /// Renders a CSS-only tab item with a heading and panel content. The <c>heading</c> attribute is required.
 /// </summary>
 /// <remarks>
-/// If <c>id</c> is not provided, it is auto-generated from the heading text.
-/// ARIA attributes (<c>role</c>, <c>aria-controls</c>, <c>aria-labelledby</c>) are included for accessibility.
+/// If <c>id</c> is not provided, it is auto-generated from the heading text (trimmed, lowercased, spaces to hyphens).
+/// ARIA attributes (<c>role="tab"</c>, <c>aria-controls</c>, <c>aria-selected</c>, <c>aria-labelledby</c>) are included for accessibility.
 /// </remarks>
 [HtmlTargetElement("tab-item", ParentTag = "tab")]
 public class TabItemTagHelper : TagHelper
 {
     private static readonly Regex IdSanitizerRegex =
-        new Regex(@"[^a-zA-Z0-9\s-]", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        new Regex(@"[^a-zA-Z0-9\s-]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     /// <summary>Optional unique identifier for the tab. Auto-generated from heading if not provided.</summary>
     [HtmlAttributeName("id")]
@@ -56,7 +56,7 @@ public class TabItemTagHelper : TagHelper
         Id = EnsureUniqueId(Id, usedIds);
 
         var groupName = "tabs";
-        if (context.Items.TryGetValue(typeof(TabTagHelper), out var groupNameValue)
+        if (context.Items.TryGetValue(TabTagHelper.GroupNameKey, out var groupNameValue)
             && groupNameValue is string groupNameString
             && !string.IsNullOrWhiteSpace(groupNameString))
         {
@@ -102,7 +102,8 @@ public class TabItemTagHelper : TagHelper
                 ("type", "radio"),
                 ("id", Id),
                 ("role", "tab"),
-                ("aria-controls", $"{Id}-panel"))
+                ("aria-controls", $"{Id}-panel"),
+                ("aria-selected", Selected ? "true" : "false"))
             .AttrIf(Selected, "checked", "checked")
             .SelfClose();
         html.AppendHtml(label);
@@ -114,8 +115,9 @@ public class TabItemTagHelper : TagHelper
 
     private string GenerateIdFromHeading(string heading)
     {
-        // Remove invalid characters, convert to lowercase, and replace spaces with hyphens
-        return IdSanitizerRegex.Replace(heading, "").ToLowerInvariant().Replace(' ', '-');
+        // Trim first to prevent leading/trailing hyphens from edge whitespace,
+        // then remove invalid characters, lowercase, and replace spaces with hyphens.
+        return IdSanitizerRegex.Replace(heading.Trim(), "").ToLowerInvariant().Replace(' ', '-');
     }
 
     private static HashSet<string> GetOrCreateUsedIds(TagHelperContext context)

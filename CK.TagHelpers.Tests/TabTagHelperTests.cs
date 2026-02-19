@@ -165,6 +165,45 @@ public class TabTagHelperTests
         Assert.Equal(childContent, output.Content.GetContent());
     }
 
+    // --- Code-review fixes (RED phase) ---
+
+    [Fact]
+    public async Task Should_AddTabsClass_When_ExistingClassContainsTabsAsSubstring()
+    {
+        // Arrange
+        // "my-tabs" contains the substring "tabs" but is NOT the word "tabs".
+        // The container must still receive the "tabs" CSS class.
+        var tagHelper = new TabTagHelper();
+        var context = CreateContext();
+        var output = CreateOutput(
+            tagName: "tab",
+            childContent: "<div>Content</div>",
+            attributes: new TagHelperAttributeList { { "class", "my-tabs" } });
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert – currently FAILS: returns "my-tabs" (substring match treats it as already present)
+        Assert.Equal("tabs my-tabs", output.Attributes["class"].Value);
+    }
+
+    [Fact]
+    public async Task Should_SetRoleTablist_When_Processed()
+    {
+        // Arrange
+        var tagHelper = new TabTagHelper();
+        var context = CreateContext();
+        var output = CreateOutput(tagName: "tab", childContent: "<div>Content</div>");
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert – currently FAILS: role attribute is not set
+        Assert.Equal("tablist", output.Attributes["role"]?.Value?.ToString());
+    }
+
+    // --- end code-review fixes ---
+
     [Fact]
     public async Task Should_RenderDistinctRadioGroupNames_When_MultipleTabSetsAreRendered()
     {
