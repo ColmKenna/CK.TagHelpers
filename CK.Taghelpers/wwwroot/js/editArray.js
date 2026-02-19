@@ -203,6 +203,7 @@ function addNewItem(containerId, templateId) {
     const addButton = document.getElementById(containerId + SUFFIX_ADD);
     if (addButton) {
         addButton.disabled = true;
+        addButton.setAttribute('aria-disabled', 'true');
     }
 
     // Notify listeners that a new item was added (e.g. for validation wiring)
@@ -444,7 +445,19 @@ function updateDisplayFromForm(itemId) {
         inputs.forEach(input => {
             const displayElement = displayContainer.querySelector(`[data-display-for="${input.id}"]`);
             if (displayElement) {
-                displayElement.textContent = input.value;
+                const isCheckable = input.type === 'checkbox' || input.type === 'radio';
+                const isMultiSelect = input.tagName === 'SELECT' && input.multiple;
+                if (isCheckable) {
+                    displayElement.textContent = input.checked
+                        ? (input.dataset.checkedLabel || 'Yes')
+                        : (input.dataset.uncheckedLabel || 'No');
+                } else if (isMultiSelect) {
+                    displayElement.textContent = Array.from(input.selectedOptions)
+                        .map(option => option.text)
+                        .join(', ');
+                } else {
+                    displayElement.textContent = input.value;
+                }
             }
         });
     }
@@ -602,7 +615,9 @@ function syncAddButtonState(containerId) {
     const currentCount = itemsContainer
         ? itemsContainer.querySelectorAll(SELECTOR_ITEM).length
         : 0;
-    addButton.disabled = currentCount >= maxItems;
+    const shouldDisable = currentCount >= maxItems;
+    addButton.disabled = shouldDisable;
+    addButton.setAttribute('aria-disabled', shouldDisable ? 'true' : 'false');
 }
 
 /**

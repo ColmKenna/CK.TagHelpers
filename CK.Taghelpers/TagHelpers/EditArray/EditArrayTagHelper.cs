@@ -35,8 +35,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
     private const string DoneButtonTextAttributeName = "asp-done-text";
     private const string CancelButtonTextAttributeName = "asp-cancel-text";
     private const string AddButtonTextAttributeName = "asp-add-text";
-    private const string ContainerCssClassDefault = "edit-array-container";
-    private const string ItemCssClassDefault = "edit-array-item";
+    // Defaults moved to CssClasses nested type — see CssClasses.ContainerDefault / CssClasses.ItemDefault
 #endregion
 
 #region Nested Types
@@ -70,6 +69,10 @@ public sealed partial class EditArrayTagHelper : TagHelper
         public const string CancelButtonModifier = ButtonSmall + " " + ButtonSecondary + " " + CancelEditButton + " " + MarginTop2;
         public const string AddButtonModifier = ButtonPrimary + " " + MarginTop2;
         public const string ErrorPanel = EditArrayError + " " + Alert + " " + AlertDanger;
+
+        // Container / item default class names (moved from module-level constants for cohesion)
+        public const string ContainerDefault = "edit-array-container";
+        public const string ItemDefault = "edit-array-item";
     }
 
     private enum ButtonKind { Edit, Delete, Done, Cancel }
@@ -691,7 +694,8 @@ public sealed partial class EditArrayTagHelper : TagHelper
             .Attr(
                 ("class", CssClasses.EditArrayItems),
                 ("id", $"{containerId}-items"),
-                ("aria-live", "polite"))
+                ("aria-live", "polite"),
+                ("role", "list"))
             .CloseStart();
 
         var hasItems = false;
@@ -707,7 +711,8 @@ public sealed partial class EditArrayTagHelper : TagHelper
             var itemTag = html.OpenDivTag()
                 .Attr(
                     ("class", GetItemCssClass()),
-                    ("id", itemId));
+                    ("id", itemId),
+                    ("role", "listitem"));
 
             // Add callback data attributes for safe JS invocation (XSS prevention)
             AppendCallbackDataAttributes(itemTag);
@@ -723,18 +728,23 @@ public sealed partial class EditArrayTagHelper : TagHelper
                 .SelfClose();
 
             var originalPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
-            ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = fieldName;
-
-            var viewData = new ViewDataDictionary<object>(ViewContext.ViewData)
+            try
             {
-                Model = item
-            };
+                ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = fieldName;
 
-            await RenderItemDisplayMode(html, item, itemId, viewData, index + 1);
+                var viewData = new ViewDataDictionary<object>(ViewContext.ViewData)
+                {
+                    Model = item
+                };
 
-            AppendReorderButtons(html, containerId, itemId, isTemplate: false);
+                await RenderItemDisplayMode(html, item, itemId, viewData, index + 1);
 
-            ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
+                AppendReorderButtons(html, containerId, itemId, isTemplate: false, displayIndex: index + 1);
+            }
+            finally
+            {
+                ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
+            }
 
             html.CloseTag();
 
@@ -809,92 +819,98 @@ public sealed partial class EditArrayTagHelper : TagHelper
 
         var templateFieldName = GetFieldName(modelExpressionPrefix, collectionName, "__index__");
         var originalPrefix = ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix;
-        ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = templateFieldName;
-
-        object? templateModel = null;
-        var itemType = For?.ModelExplorer?.Metadata?.ElementType 
-                       ?? Items.GetType().GetGenericArguments().FirstOrDefault();
-
-        if (itemType != null)
+        try
         {
-            try
+            ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = templateFieldName;
+
+            object? templateModel = null;
+            var itemType = For?.ModelExplorer?.Metadata?.ElementType
+                           ?? Items.GetType().GetGenericArguments().FirstOrDefault();
+
+            if (itemType != null)
             {
-                templateModel = Activator.CreateInstance(itemType);
+                try
+                {
+                    templateModel = Activator.CreateInstance(itemType);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Failed to create template instance of type '{itemType.Name}'. " +
+                        $"Ensure the type has a parameterless constructor.", ex);
+                }
             }
-            catch (Exception ex)
+
+            var viewData = new ViewDataDictionary<object>(ViewContext.ViewData)
             {
-                throw new InvalidOperationException(
-                    $"Failed to create template instance of type '{itemType.Name}'. " +
-                    $"Ensure the type has a parameterless constructor.", ex);
+                Model = templateModel
+            };
+
+            var itemTag = html.OpenDivTag()
+                .Attr("class", GetItemCssClass());
+
+            // Add callback data attributes for safe JS invocation (XSS prevention)
+            AppendCallbackDataAttributes(itemTag);
+            itemTag.CloseStart();
+
+            var name = $"{templateFieldName}.IsDeleted";
+
+            // IsDeleted marker is a direct child of the item div (consistent with regular items).
+            html.OpenInputTag()
+                .Attr(
+                    ("type", "hidden"),
+                    ("name", name),
+                    ("value", "false"))
+                .BoolAttr("data-is-deleted-marker")
+                .SelfClose();
+
+            var hasDisplayView = !string.IsNullOrWhiteSpace(DisplayViewName);
+
+            if (hasDisplayView)
+            {
+                html.OpenDivTag()
+                    .Attr("class", $"{CssClasses.DisplayContainer} {CssClasses.Hidden}")
+                    .CloseStart();
+                if (templateModel != null)
+                {
+                    var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, templateModel, viewData);
+                    html.AppendHtml(displayViewContent);
+                }
+
+                AppendActionButton(html, ButtonKind.Edit, null, true);
+                AppendActionButton(html, ButtonKind.Delete, null, true);
+                html.CloseTag();
             }
-        }
 
-        var viewData = new ViewDataDictionary<object>(ViewContext.ViewData)
-        {
-            Model = templateModel
-        };
-
-        var itemTag = html.OpenDivTag()
-            .Attr("class", GetItemCssClass());
-
-        // Add callback data attributes for safe JS invocation (XSS prevention)
-        AppendCallbackDataAttributes(itemTag);
-        itemTag.CloseStart();
-
-        var name = $"{templateFieldName}.IsDeleted";
-
-        // IsDeleted marker is a direct child of the item div (consistent with regular items).
-        html.OpenInputTag()
-            .Attr(
-                ("type", "hidden"),
-                ("name", name),
-                ("value", "false"))
-            .BoolAttr("data-is-deleted-marker")
-            .SelfClose();
-
-        var hasDisplayView = !string.IsNullOrWhiteSpace(DisplayViewName);
-
-        if (hasDisplayView)
-        {
             html.OpenDivTag()
-                .Attr("class", $"{CssClasses.DisplayContainer} {CssClasses.Hidden}")
+                .Attr("class", CssClasses.EditContainer)
                 .CloseStart();
+
             if (templateModel != null)
             {
-                var displayViewContent = await _htmlHelper.PartialAsync(DisplayViewName!, templateModel, viewData);
-                html.AppendHtml(displayViewContent);
+                var viewContent = await _htmlHelper.PartialAsync(ViewName, templateModel, viewData);
+                html.AppendHtml(viewContent);
             }
 
-            AppendActionButton(html, ButtonKind.Edit, null, true);
-            AppendActionButton(html, ButtonKind.Delete, null, true);
+            if (hasDisplayView)
+            {
+                AppendActionButton(html, ButtonKind.Done, null, true);
+                AppendActionButton(html, ButtonKind.Cancel, null, true);
+            }
+            else
+            {
+                AppendActionButton(html, ButtonKind.Delete, null, true);
+            }
+            html.CloseTag();
+
+            AppendReorderButtons(html, containerId, itemId: null, isTemplate: true);
+
             html.CloseTag();
         }
-
-        html.OpenDivTag()
-            .Attr("class", CssClasses.EditContainer)
-            .CloseStart();
-
-        if (templateModel != null)
+        finally
         {
-            var viewContent = await _htmlHelper.PartialAsync(ViewName, templateModel, viewData);
-            html.AppendHtml(viewContent);
+            ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
         }
-
-        if (hasDisplayView)
-        {
-            AppendActionButton(html, ButtonKind.Done, null, true);
-            AppendActionButton(html, ButtonKind.Cancel, null, true);
-        }
-        else
-        {
-            AppendActionButton(html, ButtonKind.Delete, null, true);
-        }
-        html.CloseTag();
-
-        AppendReorderButtons(html, containerId, itemId: null, isTemplate: true);
-
-        html.CloseTag();
-        ViewContext.ViewData.TemplateInfo.HtmlFieldPrefix = originalPrefix;
         html.CloseTag();
 
         if (ShowAddButton)
@@ -924,7 +940,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
         html.DivElement(EmptyPlaceholder, cssClass: CssClasses.EditArrayPlaceholder);
     }
 
-    private void AppendReorderButtons(IHtmlFlow html, string containerId, string? itemId, bool isTemplate)
+    private void AppendReorderButtons(IHtmlFlow html, string containerId, string? itemId, bool isTemplate, int displayIndex = 0)
     {
         if (!EnableReordering)
         {
@@ -935,8 +951,8 @@ public sealed partial class EditArrayTagHelper : TagHelper
         var downText = string.IsNullOrWhiteSpace(MoveDownButtonText) ? "Move Down" : MoveDownButtonText;
         var reorderButtonCssClass = GetReorderButtonCssClass();
         var resolvedItemId = isTemplate ? "closest" : itemId ?? string.Empty;
-        var upAriaLabel = isTemplate ? "Move item up" : $"Move item {itemId} up";
-        var downAriaLabel = isTemplate ? "Move item down" : $"Move item {itemId} down";
+        var upAriaLabel = isTemplate ? "Move item up" : $"Move item {displayIndex} up";
+        var downAriaLabel = isTemplate ? "Move item down" : $"Move item {displayIndex} down";
 
         
         
@@ -949,20 +965,20 @@ public sealed partial class EditArrayTagHelper : TagHelper
             $"{reorderButtonCssClass} {CssClasses.ReorderButton} {CssClasses.ReorderUpButton}",
             upText,
             upAriaLabel,
-            ("action", "move"),
-            ("container-id", containerId),
-            ("item-id", resolvedItemId),
-            ("direction", "-1"));
+            ("data-action", "move"),
+            ("data-container-id", containerId),
+            ("data-item-id", resolvedItemId),
+            ("data-direction", "-1"));
 
         AppendButton(
             html,
             $"{reorderButtonCssClass} {CssClasses.ReorderButton} {CssClasses.ReorderDownButton}",
             downText,
             downAriaLabel,
-            ("action", "move"),
-            ("container-id", containerId),
-            ("item-id", resolvedItemId),
-            ("direction", "1"));
+            ("data-action", "move"),
+            ("data-container-id", containerId),
+            ("data-item-id", resolvedItemId),
+            ("data-direction", "1"));
 
         html.CloseTag();
     }
@@ -1101,7 +1117,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
     /// <returns>The raw container CSS class (Razor will encode).</returns>
     private string GetContainerCssClass()
     {
-        return EnsureDefaultCssClass(ContainerCssClass, ContainerCssClassDefault, nameof(ContainerCssClass));
+        return EnsureDefaultCssClass(ContainerCssClass, CssClasses.ContainerDefault, nameof(ContainerCssClass));
     }
 
     /// <summary>
@@ -1110,7 +1126,7 @@ public sealed partial class EditArrayTagHelper : TagHelper
     /// <returns>The raw item CSS class (Razor will encode).</returns>
     private string GetItemCssClass()
     {
-        return EnsureDefaultCssClass(ItemCssClass, ItemCssClassDefault, nameof(ItemCssClass));
+        return EnsureDefaultCssClass(ItemCssClass, CssClasses.ItemDefault, nameof(ItemCssClass));
     }
 
     /// <summary>
@@ -1220,6 +1236,10 @@ public sealed partial class EditArrayTagHelper : TagHelper
         {
             errors.Add($"'{ArrayIdAttributeName}' attribute is required and must not be null, empty, or whitespace. The id is used to generate unique JavaScript function calls and DOM element identifiers.");
         }
+        else if (!ValidationRegex.SafeId().IsMatch(ArrayId))
+        {
+            errors.Add($"'{ArrayIdAttributeName}' attribute contains invalid characters. Only letters, digits, hyphens, and underscores allowed, and must start with a letter.");
+        }
 
         if (DisplayMode && string.IsNullOrWhiteSpace(DisplayViewName))
         {
@@ -1238,6 +1258,43 @@ public sealed partial class EditArrayTagHelper : TagHelper
         else if (ViewContext.ViewData == null)
         {
             errors.Add("ViewContext.ViewData must not be null. Ensure ViewContext is properly initialized.");
+        }
+
+        // Validate CSS class attribute formats
+        if (!string.IsNullOrWhiteSpace(ContainerCssClass) && !ValidationRegex.SafeCssClass().IsMatch(ContainerCssClass))
+        {
+            errors.Add($"'{nameof(ContainerCssClass)}' contains invalid characters. Only alphanumeric, spaces, hyphens, and underscores are allowed.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(ItemCssClass) && !ValidationRegex.SafeCssClass().IsMatch(ItemCssClass))
+        {
+            errors.Add($"'{nameof(ItemCssClass)}' contains invalid characters. Only alphanumeric, spaces, hyphens, and underscores are allowed.");
+        }
+
+        if (!ValidationRegex.SafeCssClass().IsMatch(ButtonCssClass))
+        {
+            errors.Add($"'{nameof(ButtonCssClass)}' contains invalid characters. Only alphanumeric, spaces, hyphens, and underscores are allowed.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(ReorderButtonCssClass) && !ValidationRegex.SafeCssClass().IsMatch(ReorderButtonCssClass))
+        {
+            errors.Add($"'{nameof(ReorderButtonCssClass)}' contains invalid characters. Only alphanumeric, spaces, hyphens, and underscores are allowed.");
+        }
+
+        // Validate JavaScript callback identifier names
+        if (!string.IsNullOrWhiteSpace(OnUpdate) && !ValidationRegex.SafeJsIdentifier().IsMatch(OnUpdate))
+        {
+            errors.Add($"'{nameof(OnUpdate)}' must be a valid JavaScript identifier. Only letters, digits, underscores, and dollar signs allowed, and must start with a letter, underscore, or dollar sign.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(OnDone) && !ValidationRegex.SafeJsIdentifier().IsMatch(OnDone))
+        {
+            errors.Add($"'{nameof(OnDone)}' must be a valid JavaScript identifier. Only letters, digits, underscores, and dollar signs allowed, and must start with a letter, underscore, or dollar sign.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(OnDelete) && !ValidationRegex.SafeJsIdentifier().IsMatch(OnDelete))
+        {
+            errors.Add($"'{nameof(OnDelete)}' must be a valid JavaScript identifier. Only letters, digits, underscores, and dollar signs allowed, and must start with a letter, underscore, or dollar sign.");
         }
 
         if (errors.Count > 0)

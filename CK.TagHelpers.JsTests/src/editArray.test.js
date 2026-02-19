@@ -975,6 +975,137 @@ describe('editArray.js', () => {
         });
     });
 
+    // Validates updateDisplayFromForm handles checkbox, radio and multi-select inputs correctly.
+    describe('updateDisplayFromForm input types', () => {
+        function setupDisplayItem(editHtml, displayHtml) {
+            document.body.innerHTML = `
+                <div id="test-item" class="edit-array-item">
+                    <div id="test-item-display" class="display-container">${displayHtml}</div>
+                    <div id="test-item-edit" class="edit-container">${editHtml}</div>
+                </div>`;
+        }
+
+        it('shows text value for regular text inputs', () => {
+            setupDisplayItem(
+                '<input type="text" id="field_0" value="Alice" />',
+                '<span data-display-for="field_0"></span>'
+            );
+            updateDisplayFromForm('test-item');
+            expect(document.querySelector('[data-display-for="field_0"]').textContent).toBe('Alice');
+        });
+
+        it('shows "Yes" when a checkbox is checked', () => {
+            setupDisplayItem(
+                '<input type="checkbox" id="active_0" checked />',
+                '<span data-display-for="active_0"></span>'
+            );
+            updateDisplayFromForm('test-item');
+            expect(document.querySelector('[data-display-for="active_0"]').textContent).toBe('Yes');
+        });
+
+        it('shows "No" when a checkbox is unchecked', () => {
+            setupDisplayItem(
+                '<input type="checkbox" id="active_0" />',
+                '<span data-display-for="active_0"></span>'
+            );
+            updateDisplayFromForm('test-item');
+            expect(document.querySelector('[data-display-for="active_0"]').textContent).toBe('No');
+        });
+
+        it('uses data-checked-label / data-unchecked-label overrides when provided', () => {
+            setupDisplayItem(
+                '<input type="checkbox" id="active_0" checked data-checked-label="Enabled" data-unchecked-label="Disabled" />',
+                '<span data-display-for="active_0"></span>'
+            );
+            updateDisplayFromForm('test-item');
+            expect(document.querySelector('[data-display-for="active_0"]').textContent).toBe('Enabled');
+        });
+
+        it('shows comma-joined selected option text for a multi-select', () => {
+            setupDisplayItem(
+                `<select id="tags_0" multiple>
+                    <option value="1" selected>Apple</option>
+                    <option value="2">Banana</option>
+                    <option value="3" selected>Cherry</option>
+                </select>`,
+                '<span data-display-for="tags_0"></span>'
+            );
+            updateDisplayFromForm('test-item');
+            expect(document.querySelector('[data-display-for="tags_0"]').textContent).toBe('Apple, Cherry');
+        });
+
+        it('shows empty string when no options are selected in a multi-select', () => {
+            setupDisplayItem(
+                `<select id="tags_0" multiple>
+                    <option value="1">Apple</option>
+                    <option value="2">Banana</option>
+                </select>`,
+                '<span data-display-for="tags_0"></span>'
+            );
+            updateDisplayFromForm('test-item');
+            expect(document.querySelector('[data-display-for="tags_0"]').textContent).toBe('');
+        });
+
+        it('leaves display unchanged when no matching data-display-for element exists', () => {
+            setupDisplayItem(
+                '<input type="text" id="field_0" value="Test" />',
+                '<span data-display-for="other_field">Untouched</span>'
+            );
+            updateDisplayFromForm('test-item');
+            expect(document.querySelector('[data-display-for="other_field"]').textContent).toBe('Untouched');
+        });
+    });
+
+    // Validates add-button aria-disabled is kept in sync with the disabled property.
+    describe('add button aria-disabled state', () => {
+        it('sets aria-disabled="true" on the add button when max-items is reached', () => {
+            // Arrange
+            setupFixture({ maxItems: 1 });
+            addNewItem('test-container', 'test-template');
+            toggleEditMode('test-container-item-0'); // save so item count is 1
+
+            // Act — attempt a second add (will be blocked and syncAddButtonState fires)
+            addNewItem('test-container', 'test-template');
+
+            // Assert
+            const addButton = document.getElementById('test-container-add');
+            expect(addButton.disabled).toBe(true);
+            expect(addButton.getAttribute('aria-disabled')).toBe('true');
+        });
+
+        it('sets aria-disabled="false" when item count drops below max', () => {
+            // Arrange — fill to max then free a slot
+            setupFixture({ maxItems: 1 });
+            addNewItem('test-container', 'test-template');
+            // add button is now disabled
+
+            // Act — remove the unsaved item (triggers syncAddButtonState)
+            removeUnsavedItem('test-container-item-0', 'test-container');
+
+            // Assert
+            const addButton = document.getElementById('test-container-add');
+            expect(addButton.disabled).toBe(false);
+            expect(addButton.getAttribute('aria-disabled')).toBe('false');
+        });
+
+        it('sets aria-disabled="true" when syncAddButtonState is called at capacity', () => {
+            // Arrange
+            setupFixture({ maxItems: 2 });
+            // Pre-populate items container manually to simulate server-rendered items
+            const itemsContainer = document.getElementById('test-container-items');
+            itemsContainer.insertAdjacentHTML('beforeend', '<div class="edit-array-item" id="item-a"></div>');
+            itemsContainer.insertAdjacentHTML('beforeend', '<div class="edit-array-item" id="item-b"></div>');
+
+            // Act
+            initEditArray();
+
+            // Assert
+            const addButton = document.getElementById('test-container-add');
+            expect(addButton.disabled).toBe(true);
+            expect(addButton.getAttribute('aria-disabled')).toBe('true');
+        });
+    });
+
     // Validates initEditArray wires event delegation and emits init events.
     describe('initEditArray rendering', () => {
         it('emits editarray:init event for each container on the page', () => {

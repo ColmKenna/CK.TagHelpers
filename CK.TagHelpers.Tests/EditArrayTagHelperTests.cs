@@ -728,54 +728,82 @@ public class EditArrayTagHelperTests
     }
 
     [Fact]
-    public async Task Should_ThrowArgumentException_When_ArrayIdStartsWithDigit()
+    public async Task Should_RenderErrorMessage_When_ArrayIdStartsWithDigit()
     {
-        // Arrange
+        // Arrange - id starts with digit, fails SafeId regex
         var tagHelper = CreateTagHelper(id: "1invalid");
         var context = CreateContext();
         var output = CreateOutput();
 
-        // Act / Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => tagHelper.ProcessAsync(context, output));
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - error panel instead of unhandled exception
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("asp-array-id", content);
     }
 
     [Fact]
-    public async Task Should_ThrowInvalidOperationException_When_OnUpdateCallbackIsInvalid()
+    public async Task Should_RenderErrorMessage_When_OnUpdateCallbackIsInvalid()
     {
-        // Arrange
+        // Arrange - function name contains characters invalid for a JS identifier
         var tagHelper = CreateTagHelper(items: new[] { "Item1" }, viewName: "_Editor");
         tagHelper.OnUpdate = "alert('xss')";
         var context = CreateContext();
         var output = CreateOutput();
 
-        // Act / Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => tagHelper.ProcessAsync(context, output));
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - error panel instead of unhandled exception
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("OnUpdate", content);
     }
 
     [Fact]
-    public async Task Should_ThrowInvalidOperationException_When_OnDoneCallbackIsInvalid()
+    public async Task Should_RenderErrorMessage_When_OnDoneCallbackIsInvalid()
     {
-        // Arrange
+        // Arrange - dot is not allowed in a JS identifier
         var tagHelper = CreateTagHelper(items: new[] { "Item1" }, viewName: "_Editor");
         tagHelper.OnDone = "on.done";
         var context = CreateContext();
         var output = CreateOutput();
 
-        // Act / Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => tagHelper.ProcessAsync(context, output));
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("OnDone", content);
     }
 
     [Fact]
-    public async Task Should_ThrowInvalidOperationException_When_OnDeleteCallbackIsInvalid()
+    public async Task Should_RenderErrorMessage_When_OnDeleteCallbackIsInvalid()
     {
-        // Arrange
+        // Arrange - hyphen is not allowed in a JS identifier
         var tagHelper = CreateTagHelper(items: new[] { "Item1" }, viewName: "_Editor");
         tagHelper.OnDelete = "delete-item";
         var context = CreateContext();
         var output = CreateOutput();
 
-        // Act / Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => tagHelper.ProcessAsync(context, output));
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("OnDelete", content);
     }
 
     // ========================================================================
@@ -821,6 +849,28 @@ public class EditArrayTagHelperTests
     }
 
     [Fact]
+    public async Task Should_RenderDataContainerId_OnReorderButtons_When_EnableReorderingIsTrue()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new[] { "Item1" }, viewName: "_Editor");
+        tagHelper.EnableReordering = true;
+
+        SetupPartialAsync("_Editor", new HtmlString(""));
+        SetupPartialAsync("_Display", new HtmlString(""));
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert — container-id must carry the data- prefix so JS can read it
+        var content = output.Content.GetContent();
+        Assert.Contains("data-container-id=\"edit-array-test-array\"", content);
+        Assert.DoesNotContain(" container-id=\"edit-array-test-array\"", content); // bare form must be absent
+    }
+
+    [Fact]
     public async Task Should_RenderMoveButtons_When_EnableReorderingIsTrue()
     {
         // Arrange
@@ -853,6 +903,8 @@ public class EditArrayTagHelperTests
     // ========================================================================
     // 8. Attribute Preservation Tests
     // ========================================================================
+
+    // (Tests inserted after section 8 — sections 10-12 appended near helper methods)
 
     [Fact]
     public async Task Should_PreserveUserProvidedClassAttribute_When_ClassIsSetOnElement()
@@ -898,6 +950,245 @@ public class EditArrayTagHelperTests
         // Assert
         var classValue = output.Attributes["class"].Value.ToString();
         Assert.Equal("edit-array-container", classValue);
+    }
+
+    // ========================================================================
+    // 9. HtmlFieldPrefix Restoration Tests
+    // ========================================================================
+
+    [Fact]
+    public async Task Should_RestoreHtmlFieldPrefix_When_PartialAsyncThrows_DuringItemRendering()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new[] { "Item1" });
+        tagHelper.DisplayViewName = null; // edit-only — one PartialAsync call per item
+
+        var viewContext = tagHelper.ViewContext;
+        viewContext.ViewData.TemplateInfo.HtmlFieldPrefix = "OriginalPrefix";
+
+        _htmlHelperMock
+            .Setup(h => h.PartialAsync("_ItemEditor", It.IsAny<object>(), It.IsAny<ViewDataDictionary>()))
+            .ThrowsAsync(new InvalidOperationException("Simulated render failure"));
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act — ProcessAsync must throw because PartialAsync throws
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+
+        // Assert — HtmlFieldPrefix must be restored despite the exception
+        Assert.Equal("OriginalPrefix", viewContext.ViewData.TemplateInfo.HtmlFieldPrefix);
+    }
+
+    [Fact]
+    public async Task Should_RestoreHtmlFieldPrefix_When_PartialAsyncThrows_DuringTemplateRendering()
+    {
+        // Arrange — empty but typed items collection so templateModel is non-null
+        var tagHelper = CreateTagHelper();
+        tagHelper.Items = new List<TestItem>();
+        tagHelper.DisplayViewName = null; // edit-only template, one PartialAsync call
+        tagHelper.RenderTemplate = true;
+
+        var viewContext = tagHelper.ViewContext;
+        viewContext.ViewData.TemplateInfo.HtmlFieldPrefix = "OriginalPrefix";
+
+        _htmlHelperMock
+            .Setup(h => h.PartialAsync("_ItemEditor", It.IsAny<object>(), It.IsAny<ViewDataDictionary>()))
+            .ThrowsAsync(new InvalidOperationException("Template render failure"));
+
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            tagHelper.ProcessAsync(context, output));
+
+        // Assert
+        Assert.Equal("OriginalPrefix", viewContext.ViewData.TemplateInfo.HtmlFieldPrefix);
+    }
+
+    // ========================================================================
+    // 10. Error Panel for Invalid Attribute Formats
+    // ========================================================================
+
+    [Fact]
+    public async Task Should_RenderErrorMessage_When_ContainerCssClassContainsInvalidCharacters()
+    {
+        // Arrange - exclamation mark is not in the safe CSS class regex
+        var tagHelper = CreateTagHelper();
+        tagHelper.ContainerCssClass = "my-class!bad";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - error panel rendered instead of exception
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        var content = output.Content.GetContent();
+        Assert.Contains("EditArrayTagHelper Configuration Error", content);
+        Assert.Contains("ContainerCssClass", content);
+    }
+
+    [Fact]
+    public async Task Should_RenderErrorMessage_When_ItemCssClassContainsInvalidCharacters()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.ItemCssClass = "item@bad";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        var content = output.Content.GetContent();
+        Assert.Contains("ItemCssClass", content);
+    }
+
+    [Fact]
+    public async Task Should_RenderErrorMessage_When_ButtonCssClassContainsInvalidCharacters()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        tagHelper.ButtonCssClass = "btn<danger";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        Assert.Equal("div", output.TagName);
+        Assert.Contains("edit-array-error", output.Attributes["class"].Value.ToString());
+        var content = output.Content.GetContent();
+        Assert.Contains("ButtonCssClass", content);
+    }
+
+    [Fact]
+    public async Task Should_NotRenderErrorMessage_When_ValidCssClassesProvided()
+    {
+        // Arrange - these are all valid CSS class strings
+        var tagHelper = CreateTagHelper();
+        tagHelper.ContainerCssClass = "my-container custom_wrap";
+        tagHelper.ItemCssClass = "my-item row";
+        tagHelper.ButtonCssClass = "btn btn-primary";
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - should render normally, no error panel
+        Assert.Equal("div", output.TagName);
+        Assert.DoesNotContain("edit-array-error", output.Attributes["class"].Value.ToString());
+    }
+
+    // ========================================================================
+    // 11. Reorder Aria Labels
+    // ========================================================================
+
+    [Fact]
+    public async Task Should_UseDisplayIndex_InReorderAriaLabels_ForFirstItem()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new[] { "Item1", "Item2" }, viewName: "_Editor");
+        tagHelper.EnableReordering = true;
+        SetupPartialAsync("_Editor", new HtmlString(""));
+        SetupPartialAsync("_Display", new HtmlString(""));
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - aria labels use human-readable index 1 and 2, not raw DOM IDs
+        var content = output.Content.GetContent();
+        Assert.Contains("aria-label=\"Move item 1 up\"", content);
+        Assert.Contains("aria-label=\"Move item 1 down\"", content);
+        Assert.Contains("aria-label=\"Move item 2 up\"", content);
+        Assert.Contains("aria-label=\"Move item 2 down\"", content);
+        // Should NOT contain raw DOM IDs in aria labels
+        Assert.DoesNotContain("aria-label=\"Move item edit-array-test-array-item-0 up\"", content);
+        Assert.DoesNotContain("aria-label=\"Move item edit-array-test-array-item-1 up\"", content);
+    }
+
+    [Fact]
+    public async Task Should_UseGenericAriaLabels_ForTemplateReorderButtons()
+    {
+        // Arrange - template buttons don't have a display index
+        var items = new List<TestItem> { new TestItem() };
+        var tagHelper = CreateTagHelper(items: Array.Empty<object>(), viewName: "_Editor");
+        tagHelper.Items = items;
+        tagHelper.RenderTemplate = true;
+        tagHelper.EnableReordering = true;
+        SetupPartialAsync("_Editor", new HtmlString(""));
+        SetupPartialAsync("_Display", new HtmlString(""));
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - template buttons use generic labels (no index)
+        var content = output.Content.GetContent();
+        var templateStart = content.IndexOf("<template", StringComparison.Ordinal);
+        var templateEnd = content.IndexOf("</template>", StringComparison.Ordinal);
+        var templateContent = content.Substring(templateStart, templateEnd - templateStart);
+        Assert.Contains("aria-label=\"Move item up\"", templateContent);
+        Assert.Contains("aria-label=\"Move item down\"", templateContent);
+    }
+
+    // ========================================================================
+    // 12. Accessibility — role Attributes
+    // ========================================================================
+
+    [Fact]
+    public async Task Should_RenderRoleList_OnItemsContainer()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper();
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert
+        var content = output.Content.GetContent();
+        Assert.Contains("role=\"list\"", content);
+        // The role must be on the items container (alongside aria-live)
+        Assert.Contains("aria-live=\"polite\" role=\"list\"", content);
+    }
+
+    [Fact]
+    public async Task Should_RenderRoleListitem_OnEachItem()
+    {
+        // Arrange
+        var tagHelper = CreateTagHelper(items: new[] { "Item1", "Item2" }, viewName: "_Editor");
+        SetupPartialAsync("_Editor", new HtmlString(""));
+        SetupPartialAsync("_Display", new HtmlString(""));
+        var context = CreateContext();
+        var output = CreateOutput();
+
+        // Act
+        await tagHelper.ProcessAsync(context, output);
+
+        // Assert - each item wrapper has role="listitem"
+        var content = output.Content.GetContent();
+        var count = 0;
+        var searchFrom = 0;
+        while ((searchFrom = content.IndexOf("role=\"listitem\"", searchFrom, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            searchFrom++;
+        }
+        Assert.Equal(2, count);
     }
 
     // ========================================================================
