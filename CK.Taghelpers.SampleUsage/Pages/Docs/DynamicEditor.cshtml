@@ -1,0 +1,462 @@
+@page
+@model DynamicEditorModel
+@{
+    ViewData["Title"] = "DynamicEditor ViewComponent";
+}
+
+<div class="docs-container">
+
+    <nav class="docs-breadcrumb">
+        <a asp-page="/Docs/Index">TagHelper Reference</a> &rsaquo; DynamicEditor
+    </nav>
+
+    <div class="docs-header">
+        <h1>DynamicEditor ViewComponent</h1>
+        <p class="docs-subtitle">Renders a model-driven <code>&lt;dialog&gt;</code> editor that reflects a model's properties into form fields and dispatches custom events on confirm and cancel.</p>
+        <div class="docs-meta">
+            <div><span class="docs-meta-label">Type:</span> ViewComponent</div>
+            <div><span class="docs-meta-label">Class:</span> <code>DynamicEditorViewComponent</code></div>
+            <div><span class="docs-meta-label">Namespace:</span> <code>CK.Taghelpers.ViewComponents</code></div>
+        </div>
+        <div class="docs-meta mt-2">
+            <div><span class="docs-meta-label">JS:</span> <code>_content/CK.Taghelpers/js/dynamicEditor.js</code></div>
+            <div><span class="docs-meta-label">CSS:</span> Bring your own (see <a href="#generated-html">Generated HTML structure</a>)</div>
+        </div>
+    </div>
+
+    <!-- 2. Overview -->
+    <div class="docs-section">
+        <h2>Overview</h2>
+        <p>
+            The DynamicEditor ViewComponent renders a native HTML <code>&lt;dialog&gt;</code> element containing
+            an auto-generated form. It reflects the public properties of any model object and produces the
+            appropriate input type for each property — text, number, checkbox, date/time, email, select, multi-select,
+            and more — using .NET data annotation attributes to drive both input type inference and HTML5 validation.
+        </p>
+        <p>
+            When the user confirms their edits, the component dispatches a <code>{eventName}-update</code> custom
+            event on the dialog element with the form data as the event detail. Cancelling dispatches
+            <code>{eventName}-cancel</code> and restores the form to its pre-open state. The dialog itself
+            is not opened automatically — you call <code>showModal()</code> on it from JavaScript at the
+            appropriate moment.
+        </p>
+        <p>
+            Use this component when you need a lightweight, no-dependency inline editor for a known model shape.
+            It avoids round-trips and partial page reloads for common edit-in-place scenarios.
+        </p>
+    </div>
+
+    <!-- 3. Getting Started -->
+    <div class="docs-section">
+        <h2>Getting Started</h2>
+        <p>Invoke the ViewComponent from a Razor view or page, then open the dialog with JavaScript:</p>
+<pre><code class="language-cshtml">@* Render the editor for a model object *@
+@@await Component.InvokeAsync("DynamicEditor", new { model = Model.Person, eventName = "person" })
+
+@* A button to open it *@
+&lt;button id="edit-btn"&gt;Edit Person&lt;/button&gt;
+
+&lt;script&gt;
+    // Listen for the update event to receive the edited data
+    document.addEventListener('person-update', function (e) {
+        console.log('Updated values:', e.detail);
+        // e.detail.FirstName, e.detail.LastName, etc.
+    });
+
+    // Open the dialog when the button is clicked
+    document.getElementById('edit-btn').addEventListener('click', function () {
+        // The dialog ID is in the rendered markup; use a known selector or data attribute
+        document.querySelector('.dynamic-editor-dialog').showModal();
+    });
+&lt;/script&gt;</code></pre>
+
+        <div class="docs-note">
+            <strong>Getting the dialog ID</strong>
+            The component auto-generates a unique <code>dialogId</code> (e.g. <code>dialog-3f2a1c9b</code>)
+            per render. If you need to open it by exact ID, capture it at render time via a wrapper element
+            or store it in <code>ViewData</code>. See the <a href="#working-with-dialog-id">Working with dialog ID</a> section.
+        </div>
+    </div>
+
+    <!-- 4. Parameters -->
+    <div class="docs-section">
+        <h2>Invocation Parameters</h2>
+        <table class="docs-table">
+            <thead>
+                <tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>model</code> <span class="badge-required">Required</span></td>
+                    <td><code>object</code></td>
+                    <td>—</td>
+                    <td>
+                        The model object whose properties are reflected to build the form fields.
+                        Must not be <code>null</code>. Complex nested properties and non-enum collections
+                        are silently skipped.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>eventName</code></td>
+                    <td><code>string</code></td>
+                    <td><code>"entity"</code></td>
+                    <td>
+                        The prefix used for custom events dispatched by the dialog. A value of
+                        <code>"person"</code> produces <code>person-update</code> and
+                        <code>person-cancel</code> events. Must contain only letters, digits, hyphens,
+                        and underscores. Null or whitespace falls back to <code>"entity"</code>.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 5. Field Type Inference -->
+    <div class="docs-section">
+        <h2>Field Type Inference</h2>
+        <p>
+            The component determines the <code>&lt;input&gt;</code> type for each property by inspecting
+            the CLR type and any applied data annotation attributes, in the following order:
+        </p>
+        <table class="docs-table">
+            <thead>
+                <tr><th>Condition</th><th>Rendered as</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>bool</code></td><td><code>&lt;input type="checkbox"&gt;</code></td></tr>
+                <tr><td><code>DateTime</code> / <code>DateTime?</code></td><td><code>&lt;input type="datetime-local"&gt;</code> (or <code>date</code>/<code>time</code> — see below)</td></tr>
+                <tr><td>Enum collection (e.g. <code>IEnumerable&lt;MyEnum&gt;</code>)</td><td><code>&lt;select multiple&gt;</code> with all enum members as options</td></tr>
+                <tr><td>Enum type</td><td><code>&lt;select&gt;</code> with all enum members as options</td></tr>
+                <tr><td>Numeric types (<code>int</code>, <code>long</code>, <code>decimal</code>, <code>double</code>, <code>float</code>)</td><td><code>&lt;input type="number"&gt;</code></td></tr>
+                <tr><td><code>[DataType(DataType.MultilineText)]</code></td><td><code>&lt;textarea&gt;</code></td></tr>
+                <tr><td><code>[EmailAddress]</code> or <code>[DataType(DataType.EmailAddress)]</code></td><td><code>&lt;input type="email"&gt;</code></td></tr>
+                <tr><td><code>[Phone]</code> or <code>[DataType(DataType.PhoneNumber)]</code></td><td><code>&lt;input type="tel"&gt;</code></td></tr>
+                <tr><td><code>[Url]</code> or <code>[DataType(DataType.Url)]</code></td><td><code>&lt;input type="url"&gt;</code></td></tr>
+                <tr><td><code>[DataType(DataType.Password)]</code></td><td><code>&lt;input type="password"&gt;</code></td></tr>
+                <tr><td><code>[DataType(DataType.Date)]</code></td><td><code>&lt;input type="date"&gt;</code></td></tr>
+                <tr><td><code>[DataType(DataType.Time)]</code></td><td><code>&lt;input type="time"&gt;</code></td></tr>
+                <tr><td>Everything else</td><td><code>&lt;input type="text"&gt;</code></td></tr>
+            </tbody>
+        </table>
+
+        <h3>Skipped properties</h3>
+        <p>The following properties are silently excluded from the form:</p>
+        <ul>
+            <li>Properties with complex CLR types (other than <code>DateTime</code>/<code>DateTime?</code>)</li>
+            <li>Collection properties whose element type is not an enum</li>
+        </ul>
+
+        <h3>Validation attribute mapping</h3>
+        <p>These data annotation attributes are translated to HTML validation attributes on the input:</p>
+        <table class="docs-table">
+            <thead>
+                <tr><th>Annotation</th><th>HTML attribute(s) emitted</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>[Required]</code></td><td><code>required="required"</code>, <code>data-val-required</code> (if custom error message)</td></tr>
+                <tr><td><code>[MinLength(n)]</code></td><td><code>minlength="n"</code>, <code>data-val-minlength</code></td></tr>
+                <tr><td><code>[MaxLength(n)]</code></td><td><code>maxlength="n"</code>, <code>data-val-maxlength</code></td></tr>
+                <tr><td><code>[StringLength(max, MinimumLength = min)]</code></td><td><code>minlength</code>, <code>maxlength</code></td></tr>
+                <tr><td><code>[Range(min, max)]</code></td><td><code>min</code>, <code>max</code>, <code>data-val-range</code></td></tr>
+                <tr><td><code>[RegularExpression(pattern)]</code></td><td><code>pattern</code>, <code>data-val-regex</code></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 5b. Generated HTML -->
+    <div class="docs-section" id="generated-html">
+        <h2>Generated HTML Structure</h2>
+        <p>The component renders a <code>&lt;dialog&gt;</code> and an inline <code>&lt;script&gt;</code> that calls <code>DynamicEditor.init()</code>:</p>
+<pre><code class="language-html">&lt;dialog id="dialog-3f2a1c9b"
+        class="dynamic-editor-dialog"
+        data-event-name="person"
+        aria-labelledby="dialog-3f2a1c9b-title"
+        aria-modal="true"&gt;
+
+    &lt;form method="dialog" id="dialog-3f2a1c9b-form" novalidate&gt;
+        &lt;h3 id="dialog-3f2a1c9b-title"&gt;Edit person&lt;/h3&gt;
+
+        &lt;div id="dialog-3f2a1c9b-validation-summary" class="validation-summary" style="display:none;"&gt;&lt;/div&gt;
+
+        &lt;div class="editor-fields"&gt;
+            &lt;div class="form-group"&gt;
+                &lt;label for="dialog-3f2a1c9b_FirstName"&gt;First Name &lt;span class="required-indicator"&gt;*&lt;/span&gt;&lt;/label&gt;
+                &lt;input type="text" name="FirstName" id="dialog-3f2a1c9b_FirstName"
+                       class="form-control" value="Alice" required="required" /&gt;
+                &lt;span class="field-validation-error" data-valmsg-for="FirstName"&gt;&lt;/span&gt;
+            &lt;/div&gt;
+            @* ... one .form-group per visible property ... *@
+        &lt;/div&gt;
+
+        &lt;div class="actions" role="group" aria-label="Dialog actions"&gt;
+            &lt;button type="button" id="dialog-3f2a1c9b-cancel"&gt;Cancel&lt;/button&gt;
+            &lt;button type="button" id="dialog-3f2a1c9b-confirm"&gt;Confirm&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/form&gt;
+&lt;/dialog&gt;
+
+&lt;script src="...dynamicEditor.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    if (window.DynamicEditor) { DynamicEditor.init('dialog-3f2a1c9b'); }
+&lt;/script&gt;</code></pre>
+
+        <h3>CSS class reference</h3>
+        <table class="docs-table">
+            <thead><tr><th>Class</th><th>Element</th><th>Purpose</th></tr></thead>
+            <tbody>
+                <tr><td><code>dynamic-editor-dialog</code></td><td><code>&lt;dialog&gt;</code></td><td>Identifies the dialog for styling and scripted selection.</td></tr>
+                <tr><td><code>validation-summary</code></td><td><code>&lt;div&gt;</code></td><td>Container for the validation error summary. Hidden by default.</td></tr>
+                <tr><td><code>editor-fields</code></td><td><code>&lt;div&gt;</code></td><td>Wraps all generated field groups.</td></tr>
+                <tr><td><code>form-group</code></td><td><code>&lt;div&gt;</code></td><td>Wraps one label + input + error span.</td></tr>
+                <tr><td><code>form-control</code></td><td>inputs, select, textarea</td><td>Applied to every form control.</td></tr>
+                <tr><td><code>required-indicator</code></td><td><code>&lt;span&gt;</code> inside label</td><td>Asterisk shown for required fields.</td></tr>
+                <tr><td><code>field-validation-error</code></td><td><code>&lt;span&gt;</code></td><td>Per-field error message element. Shown/populated by the JS module on validation failure.</td></tr>
+                <tr><td><code>input-validation-error</code></td><td>inputs, select, textarea</td><td>Added by JS to invalid inputs during validation.</td></tr>
+                <tr><td><code>actions</code></td><td><code>&lt;div&gt;</code></td><td>Wraps the Cancel and Confirm buttons.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 6. Configuration -->
+    <div class="docs-section">
+        <h2>Configuration and Usage Guidance</h2>
+
+        <h3>Controlling field labels</h3>
+        <p>
+            The label text defaults to the property name. Apply <code>[Display(Name = "...")]</code> to
+            override it:
+        </p>
+<pre><code class="language-csharp">public class PersonModel
+{
+    [Required]
+    [Display(Name = "First Name")]
+    public string FirstName { get; set; } = "";
+
+    [Display(Name = "Date of Birth")]
+    [DataType(DataType.Date)]
+    public DateTime? DateOfBirth { get; set; }
+
+    [DataType(DataType.MultilineText)]
+    [Display(Name = "Bio")]
+    public string? Notes { get; set; }
+}</code></pre>
+
+        <h3 id="working-with-dialog-id">Working with the dialog ID</h3>
+        <p>
+            The component generates a new unique <code>dialogId</code> on every render. When you need to
+            open the dialog from JavaScript, the most reliable approach is to target the dialog by its class
+            or a wrapper data attribute rather than by ID:
+        </p>
+<pre><code class="language-cshtml">@* Wrap the component to capture the rendered dialog *@
+&lt;div data-editor="person"&gt;
+    @@await Component.InvokeAsync("DynamicEditor", new { model = Model.Person, eventName = "person" })
+&lt;/div&gt;
+
+&lt;button data-open-editor="person"&gt;Edit Person&lt;/button&gt;
+
+&lt;script&gt;
+    document.querySelectorAll('[data-open-editor]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var name = btn.dataset.openEditor;
+            var dialog = document.querySelector('[data-editor="' + name + '"] .dynamic-editor-dialog');
+            if (dialog) dialog.showModal();
+        });
+    });
+&lt;/script&gt;</code></pre>
+
+        <h3>Handling the update event</h3>
+        <p>
+            The <code>{eventName}-update</code> event fires on the <code>&lt;dialog&gt;</code> element and
+            bubbles. Listen on the dialog, its wrapper, or <code>document</code>. The <code>detail</code>
+            object keys match the model's property names exactly:
+        </p>
+<pre><code class="language-javascript">document.addEventListener('person-update', function (event) {
+    var data = event.detail;
+    // data.FirstName, data.LastName, data.DateOfBirth, etc.
+
+    // Send to server via fetch:
+    fetch('/api/people', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+});</code></pre>
+
+        <h3>Handling the cancel event</h3>
+        <p>
+            The <code>{eventName}-cancel</code> event detail includes both the form's original values (as
+            captured when the dialog opened) and the values the user had changed to before cancelling:
+        </p>
+<pre><code class="language-javascript">document.addEventListener('person-cancel', function (event) {
+    var original = event.detail.originalValues;
+    var abandoned = event.detail.canceledValues;
+    console.log('User discarded changes to:', Object.keys(abandoned)
+        .filter(k => abandoned[k] !== original[k]));
+});</code></pre>
+
+        <h3>Multiple editors on the same page</h3>
+        <p>
+            Invoke the component once per model that needs editing. Each render produces a unique dialog ID,
+            so there is no conflict. Namespace your <code>eventName</code> values to avoid listener collisions:
+        </p>
+<pre><code class="language-cshtml">@@await Component.InvokeAsync("DynamicEditor", new { model = Model.Person, eventName = "person" })
+@@await Component.InvokeAsync("DynamicEditor", new { model = Model.Address, eventName = "address" })</code></pre>
+
+        <h3>Enum fields</h3>
+        <p>
+            A property of an enum type renders as a <code>&lt;select&gt;</code> with one option per enum
+            member. A collection of an enum type (e.g. <code>IEnumerable&lt;Status&gt;</code>) renders as
+            a multi-select with all members available:
+        </p>
+<pre><code class="language-csharp">public enum Status { Active, Inactive, Pending }
+
+public class TaskModel
+{
+    public Status Priority { get; set; }            // → &lt;select&gt;
+    public IList&lt;Status&gt; AllowedStatuses { get; set; } = new List&lt;Status&gt;(); // → &lt;select multiple&gt;
+}</code></pre>
+
+        <h3>Programmatic cleanup</h3>
+        <p>
+            If you remove a dialog from the DOM dynamically, call <code>DynamicEditor.destroy(dialogId)</code>
+            to detach event listeners and the MutationObserver, preventing memory leaks:
+        </p>
+<pre><code class="language-javascript">var dialogId = document.querySelector('.dynamic-editor-dialog').id;
+
+// When done with the dialog:
+DynamicEditor.destroy(dialogId);
+dialog.remove();</code></pre>
+
+        <h3>Accessibility</h3>
+        <p>The generated <code>&lt;dialog&gt;</code> element includes the following ARIA attributes:</p>
+        <ul>
+            <li><code>aria-labelledby="{dialogId}-title"</code> — links to the <code>&lt;h3&gt;</code> heading inside the dialog.</li>
+            <li><code>aria-modal="true"</code> — signals to assistive technology that the dialog is modal.</li>
+            <li>The <code>&lt;div class="actions"&gt;</code> has <code>role="group"</code> and <code>aria-label="Dialog actions"</code>.</li>
+            <li>Required fields have a <code>&lt;span class="required-indicator"&gt;*&lt;/span&gt;</code> inside their label. Add a visually hidden legend or CSS content like <code>::before { content: "* required" }</code> for screen reader context.</li>
+            <li>The native <code>&lt;dialog&gt;</code> element traps focus while open in all modern browsers.</li>
+        </ul>
+    </div>
+
+    <!-- 7. JavaScript API -->
+    <div class="docs-section">
+        <h2>JavaScript API</h2>
+        <p>
+            <code>dynamicEditor.js</code> is an IIFE that exposes <code>window.DynamicEditor</code>. Each
+            dialog rendered by the component calls <code>DynamicEditor.init()</code> automatically via the
+            inline script at the bottom of the rendered output, so you rarely need to call it manually.
+        </p>
+
+        <h3>Methods</h3>
+        <table class="docs-table">
+            <thead>
+                <tr><th>Method</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>DynamicEditor.init(dialogId)</code></td>
+                    <td><code>string</code></td>
+                    <td><code>void</code></td>
+                    <td>
+                        Initialises a dialog: wires Confirm and Cancel click handlers, starts a
+                        <code>MutationObserver</code> that captures form state when the <code>open</code>
+                        attribute appears. Idempotent — subsequent calls with the same ID are no-ops.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>DynamicEditor.destroy(dialogId)</code></td>
+                    <td><code>string</code></td>
+                    <td><code>void</code></td>
+                    <td>
+                        Removes the Confirm and Cancel click handlers, disconnects the MutationObserver,
+                        and removes the dialog from the internal registry. Call before removing a dialog
+                        from the DOM.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Custom Events</h3>
+        <p>All events are dispatched on the <code>&lt;dialog&gt;</code> element and bubble.</p>
+        <table class="docs-table">
+            <thead>
+                <tr><th>Event</th><th>Detail type</th><th>When fired</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>{eventName}-update</code></td>
+                    <td><code>Record&lt;string, string | string[] | boolean&gt;</code></td>
+                    <td>
+                        When the user clicks Confirm and all fields pass validation. The detail object
+                        is keyed by property name. Multi-select fields produce string arrays; checkboxes
+                        produce booleans; everything else produces strings.
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>{eventName}-cancel</code></td>
+                    <td><code>{ originalValues, canceledValues }</code></td>
+                    <td>
+                        When the user clicks Cancel. <code>originalValues</code> is the state captured
+                        when the dialog opened; <code>canceledValues</code> is what the user had typed
+                        before cancelling. The form is restored to <code>originalValues</code> before
+                        this event fires.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Validation behaviour</h3>
+        <p>
+            The JS module uses the HTML5 <code>checkValidity()</code> API against each form element when
+            Confirm is clicked. Errors are displayed:
+        </p>
+        <ul>
+            <li>Per-field: in the <code>&lt;span data-valmsg-for="{propertyName}"&gt;</code> element, using custom messages from <code>data-val-required</code>, <code>data-val-minlength</code>, <code>data-val-maxlength</code>, <code>data-val-range</code>, and <code>data-val-regex</code> data attributes where present.</li>
+            <li>Summary: in <code>{dialogId}-validation-summary</code> as a bulleted list.</li>
+            <li>Input styling: <code>input-validation-error</code> class added to invalid inputs.</li>
+        </ul>
+        <p>All errors are cleared automatically when the dialog is next opened.</p>
+    </div>
+
+    <!-- 8. Notes -->
+    <div class="docs-section">
+        <h2>Notes and Known Limitations</h2>
+        <ul>
+            <li>
+                <strong>Dialog ID is not stable across renders.</strong> The ID (<code>dialog-{8hex}</code>)
+                is generated from a new GUID on every request, so it changes on every page load. Do not
+                hard-code it in scripts or CSS. Select the dialog by class
+                (<code>.dynamic-editor-dialog</code>) or by a wrapper data attribute.
+            </li>
+            <li>
+                <strong>No server POST wiring.</strong> The component does not submit to a form action.
+                It dispatches a client-side event. You are responsible for sending the data to the server
+                (e.g. via <code>fetch</code>) in an event listener.
+            </li>
+            <li>
+                <strong>Complex and non-enum collection properties are silently skipped.</strong>
+                If a property of type <code>Address</code> or <code>List&lt;string&gt;</code> is present,
+                it will not appear in the form. Use a flattened view model if you need to edit such fields.
+            </li>
+            <li>
+                <strong>The <code>eventName</code> appears in the dialog title.</strong> The heading reads
+                "Edit {eventName}" — e.g. "Edit person". Provide a meaningful, user-facing name
+                (e.g. <code>"Person"</code>, <code>"Team Member"</code>) rather than a technical identifier.
+            </li>
+            <li>
+                <strong>The component embeds its own <code>&lt;script&gt;</code> tag.</strong> The
+                <code>dynamicEditor.js</code> script reference and the init call are rendered inline
+                directly after the <code>&lt;dialog&gt;</code>. If the page uses a strict CSP, ensure
+                <code>dynamicEditor.js</code> is allowed by hash or nonce; the inline init script will
+                also need to be permitted.
+            </li>
+            <li>
+                <strong>Multi-select form data.</strong> Multi-select fields use
+                <code>data-collection="true"</code> on the <code>&lt;select&gt;</code> element.
+                The JS module ensures empty multi-selects produce an empty array (not a missing key)
+                in the event detail.
+            </li>
+        </ul>
+    </div>
+
+</div>
