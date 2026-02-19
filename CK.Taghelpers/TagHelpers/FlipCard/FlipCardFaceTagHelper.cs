@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using System.Drawing;
-using System.Text;
-using System.Text.Encodings.Web;
 
 namespace CK.Taghelpers.TagHelpers.FlipCard;
 
@@ -85,13 +82,12 @@ public enum FlipDirection
     Horizontal,
     Vertical
 }
+
 [HtmlTargetElement("flip-card")]
 public partial class FlipCardTagHelper : TagHelper
 {
-
     [HtmlAttributeName("flip-direction")]
     public FlipDirection FlipDirection { get; set; } = FlipDirection.Horizontal;
-
 
     [HtmlAttributeName("auto-height")]
     public bool? AutoHeight { get; set; }
@@ -99,10 +95,8 @@ public partial class FlipCardTagHelper : TagHelper
     [HtmlAttributeName("button-text")]
     public string ButtonText { get; set; } = "Flip";
 
-
     [HtmlAttributeName("front-button-text")]
     public string? FrontButtonText { get; set; }
-
 
     [HtmlAttributeName("back-button-text")]
     public string? BackButtonText { get; set; }
@@ -125,90 +119,92 @@ public partial class FlipCardTagHelper : TagHelper
         // Process child content (this triggers card-front and card-back TagHelpers)
         await output.GetChildContentAsync();
 
-        // Read width/height from Size class
-
-        // Determine if auto-height should be applied
-        var useAutoHeight = AutoHeight ?? false;
-
         // Build CSS classes
         var flipClass = FlipDirection == FlipDirection.Vertical ? "flip-vertical" : "flip-horizontal";
-        var autoHeightClass = useAutoHeight ? "auto-height" : "";
-        var cardClasses = $"card {flipClass} {autoHeightClass}".Trim();
-
+        var useAutoHeight = AutoHeight ?? false;
+        var cardClasses = useAutoHeight ? $"card {flipClass} auto-height" : $"card {flipClass}";
 
         // Container classes with flip-card scope
         var containerClasses = string.IsNullOrEmpty(CssClass)
             ? "card-container flip-card"
             : $"card-container flip-card {CssClass}";
 
-        // HTML-encode titles and button text
-        var encoder = HtmlEncoder.Default;
-        var frontTitle = encoder.Encode(cardContext.FrontTitle ?? "Front");
-        var backTitle = encoder.Encode(cardContext.BackTitle ?? "Back");
-        var frontButtonText = encoder.Encode(FrontButtonText ?? ButtonText);
-        var backButtonText = encoder.Encode(BackButtonText ?? ButtonText);
-
         // Build button CSS class
         var buttonClasses = string.IsNullOrEmpty(ButtonCssClass)
             ? "rotate-button"
             : $"rotate-button {ButtonCssClass}";
 
-        // Convert IHtmlContent to string for template
-        var frontContentHtml = GetHtmlString(cardContext.FrontContent);
-        var backContentHtml = GetHtmlString(cardContext.BackContent);
+        var hasBackContent = cardContext.BackContent != null;
+        var renderButtons = ShowButtons && hasBackContent;
 
-        // Build the output HTML
+        // Build the output HTML using HtmlBuilder
+        var builder = HtmlBuilder.Create();
+
+        using (builder.DivScope(cardClasses))
+        {
+            // Front panel
+            using (var frontScope = builder.OpenDivScope("card-front"))
+            {
+                frontScope.Tag.Attr("aria-hidden", "false").CloseStart();
+
+                using (builder.DivScope("card-front-header"))
+                {
+                    builder.H2Element(cardContext.FrontTitle ?? "Front");
+
+                    if (renderButtons)
+                    {
+                        builder.OpenButtonTag()
+                            .Attr("type", "button")
+                            .Attr("class", buttonClasses)
+                            .BoolAttr("data-flip-card-button")
+                            .Attr("aria-pressed", "false")
+                            .CloseStart()
+                            .Text(FrontButtonText ?? ButtonText)
+                            .CloseTag();
+                    }
+                }
+
+                using (builder.DivScope("card-front-content"))
+                {
+                    if (cardContext.FrontContent != null)
+                        builder.AppendHtml(cardContext.FrontContent);
+                }
+            }
+
+            // Back panel — only rendered when back content exists
+            if (hasBackContent)
+            {
+                using (var backScope = builder.OpenDivScope("card-back"))
+                {
+                    backScope.Tag.Attr("aria-hidden", "true").CloseStart();
+
+                    using (builder.DivScope("card-back-header"))
+                    {
+                        builder.H2Element(cardContext.BackTitle ?? "Back");
+
+                        if (renderButtons)
+                        {
+                            builder.OpenButtonTag()
+                                .Attr("type", "button")
+                                .Attr("class", buttonClasses)
+                                .BoolAttr("data-flip-card-button")
+                                .Attr("aria-pressed", "false")
+                                .CloseStart()
+                                .Text(BackButtonText ?? ButtonText)
+                                .CloseTag();
+                        }
+                    }
+
+                    using (builder.DivScope("card-back-content"))
+                    {
+                        builder.AppendHtml(cardContext.BackContent!);
+                    }
+                }
+            }
+        }
+
         output.TagName = "div";
         output.Attributes.SetAttribute("class", containerClasses);
-
-        // Check if back content exists - only show buttons and back panel if it does
-        var hasBackContent = cardContext.BackContent != null;
-
-        // Build button HTML conditionally (only if there's something to flip to)
-        var frontButtonHtml = ShowButtons && hasBackContent
-            ? $@"<button type=""button"" class=""{buttonClasses}"" data-flip-card-button aria-pressed=""false"">{frontButtonText}</button>"
-            : "";
-        var backButtonHtml = ShowButtons && hasBackContent
-            ? $@"<button type=""button"" class=""{buttonClasses}"" data-flip-card-button aria-pressed=""false"">{backButtonText}</button>"
-            : "";
-
-        // Build back panel HTML only if there's back content
-        var backPanelHtml = hasBackContent
-            ? $@"
-    <div class=""card-back"" aria-hidden=""true"">
-        <div class=""card-back-header"">
-            <h2>{backTitle}</h2>
-            {backButtonHtml}
-        </div>
-        <div class=""card-back-content"">
-            {backContentHtml}
-        </div>
-    </div>"
-            : "";
-
-        var html = $@"
-<div class=""{cardClasses}"">
-    <div class=""card-front"" aria-hidden=""false"">
-        <div class=""card-front-header"">
-            <h2>{frontTitle}</h2>
-            {frontButtonHtml}
-        </div>
-        <div class=""card-front-content"">
-            {frontContentHtml}
-        </div>
-    </div>{backPanelHtml}
-</div>";
-
-        output.Content.SetHtmlContent(html);
+        output.Content.SetHtmlContent((IHtmlContent)builder);
     }
-
-    private static string GetHtmlString(IHtmlContent? content)
-    {
-        if (content == null) return string.Empty;
-        using var writer = new StringWriter();
-        content.WriteTo(writer, HtmlEncoder.Default);
-        return writer.ToString();
-    }
-
-
 }
